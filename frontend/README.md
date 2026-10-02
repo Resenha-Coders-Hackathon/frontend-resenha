@@ -1,1 +1,0 @@
-# ResenhaCoders Frontend
