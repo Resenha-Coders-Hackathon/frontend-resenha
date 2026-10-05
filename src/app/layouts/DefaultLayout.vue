@@ -1,5 +1,10 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { HeaderComp } from '@/shared/components'
+</script>
 
 <template>
-  <RouterView />
+  <HeaderComp />
+  <main>
+    <RouterView />
+  </main>
 </template>

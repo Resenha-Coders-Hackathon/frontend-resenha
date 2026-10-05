@@ -3,7 +3,13 @@ import type { RouteRecordRaw } from 'vue-router'
 export const moduleRoutes: RouteRecordRaw[] = [
   {
     path: '/',
-    name: 'Home',
-    component: () => import('../views/HomeView.vue'),
+    component: () => import('@/app/layouts/DefaultLayout.vue'),
+    children: [
+      {
+        path: '/',
+        name: 'Home',
+        component: () => import('../views/HomeView.vue'),
+      },
+    ],
   },
 ]
