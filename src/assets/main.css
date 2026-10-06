@@ -4,14 +4,31 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-poppins: 'Poppins', sans-serif;
   --font-jakarta: 'Plus Jakarta Sans', sans-serif;
+
   --surface: #f9f9ff;
   --surface-dark: #0f131d;
-  --primary-color: #ff6b35;
+
+  --surface-container: #ffffff;
+  --surface-container-dark: #1e2939;
+
+  --surface-container-low: #f1f3ff;
+  --surface-container-low-dark: #0a0e18;
+
+  --primary: #ab3500;
+  --primary-dark: #ffb59d;
+
+  --primary-container: #ff6b35;
+  --primary-container-dark: #ff8c53;
+
   --secondary-color: #1e2a78;
+
   --tertiary-color: #2590f6;
+
   --neutral-color: #1a202c;
+
+  --on-surface-variant: #594139;
+  --on-surface-variant-dark: #a6adbb;
 }
 
 html {
@@ -19,10 +36,10 @@ html {
   overflow-x: hidden;
   font-family: 'Plus Jakarta Sans', sans-serif;
   transition: color 0.05s ease-in;
+  color: var(--neutral-color);
   background-color: var(--surface);
 
   font-size: 18px;
-  font-weight: '400';
   line-height: 28px;
 
   /* font-md */
@@ -41,9 +58,21 @@ html {
 
 h1 {
   font-size: 56px;
-  font-weight: '800';
+  font-weight: bold;
   line-height: 64px;
   letter-spacing: -0.03em;
+
+  /* mobile */
+  /* font-size: 36px;
+  line-height: 44px;
+  letter-spacing: -0.02em; */
+}
+
+h2 {
+  font-size: 40px;
+  font-weight: bold;
+  line-height: 44px;
+  letter-spacing: -0.02em;
 
   /* mobile */
   /* font-size: 36px;
