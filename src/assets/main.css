@@ -29,6 +29,16 @@
 
   --on-surface-variant: #594139;
   --on-surface-variant-dark: #a6adbb;
+
+  --outline: #8d7168;
+  --surface-bright: #fff8f6;
+  --on-surface: #261814;
+  --on-surface-dark: #594139;
+
+  --surface-dim: #eed5cd;
+  --primary-fixed: #ffdbd0;
+  --on-primary-fixed: #390c00;
+  --surface-container-high: #fde3db;
 }
 
 html {

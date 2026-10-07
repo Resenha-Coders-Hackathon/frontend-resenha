@@ -1,5 +1,21 @@
 <script setup lang="ts">
-import { SelectorPillTab, GoogleButton } from '../components'
+import { ref } from 'vue'
+import { GoogleButton } from '../components'
+import { BaseInput, PasswordInput, SegmentedControl, BaseButton } from '@/shared/components'
+
+const email = ref('')
+const password = ref('')
+const modelValue = ref('cliente')
+const modes = [
+  {
+    value: 'cliente',
+    label: 'Portal do Cliente / Embargador',
+  },
+  {
+    value: 'operador',
+    label: 'Operador / Transportador',
+  },
+]
 </script>
 
 <template>
@@ -33,7 +49,7 @@ import { SelectorPillTab, GoogleButton } from '../components'
           Acesse seu workspace corporativo LogiFlow e gerencie suas operações.
         </p>
 
-        <SelectorPillTab />
+        <SegmentedControl v-model="modelValue" :options="modes" />
 
         <GoogleButton />
 
@@ -47,6 +63,12 @@ import { SelectorPillTab, GoogleButton } from '../components'
             ou com e-mail
           </p>
         </div>
+
+        <BaseInput v-model="email" label="E-mail" type="email" icon="alternate_email" />
+
+        <PasswordInput v-model="password" label="Senha" icon="lock" />
+
+        <BaseButton label="Entrar" icon="arrow_forward" icon-position="right" />
       </div>
     </div>
   </section>
