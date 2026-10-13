@@ -20,7 +20,9 @@ const modes = [
 
 <template>
   <section class="px-10 py-5">
-    <div class="flex h-170 w-full rounded-2xl overflow-hidden">
+    <div
+      class="flex h-170 w-full rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-2xl"
+    >
       <div
         style="
           background-image: url(/auth.svg);
@@ -43,7 +45,7 @@ const modes = [
         </p>
       </div>
 
-      <div class="h-screen w-[65%] px-10 py-20">
+      <div class="h-screen w-[65%] px-10 py-20 bg-(--surface-container) dark:bg-(--surface-dark)">
         <h2>Bem-vindo de volta!</h2>
         <p class="mt-2 dark:text-(--on-surface-variant-dark)">
           Acesse seu workspace corporativo LogiFlow e gerencie suas operações.

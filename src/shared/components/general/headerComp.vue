@@ -55,7 +55,7 @@ const authItems: IMenuItems[] = [
       <nav class="hidden md:block">
         <ul class="flex items-center gap-8 text-sm dark:text-(--on-surface-variant-dark)">
           <li v-for="item in menuItems" :key="item.label">
-            <RouterLink :to="item.link">
+            <RouterLink :to="item.link" class="hover:text-(--primary)">
               {{ item.label }}
             </RouterLink>
           </li>
@@ -73,16 +73,16 @@ const authItems: IMenuItems[] = [
                 'flex items-center gap-1 transition-all duration-300',
                 item.label === 'Entrar'
                   ? 'group rounded-full bg-(--primary) px-3 py-1.5 text-white hover:bg-(--primary)/80'
-                  : '',
+                  : 'hover:text-(--primary)',
               ]"
             >
+              {{ item.label }}
               <span
                 v-if="item.label === 'Entrar'"
                 class="material-symbols-outlined transition-transform duration-300 group-hover:translate-x-1"
               >
                 login
               </span>
-              {{ item.label }}
             </RouterLink>
           </li>
         </ul>
