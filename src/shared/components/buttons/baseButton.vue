@@ -62,12 +62,15 @@ const buttonClasses = computed(() => [
 </script>
 
 <template>
-  <button :type="type" :disabled="disabled || loading" :class="['mt-5', buttonClasses]">
+  <button :type="type" :disabled="disabled || loading" :class="['mt-5 group', buttonClasses]">
     <span v-if="loading" class="material-symbols-outlined animate-spin text-[18px]">
       progress_activity
     </span>
 
-    <span v-else-if="icon && iconPosition === 'left'" class="material-symbols-outlined text-[18px]">
+    <span
+      v-else-if="icon && iconPosition === 'left'"
+      class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-all duration-300"
+    >
       {{ icon }}
     </span>
 
@@ -77,7 +80,7 @@ const buttonClasses = computed(() => [
 
     <span
       v-if="!loading && icon && iconPosition === 'right'"
-      class="material-symbols-outlined text-[18px]"
+      class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-all duration-300"
     >
       {{ icon }}
     </span>
