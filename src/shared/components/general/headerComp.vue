@@ -41,19 +41,21 @@ const authItems: IMenuItems[] = [
 </script>
 
 <template>
-  <header class="relative z-50 bg-(--surface) md:px-20 md:py-2 dark:bg-(--surface-dark)">
+  <header class="relative z-1">
     <div
-      class="flex items-center justify-between gap-4 border-b border-gray-200 bg-(--surface-container) px-4 py-3 dark:border-gray-700 dark:bg-(--surface-container-dark) md:rounded-full md:border md:px-8 md:py-2"
+      class="flex inset-x-none w-full xl:w-auto xl:inset-x-30 xl:mt-5 absolute items-center justify-between gap-4 border-b border-gray-200 bg-(--surface-container) px-4 py-3 dark:border-gray-700 dark:bg-(--surface-container-dark) xl:rounded-full xl:border xl:px-8 xl:py-2"
     >
       <RouterLink to="/" class="font-bold" @click="closeMenu">
         Resenha<span
-          class="bg-linear-to-r from-(--primary) to-(--primary-container) bg-clip-text text-transparent dark:from-(--primary-container-dark) dark:to-(--primary-dark)"
+          class="shrink-0 whitespace-nowrap bg-linear-to-r from-(--primary) to-(--primary-container) bg-clip-text text-transparent dark:from-(--primary-container-dark) dark:to-(--primary-dark)"
           >Coders</span
         >
       </RouterLink>
 
-      <nav class="hidden md:block">
-        <ul class="flex items-center gap-8 text-sm dark:text-(--on-surface-variant-dark)">
+      <nav class="hidden min-w-0 flex-1 md:block">
+        <ul
+          class="flex items-center justify-center gap-3 text-sm lg:gap-6 dark:text-(--on-surface-variant-dark)"
+        >
           <li v-for="item in menuItems" :key="item.label">
             <RouterLink :to="item.link" class="hover:text-(--primary) active:text-(--primary)">
               {{ item.label }}
@@ -62,9 +64,9 @@ const authItems: IMenuItems[] = [
         </ul>
       </nav>
 
-      <div class="hidden items-center gap-6 md:flex">
+      <div class="hidden items-center gap-6 lg:flex">
         <ul
-          class="flex items-center gap-4 text-sm font-semibold dark:text-(--on-surface-variant-dark)"
+          class="flex items-center gap-4 text-sm font-semibold dark:text-(--on-surface-variant-dark) border-l pl-5 border-gray-200 dark:border-gray-700"
         >
           <li v-for="item in authItems" :key="item.label">
             <RouterLink
@@ -90,7 +92,7 @@ const authItems: IMenuItems[] = [
         <ThemeSwitcher />
       </div>
 
-      <div class="flex items-center gap-3 md:hidden">
+      <div class="flex items-center gap-3 lg:hidden">
         <ThemeSwitcher />
 
         <button
@@ -104,11 +106,7 @@ const authItems: IMenuItems[] = [
     </div>
 
     <Transition name="fade">
-      <button
-        v-if="isMenuOpen"
-        class="fixed inset-0 z-40 bg-black/40 md:hidden"
-        @click="closeMenu"
-      />
+      <button v-if="isMenuOpen" class="fixed inset-0 bg-black/40 md:hidden" @click="closeMenu" />
     </Transition>
 
     <Transition name="sidebar">

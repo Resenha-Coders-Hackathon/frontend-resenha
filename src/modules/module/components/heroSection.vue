@@ -1,7 +1,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <section class="grid min-h-svh items-center justify-center px-5 py-20 sm:px-8 md:py-24">
+  <section class="grid min-h-dvh items-center justify-center px-5 py-20 sm:px-8 md:py-24">
     <div class="mx-auto w-full max-w-190">
       <h1
         class="mx-auto max-w-4xl text-center text-4xl leading-tight font-bold tracking-tight sm:text-5xl sm:leading-tight md:text-6xl md:leading-[1.12]"
