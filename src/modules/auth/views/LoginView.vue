@@ -19,13 +19,13 @@ const modes = [
 </script>
 
 <template>
-  <section class="px-4 py-5 sm:px-6 sm:py-8 md:px-12 xl:px-20 pt-22">
+  <section class="px-4 py-5 sm:px-6 sm:py-8 md:px-12 xl:px-20 mt-[3vw]">
     <div
       class="mx-auto flex flex-col lg:flex-row lg:max-h-170 w-full max-w-8xl rounded-2xl overflow-hidden shadow-2xl"
     >
       <div
         style="
-          background-image: url(/auth.svg);
+          background-image: url(/login.svg);
           background-repeat: no-repeat;
           background-size: cover;
           background-position: center;

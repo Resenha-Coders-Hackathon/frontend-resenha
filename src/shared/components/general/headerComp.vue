@@ -30,7 +30,7 @@ const menuItems: IMenuItems[] = [
 
 const authItems: IMenuItems[] = [
   {
-    link: '/',
+    link: '/registrar',
     label: 'Criar conta',
   },
   {
