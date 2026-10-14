@@ -1,7 +1,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <section class="px-4 sm:px-6 md:px-12 xl:px-20 mt-[5vw]">
+  <section class="px-4 sm:px-6 md:px-12 xl:px-20 mt-[25vw] lg:mt-[5vw]">
     <div
       class="mx-auto flex min-h-[70dvh] w-full max-w-8xl flex-col items-center justify-center overflow-hidden rounded-2xl bg-(--surface-container) px-5 py-12 text-center shadow-2xl dark:bg-(--surface-dark) sm:px-8 sm:py-16 md:px-12 lg:min-h-170 lg:px-20"
     >
