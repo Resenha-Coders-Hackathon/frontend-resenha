@@ -34,7 +34,7 @@ const buttonClasses = computed(() => [
 
   {
     /* PRIMARY */
-    'bg-(--primary-container) text-white shadow-md hover:-translate-y-0.5 hover:shadow-lg dark:bg-(--primary-container-dark)':
+    'bg-(--primary) text-white shadow-md hover:-translate-y-0.5 hover:shadow-lg hover:bg-(--primary-container)':
       props.variant === 'primary',
 
     /* SECONDARY */
@@ -62,7 +62,11 @@ const buttonClasses = computed(() => [
 </script>
 
 <template>
-  <button :type="type" :disabled="disabled || loading" :class="['mt-5 group', buttonClasses]">
+  <button
+    :type="type"
+    :disabled="disabled || loading"
+    :class="['mt-5 group cursor-pointer', buttonClasses]"
+  >
     <span v-if="loading" class="material-symbols-outlined animate-spin text-[18px]">
       progress_activity
     </span>
