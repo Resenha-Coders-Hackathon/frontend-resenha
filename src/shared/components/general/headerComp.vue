@@ -98,7 +98,7 @@ const authItems: IMenuItems[] = [
           class="material-symbols-outlined flex items-center justify-center transition-colors"
           @click="isMenuOpen = !isMenuOpen"
         >
-          {{ isMenuOpen ? 'close' : 'menu' }}
+          menu
         </button>
       </div>
     </div>
