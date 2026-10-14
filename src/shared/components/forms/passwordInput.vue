@@ -49,7 +49,7 @@ const value = computed({
     <button
       type="button"
       :disabled="disabled"
-      class="material-symbols-outlined ml-2 text-(--outline) transition-colors duration-300 hover:text-(--primary)"
+      class="material-symbols-outlined ml-2 text-(--outline) transition-colors duration-300 hover:text-(--primary) active:text-(--primary)"
       @click="showPassword = !showPassword"
     >
       {{ showPassword ? 'visibility_off' : 'visibility' }}

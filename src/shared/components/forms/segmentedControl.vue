@@ -51,10 +51,10 @@ const selectOption = (value: string) => {
       :key="option.value"
       type="button"
       :class="[
-        'relative z-10 flex-1 rounded-xl py-2 text-center transition-colors duration-300 cursor-pointer',
+        'relative z-10 min-w-0 items-center justify-center text-sm sm:text-base flex-1 rounded-xl py-2 text-center transition-colors duration-300 cursor-pointer',
         modelValue === option.value
           ? 'font-bold text-white'
-          : 'text-(--on-surface-variant) hover:text-(--on-surface) dark:text-(--on-surface-variant-dark)',
+          : 'text-(--on-surface-variant) hover:text-(--on-surface) active:text-(--on-surface) dark:text-(--on-surface-variant-dark)',
       ]"
       @click="selectOption(option.value)"
     >

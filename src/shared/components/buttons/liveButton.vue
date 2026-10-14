@@ -15,7 +15,7 @@ withDefaults(defineProps<Props>(), {
     type="button"
     :disabled="disabled"
     :class="[
-      'mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-(--surface-container-low) px-5 py-3 text-sm font-semibold text-(--on-surface) transition-all duration-300 hover:bg-(--surface-container-high) dark:bg-(--surface-container-dark) dark:text-white',
+      'mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-(--surface-container-low) px-5 py-3 text-sm font-semibold text-(--on-surface) transition-all duration-300 hover:bg-(--surface-container-high) active:bg-(--surface-container-high) dark:bg-(--surface-container-dark) dark:text-white',
       {
         'cursor-not-allowed opacity-50': disabled,
       },

@@ -65,7 +65,7 @@ const increment = () => {
       <button
         type="button"
         :disabled="disabled || value <= min"
-        class="flex h-9 w-9 items-center justify-center rounded-full bg-(--surface-container) text-(--on-surface) transition-all duration-300 hover:bg-(--primary) hover:text-white disabled:cursor-not-allowed disabled:opacity-40 dark:bg-(--surface-container-dark) dark:text-(--on-surface-dark)"
+        class="flex h-9 w-9 items-center justify-center rounded-full bg-(--surface-container) text-(--on-surface) transition-all duration-300 hover:bg-(--primary) hover:text-white active:bg-(--primary) active:text-white disabled:cursor-not-allowed disabled:opacity-40 dark:bg-(--surface-container-dark) dark:text-(--on-surface-dark)"
         @click="decrement"
       >
         <span class="material-symbols-outlined text-[20px]"> remove </span>
@@ -78,7 +78,7 @@ const increment = () => {
       <button
         type="button"
         :disabled="disabled || value >= max"
-        class="flex h-9 w-9 items-center justify-center rounded-full bg-(--surface-container) text-(--on-surface) transition-all duration-300 hover:bg-(--primary) hover:text-white disabled:cursor-not-allowed disabled:opacity-40 dark:bg-(--surface-container-dark) dark:text-(--on-surface-dark)"
+        class="flex h-9 w-9 items-center justify-center rounded-full bg-(--surface-container) text-(--on-surface) transition-all duration-300 hover:bg-(--primary) hover:text-white active:bg-(--primary) active:text-white disabled:cursor-not-allowed disabled:opacity-40 dark:bg-(--surface-container-dark) dark:text-(--on-surface-dark)"
         @click="increment"
       >
         <span class="material-symbols-outlined text-[20px]"> add </span>

@@ -19,8 +19,10 @@ const modes = [
 </script>
 
 <template>
-  <section class="px-20 py-5">
-    <div class="flex h-170 w-full rounded-2xl overflow-hidden shadow-2xl">
+  <section class="px-4 py-5 sm:px-6 sm:py-8 md:px-12 xl:px-20">
+    <div
+      class="mx-auto flex flex-col lg:flex-row lg:max-h-170 w-full max-w-8xl rounded-2xl overflow-hidden shadow-2xl"
+    >
       <div
         style="
           background-image: url(/auth.svg);
@@ -28,9 +30,9 @@ const modes = [
           background-size: cover;
           background-position: center;
         "
-        class="h-screen w-[35%] px-10 py-20"
+        class="flex flex-col justify-end w-full lg:w-[35%] min-h-64 lg:h-screen px-6 py-8 sm:px-10 sm:py-12 lg:px-10 lg:py-20 lg:justify-start"
       >
-        <h2 class="text-(--surface-container)">
+        <h2 class="text-3xl sm:text-4xl text-(--surface-container)">
           A logística inteligente
           <span
             class="bg-linear-to-r from-(--primary) to-(--primary-container) bg-clip-text text-transparent dark:to-(--primary-dark) dark:from-(--primary-container-dark)"
@@ -43,8 +45,10 @@ const modes = [
         </p>
       </div>
 
-      <div class="h-screen w-[65%] px-40 py-20 bg-(--surface-container) dark:bg-(--surface-dark)">
-        <h2>Bem-vindo de volta!</h2>
+      <div
+        class="lg:h-screen w-full lg:w-[65%] px-5 py-8 sm:px-10 sm:py-12 md:px-12 md:py-16 lg:px-40 lg:py-20 bg-(--surface-container) dark:bg-(--surface-dark)"
+      >
+        <h2 class="text-3xl sm:text-4xl">Bem-vindo de volta!</h2>
         <p class="mt-2 dark:text-(--on-surface-variant-dark)">
           Acesse seu workspace corporativo LogiFlow e gerencie suas operações.
         </p>

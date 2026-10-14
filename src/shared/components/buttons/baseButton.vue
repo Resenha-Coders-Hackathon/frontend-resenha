@@ -34,22 +34,23 @@ const buttonClasses = computed(() => [
 
   {
     /* PRIMARY */
-    'bg-(--primary) text-white shadow-md hover:-translate-y-0.5 hover:shadow-lg hover:bg-(--primary-container)':
+    'bg-(--primary) text-white shadow-md hover:-translate-y-0.5 hover:shadow-lg hover:bg-(--primary-container) active:bg-(--primary-container)':
       props.variant === 'primary',
 
     /* SECONDARY */
-    'bg-(--secondary-color) text-white hover:-translate-y-0.5 hover:shadow-md':
+    'bg-(--secondary-color) text-white hover:-translate-y-0.5 hover:shadow-md active:-translate-y-0.5 active:shadow-md':
       props.variant === 'secondary',
 
     /* GHOST */
-    'bg-transparent text-(--on-surface) hover:bg-(--surface-container-low) dark:text-white dark:hover:bg-(--surface-container-dark)':
+    'bg-transparent text-(--on-surface) hover:bg-(--surface-container-low) active:bg-(--surface-container-low) dark:text-white dark:hover:bg-(--surface-container-dark) dark:active:bg-(--surface-container-dark)':
       props.variant === 'ghost',
 
     /* DESTRUCTIVE */
-    'bg-(--primary) text-white hover:bg-(--primary-container)': props.variant === 'destructive',
+    'bg-(--primary) text-white hover:bg-(--primary-container) active:hover:bg-(--primary-container)':
+      props.variant === 'destructive',
 
     /* SUCCESS */
-    'bg-(--tertiary-color) text-white hover:brightness-110 hover:-translate-y-0.5 hover:shadow-md':
+    'bg-(--tertiary-color) text-white hover:brightness-110 hover:-translate-y-0.5 hover:shadow-md active:brightness-110 active:-translate-y-0.5 active:shadow-md':
       props.variant === 'success',
 
     /* DISABLED */

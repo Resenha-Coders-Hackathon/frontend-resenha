@@ -24,7 +24,7 @@ const toggle = () => {
 
 <template>
   <label
-    class="mt-5 flex cursor-pointer items-center justify-between rounded-2xl bg-(--surface-container-low) p-3 transition-colors duration-300 hover:bg-(--surface-container) dark:bg-(--surface-container-low-dark) dark:hover:bg-(--surface-container-dark)"
+    class="mt-5 flex cursor-pointer items-center justify-between rounded-2xl bg-(--surface-container-low) p-3 transition-colors duration-300 hover:bg-(--surface-container) active:bg-(--surface-container) dark:bg-(--surface-container-low-dark) dark:hover:bg-(--surface-container-dark) dark:active:bg-(--surface-container-dark)"
   >
     <div class="flex flex-col">
       <span class="text-sm text-(--on-surface) dark:text-(--on-surface-dark)">

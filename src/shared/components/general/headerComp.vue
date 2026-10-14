@@ -55,7 +55,7 @@ const authItems: IMenuItems[] = [
       <nav class="hidden md:block">
         <ul class="flex items-center gap-8 text-sm dark:text-(--on-surface-variant-dark)">
           <li v-for="item in menuItems" :key="item.label">
-            <RouterLink :to="item.link" class="hover:text-(--primary)">
+            <RouterLink :to="item.link" class="hover:text-(--primary) active:text-(--primary)">
               {{ item.label }}
             </RouterLink>
           </li>
@@ -72,14 +72,14 @@ const authItems: IMenuItems[] = [
               :class="[
                 'flex items-center gap-1 transition-all duration-300',
                 item.label === 'Entrar'
-                  ? 'group rounded-full bg-(--primary) px-3 py-1.5 text-white hover:bg-(--primary)/80'
-                  : 'hover:text-(--primary)',
+                  ? 'group rounded-full bg-(--primary) px-3 py-1.5 text-white hover:bg-(--primary)/80 active:bg-(--primary)/80'
+                  : 'hover:text-(--primary) active:text-(--primary)',
               ]"
             >
               {{ item.label }}
               <span
                 v-if="item.label === 'Entrar'"
-                class="material-symbols-outlined transition-transform duration-300 group-hover:translate-x-1"
+                class="material-symbols-outlined transition-transform duration-300 group-hover:translate-x-1 group-active:translate-x-1"
               >
                 login
               </span>
@@ -125,7 +125,7 @@ const authItems: IMenuItems[] = [
           </RouterLink>
 
           <button
-            class="material-symbols-outlined flex items-center justify-center rounded-full text-(--on-surface) hover:bg-(--surface-container-low) dark:text-white dark:hover:bg-(--surface)"
+            class="material-symbols-outlined flex items-center justify-center rounded-full text-(--on-surface) hover:bg-(--surface-container-low) active:bg-(--surface-container-low) dark:text-white dark:hover:bg-(--surface) dark:active:bg-(--surface)"
             @click="closeMenu"
           >
             close
@@ -141,7 +141,7 @@ const authItems: IMenuItems[] = [
             <li v-for="item in menuItems" :key="item.label">
               <RouterLink
                 :to="item.link"
-                class="block rounded-xl px-4 py-3 text-sm font-medium text-(--on-surface) transition-colors hover:bg-(--surface-container-low) hover:text-(--primary) dark:text-white dark:hover:bg-(--surface) dark:hover:text-(--primary-dark)"
+                class="block rounded-xl px-4 py-3 text-sm font-medium text-(--on-surface) transition-colors hover:bg-(--surface-container-low) hover:text-(--primary) active:bg-(--surface-container-low) active:text-(--primary) dark:text-white dark:hover:bg-(--surface) dark:hover:text-(--primary-dark) dark:active:bg-(--surface) dark:active:text-(--primary-dark)"
                 @click="closeMenu"
               >
                 {{ item.label }}
@@ -162,8 +162,8 @@ const authItems: IMenuItems[] = [
                 :class="[
                   'flex items-center gap-2 rounded-full px-4 py-3 text-sm font-semibold transition-all duration-300',
                   item.label === 'Entrar'
-                    ? 'bg-(--primary) text-white hover:bg-(--primary)/80'
-                    : 'text-(--on-surface) hover:bg-(--surface-container-low) dark:text-white dark:hover:bg-(--surface)',
+                    ? 'bg-(--primary) text-white hover:bg-(--primary)/80 active:bg-(--primary)/80'
+                    : 'text-(--on-surface) hover:bg-(--surface-container-low) active:bg-(--surface-container-low) dark:text-white dark:hover:bg-(--surface) dark:active:bg-(--surface)',
                 ]"
                 @click="closeMenu"
               >
