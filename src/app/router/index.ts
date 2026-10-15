@@ -3,10 +3,17 @@ import { moduleRoutes } from '@/modules/module/router'
 import { authRoutes } from '@/modules/auth/router'
 import { geolocationRoutes } from '@/modules/geolocation/router'
 import { mapboxRoutes } from '@/modules/mapbox/router'
+import { notificationsRoutes } from '@/modules/notifications/router'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [...moduleRoutes, ...authRoutes, ...geolocationRoutes, ...mapboxRoutes],
+  routes: [
+    ...moduleRoutes,
+    ...authRoutes,
+    ...geolocationRoutes,
+    ...mapboxRoutes,
+    ...notificationsRoutes,
+  ],
   scrollBehavior() {
     return { top: 0 }
   },

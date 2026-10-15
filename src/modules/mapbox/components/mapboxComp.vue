@@ -2,9 +2,6 @@
 import { ref, onBeforeUnmount, onMounted } from 'vue'
 import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder'
-import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
-import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
-import 'mapbox-gl/dist/mapbox-gl.css'
 import { useGeolocationStore } from '@/modules/geolocation/stores'
 
 mapboxgl.accessToken = String(import.meta.env.VITE_MAPBOX_API_KEY)
