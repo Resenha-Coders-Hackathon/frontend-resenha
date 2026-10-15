@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { ref, onBeforeUnmount, onMounted, watch } from 'vue'
+import { ref, onBeforeUnmount, onMounted } from 'vue'
 import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder'
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import 'mapbox-gl/dist/mapbox-gl.css'
-import { useScreenSize } from '@/shared/composables/screenSize'
+import { useGeolocationStore } from '@/modules/geolocation/stores'
 
 mapboxgl.accessToken = String(import.meta.env.VITE_MAPBOX_API_KEY)
 
-const { isMobile } = useScreenSize()
+const geolocation = useGeolocationStore()
 
 const mapRef = ref<mapboxgl.Map | null>(null)
 const geocoderRef = ref<MapboxGeocoder | null>(null)
@@ -24,10 +24,10 @@ onMounted(async () => {
     pitch: 60,
     bearing: -30,
     antialias: true,
-    maxBounds: [
-      [-49.0, -26.6],
-      [-48.4, -25.9],
-    ],
+    // maxBounds: [
+    //   [-49.0, -26.6],
+    //   [-48.4, -25.9],
+    // ],
   })
 
   mapRef.value = map
@@ -39,25 +39,51 @@ onMounted(async () => {
     placeholder: 'Buscar local...',
   })
 
+  map.addControl(geocoder, 'bottom-left')
   geocoderRef.value = geocoder
 
-  watch(
-    isMobile,
-    (mobile) => {
-      if (mobile) {
-        if (isGeocoderAdded.value) {
-          map.removeControl(geocoder)
-          isGeocoderAdded.value = false
-        }
-      } else {
-        if (!isGeocoderAdded.value) {
-          map.addControl(geocoder, 'top-left')
-          isGeocoderAdded.value = true
-        }
-      }
-    },
-    { immediate: true },
-  )
+  map.on('load', async () => {
+    // Fonte de elevação
+    map.addSource('mapbox-dem', {
+      type: 'raster-dem',
+      url: 'mapbox://mapbox.terrain-rgb',
+      tileSize: 512,
+      maxzoom: 14,
+    })
+
+    // Ativa terreno com exagero
+    map.setTerrain({ source: 'mapbox-dem', exaggeration: 1 })
+
+    // Hillshade para sombra do relevo
+    map.addLayer({
+      id: 'hillshade-layer',
+      type: 'hillshade',
+      source: 'mapbox-dem',
+      layout: { visibility: 'visible' },
+      paint: {
+        'hillshade-exaggeration': 0.5,
+      },
+    })
+
+    // Prédios 3D
+    map.addLayer(
+      {
+        id: '3d-buildings',
+        source: 'composite',
+        'source-layer': 'building',
+        filter: ['==', 'extrude', 'true'],
+        type: 'fill-extrusion',
+        minzoom: 15,
+        paint: {
+          'fill-extrusion-color': '#aaa',
+          'fill-extrusion-height': ['get', 'height'],
+          'fill-extrusion-base': ['get', 'min_height'],
+          'fill-extrusion-opacity': 0.6,
+        },
+      },
+      'waterway-label',
+    )
+  })
 })
 
 onBeforeUnmount(() => {
@@ -77,7 +103,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="relative h-dvh w-full md:h-[42vw] min-h-150 overflow-hidden rounded-2xl">
-    <div id="map-fixed" class="h-full w-full overflow-hidden md:rounded-2xl"></div>
+  <div class="relative h-dvh w-full overflow-hidden">
+    <div id="map-fixed" class="h-full w-full overflow-hidden"></div>
   </div>
 </template>
