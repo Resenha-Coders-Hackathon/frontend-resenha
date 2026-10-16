@@ -4,49 +4,45 @@ export interface SendNotificationRequest {
   body: string
 }
 
-const NOTIFICATIONS_PATH = '/notifications'
+const NOTIFICATIONS_PATH = '/notifications/send/'
 
-interface NotificationsConfiguration {
-  endpoint: URL
-  accessToken: string
-}
-
-function getNotificationsConfiguration(): NotificationsConfiguration {
+function getNotificationsEndpoint(): URL {
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
   if (!apiBaseUrl) {
     throw new Error('Configure VITE_API_BASE_URL com a URL base do backend.')
   }
 
-  const accessToken = import.meta.env.VITE_NOTIFICATIONS_ACCESS_TOKEN
-  if (!accessToken) {
-    throw new Error('Configure VITE_NOTIFICATIONS_ACCESS_TOKEN para autenticar no backend.')
-  }
-
-  let endpoint: URL
   try {
-    endpoint = new URL(`${apiBaseUrl.replace(/\/+$/, '')}${NOTIFICATIONS_PATH}`)
+    return new URL(`${apiBaseUrl.replace(/\/+$/, '')}${NOTIFICATIONS_PATH}`)
   } catch {
     throw new Error('VITE_API_BASE_URL não contém uma URL válida.')
   }
+}
 
-  return { endpoint, accessToken }
+// O backend autentica pelo cookie access_token e, nesse caso, exige o header CSRF em POST.
+function getCsrfToken(): string {
+  const match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/)
+  return match ? decodeURIComponent(match[1]!) : ''
 }
 
 export function validateNotificationsConfiguration(): void {
-  getNotificationsConfiguration()
+  getNotificationsEndpoint()
 }
 
 export async function sendNotification(payload: SendNotificationRequest): Promise<void> {
-  const { endpoint, accessToken } = getNotificationsConfiguration()
-
-  const response = await fetch(endpoint, {
+  const response = await fetch(getNotificationsEndpoint(), {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
+      'X-CSRFToken': getCsrfToken(),
     },
     body: JSON.stringify(payload),
   })
+
+  if (response.status === 401 || response.status === 403) {
+    throw new Error('Sessão inválida ou expirada. Faça login no backend e tente novamente.')
+  }
 
   if (!response.ok) {
     throw new Error(`O backend recusou o envio da notificação (HTTP ${response.status}).`)
