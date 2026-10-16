@@ -8,6 +8,7 @@ export const notificationsRoutes: RouteRecordRaw[] = [
       {
         path: '/notificacoes',
         name: 'Notifications',
+        meta: { requiresAuth: true },
         component: () => import('../views/HomeView.vue'),
       },
     ],

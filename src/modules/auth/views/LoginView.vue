@@ -1,10 +1,37 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
 import { GoogleButton } from '../components'
+import { useAuthStore } from '../stores'
 import { BaseInput, PasswordInput, SegmentedControl, BaseButton } from '@/shared/components'
 
+const router = useRouter()
+const route = useRoute()
+const auth = useAuthStore()
 const email = ref('')
 const password = ref('')
+const isLoading = ref(false)
+
+async function handleLogin(): Promise<void> {
+  if (!email.value || !password.value) {
+    toast.error('Informe e-mail e senha.')
+    return
+  }
+
+  isLoading.value = true
+  try {
+    await auth.signIn({ email: email.value, password: password.value })
+    toast.success('Login realizado com sucesso.')
+    const redirect = String(route.query.redirect ?? '')
+    // só caminhos internos, para não virar open redirect
+    await router.push(redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/notificacoes')
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : 'Não foi possível entrar.')
+  } finally {
+    isLoading.value = false
+  }
+}
 const modelValue = ref('cliente')
 const modes = [
   {
@@ -72,7 +99,14 @@ const modes = [
 
         <PasswordInput v-model="password" label="Senha" icon="lock" />
 
-        <BaseButton label="Entrar" icon="arrow_forward" icon-position="right" />
+        <BaseButton
+          label="Entrar"
+          icon="arrow_forward"
+          icon-position="right"
+          :loading="isLoading"
+          :disabled="isLoading"
+          @click="handleLogin"
+        />
       </div>
     </div>
   </section>
