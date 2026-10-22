@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { GoogleButton } from '../components'
 import { useAuthStore } from '../stores'
+import { loginWithGoogle } from '../services'
 import { BaseInput, PasswordInput, SegmentedControl, BaseButton } from '@/shared/components'
 
 const router = useRouter()
@@ -28,6 +29,22 @@ async function handleLogin(): Promise<void> {
     await router.push(redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/notificacoes')
   } catch (error) {
     toast.error(error instanceof Error ? error.message : 'Não foi possível entrar.')
+  } finally {
+    isLoading.value = false
+  }
+}
+async function handleGoogleLogin(credential: string): Promise<void> {
+  if (isLoading.value) return
+  isLoading.value = true
+  try {
+    await loginWithGoogle(credential)
+    const user = await auth.loadUser()
+    if (!user) throw new Error('O backend não confirmou a sessão. Verifique os cookies de autenticação.')
+    toast.success('Login com Google realizado com sucesso.')
+    const redirect = String(route.query.redirect ?? '')
+    await router.push(redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/notificacoes')
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : 'Não foi possível entrar com Google.')
   } finally {
     isLoading.value = false
   }
@@ -82,7 +99,7 @@ const modes = [
 
         <SegmentedControl v-model="modelValue" :options="modes" />
 
-        <GoogleButton />
+        <GoogleButton @credential="handleGoogleLogin" />
 
         <div class="relative flex items-center justify-center py-1 mt-8">
           <span

@@ -1,7 +1,7 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios'
 
 // Rotas que nunca devem disparar refresh: um 401 nelas é resposta final.
-const AUTH_PATHS = ['/login/', '/refresh/']
+const AUTH_PATHS = ['/login/', '/login/google/', '/refresh/']
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, ''),

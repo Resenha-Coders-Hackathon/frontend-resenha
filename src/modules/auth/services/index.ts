@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { api, getErrorMessage } from '@/app/plugins/axios'
 import type { User } from '../types'
 
@@ -21,4 +22,15 @@ export async function fetchMe(): Promise<User> {
 
 export async function logout(): Promise<void> {
   await api.post('/me/logout/')
+}
+
+export async function loginWithGoogle(credential: string): Promise<void> {
+  try {
+    await api.post('/login/google/', { credential })
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      throw new Error('Token recebido do Google, mas o backend ainda não disponibiliza /api/login/google/.')
+    }
+    throw new Error(getErrorMessage(error, 'Não foi possível entrar com Google.'))
+  }
 }
