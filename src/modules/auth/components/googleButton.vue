@@ -1,50 +1,80 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { mountGoogleButton } from '../services/googleIdentity'
 
-const emit = defineEmits<{ credential: [value: string] }>()
-const container = ref<HTMLDivElement | null>(null)
-const error = ref('')
-const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
-let disposed = false
-
-type GoogleIdentity = {
-  initialize: (options: { client_id: string; callback: (response: { credential: string }) => void }) => void
-  renderButton: (element: HTMLElement, options: { theme: string; size: string; text: string }) => void
-}
-const googleWindow = window as Window & { google?: { accounts: { id: GoogleIdentity } } }
-
-function render(): void {
-  if (disposed || !container.value || !googleWindow.google) return
-  const identity = googleWindow.google.accounts.id
-  identity.initialize({
-    client_id: clientId,
-    callback: ({ credential }) => { if (!disposed) emit('credential', credential) },
-  })
-  identity.renderButton(container.value, { theme: 'outline', size: 'large', text: 'signin_with' })
-}
-
-onMounted(() => {
-  if (!clientId) {
-    error.value = 'Configure VITE_GOOGLE_CLIENT_ID para testar o login com Google.'
-    return
-  }
-  if (googleWindow.google) {
-    render()
-    return
-  }
-  const script = document.createElement('script')
-  script.src = 'https://accounts.google.com/gsi/client'
-  script.async = true
-  script.onload = render
-  script.onerror = () => { if (!disposed) error.value = 'Não foi possível carregar o botão do Google. Recarregue a página.' }
-  document.head.appendChild(script)
+const props = withDefaults(defineProps<{ buttonText?: 'signin_with' | 'signup_with' }>(), {
+  buttonText: 'signin_with',
 })
-onBeforeUnmount(() => { disposed = true })
+
+const emit = defineEmits<{
+  credential: [credential: string]
+}>()
+
+const buttonContainer = ref<HTMLDivElement>()
+const isLoading = ref(true)
+const setupMessage = ref('')
+let unmountGoogleButton: (() => void) | undefined
+let isDisposed = false
+
+function handleCredential(credential: string) {
+  emit('credential', credential)
+}
+
+onMounted(async () => {
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
+  if (!clientId) {
+    setupMessage.value = 'Configure VITE_GOOGLE_CLIENT_ID para habilitar esta opção.'
+    isLoading.value = false
+    return
+  }
+
+  try {
+    if (buttonContainer.value) {
+      const cleanup = await mountGoogleButton(
+        buttonContainer.value,
+        clientId,
+        props.buttonText,
+        handleCredential,
+      )
+      if (isDisposed) cleanup()
+      else unmountGoogleButton = cleanup
+    }
+  } catch (error) {
+    setupMessage.value =
+      error instanceof Error ? error.message : 'Não foi possível carregar o login do Google.'
+  } finally {
+    isLoading.value = false
+  }
+})
+
+onBeforeUnmount(() => {
+  isDisposed = true
+  unmountGoogleButton?.()
+})
 </script>
 
 <template>
-  <div class="mt-5">
-    <div ref="container" />
-    <p v-if="error" role="alert" class="text-sm">{{ error }}</p>
+  <div class="w-full">
+    <div v-if="setupMessage" class="w-full">
+      <button
+        type="button"
+        disabled
+        class="h-[44px] w-full rounded-[4px] border border-(--border-default) bg-(--surface) text-[14px] font-medium text-(--text-secondary) opacity-60 dark:border-(--border-inverse) dark:bg-(--surface-inverse) dark:text-(--text-inverse-muted)"
+      >
+        {{ props.buttonText === 'signup_with' ? 'Cadastrar com Google' : 'Entrar com Google' }}
+      </button>
+      <p class="mt-[8px] text-center text-[12px] leading-[18px] text-(--text-muted)">
+        {{ setupMessage }}
+      </p>
+    </div>
+
+    <div v-else class="w-full">
+      <div
+        v-if="isLoading"
+        class="h-[44px] w-full animate-pulse rounded-[4px] border border-(--border-default) bg-(--bg-subtle) dark:border-(--border-inverse) dark:bg-black/20"
+        aria-hidden="true"
+      ></div>
+      <div ref="buttonContainer" :class="['min-h-[44px] w-full', isLoading ? 'hidden' : '']"></div>
+    </div>
   </div>
 </template>
