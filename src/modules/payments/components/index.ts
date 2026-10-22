@@ -1,0 +1,5 @@
+export { default as PaymentCard } from './paymentCard.vue'
+export { default as PaymentStatusBadge } from './paymentStatusBadge.vue'
+export { default as PaymentSteps } from './paymentSteps.vue'
+export { default as PaymentSummary } from './paymentSummary.vue'
+export { default as PixCode } from './pixCode.vue'

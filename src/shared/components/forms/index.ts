@@ -1,4 +1,3 @@
-export { default as BaseInput } from './baseInput.vue'
 export { default as BaseSwitch } from './baseSwitch.vue'
 export { default as NumberStepper } from './numberStepper.vue'
 export { default as PasswordInput } from './passwordInput.vue'
