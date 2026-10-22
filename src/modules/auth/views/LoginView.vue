@@ -92,8 +92,6 @@ async function handleGoogleCredential(credential: string) {
         </template>
       </AuthField>
 
-        <GoogleButton @credential="handleGoogleLogin" />
-
       <BaseButton
         type="submit"
         label="Entrar"
