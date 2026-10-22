@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { BaseButton } from '@/shared/components'
 import { AuthField, AuthSplitLayout, GoogleButton } from '../components'
-import { login, loginWithGoogle } from '../services'
-import { useAuthFlowStore } from '../stores'
+import { useAuthFlowStore, useAuthStore } from '../stores'
 
 const router = useRouter()
+const route = useRoute()
+const auth = useAuthStore()
 const authFlow = useAuthFlowStore()
 const email = ref('')
 const password = ref('')
@@ -16,14 +17,20 @@ const errorMessage = ref('')
 const isGoogleSubmitting = ref(false)
 const googleErrorMessage = ref('')
 
+// só aceita caminhos internos, para o ?redirect= não virar open redirect
+function redirectTarget(): string {
+  const target = route.query.redirect
+  return typeof target === 'string' && /^\/(?!\/)/.test(target) ? target : '/'
+}
+
 async function handleSubmit() {
   errorMessage.value = ''
   isSubmitting.value = true
 
   try {
-    await login({ email: email.value.trim(), password: password.value })
+    await auth.signIn({ email: email.value.trim(), password: password.value })
     toast.success('Que bom ter você de volta!')
-    await router.push({ name: 'Home' })
+    await router.push(redirectTarget())
   } catch (error) {
     errorMessage.value =
       error instanceof Error ? error.message : 'Não foi possível entrar. Tente novamente.'
@@ -39,10 +46,10 @@ async function handleGoogleCredential(credential: string) {
   isGoogleSubmitting.value = true
 
   try {
-    await loginWithGoogle(credential)
+    await auth.signInWithGoogle(credential)
     authFlow.clear()
     toast.success('Você entrou com sua conta Google.')
-    await router.push({ name: 'Home' })
+    await router.push(redirectTarget())
   } catch (error) {
     googleErrorMessage.value =
       error instanceof Error ? error.message : 'Não foi possível entrar com Google.'
@@ -91,6 +98,8 @@ async function handleGoogleCredential(credential: string) {
           </div>
         </template>
       </AuthField>
+
+      <p v-if="errorMessage" role="alert" class="auth-error">{{ errorMessage }}</p>
 
       <BaseButton
         type="submit"
