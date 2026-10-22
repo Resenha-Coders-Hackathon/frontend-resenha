@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import api from '@/app/plugins/axios'
 import { moduleRoutes } from '@/modules/module/router'
 import { authRoutes } from '@/modules/auth/router'
 import { useAuthStore } from '@/modules/auth/stores'
@@ -24,9 +25,11 @@ const router = createRouter({
 
 router.beforeEach(async (to) => {
   if (!to.meta.requiresAuth) return
-  const auth = useAuthStore()
-  if (auth.user || (await auth.loadUser())) return
-  return { path: '/entrar', query: { redirect: to.fullPath } }
+  try {
+    await api.get('v1/users/me/')
+  } catch {
+    return { path: '/entrar', query: { redirect: to.fullPath } }
+  }
 })
 
 export default router
