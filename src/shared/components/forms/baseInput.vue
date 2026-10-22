@@ -15,6 +15,7 @@ const props = withDefaults(defineProps<IInputs>(), {
   icon: '',
   label: '',
   disabled: false,
+  inputmode: undefined,
 })
 
 const emit = defineEmits<{
@@ -43,6 +44,7 @@ const value = computed({
       :type="type"
       :placeholder="placeholder"
       :disabled="disabled"
+      :inputmode="inputmode"
       class="input-autofill w-full text-sm outline-none placeholder:text-(--text-muted)"
     />
   </div>

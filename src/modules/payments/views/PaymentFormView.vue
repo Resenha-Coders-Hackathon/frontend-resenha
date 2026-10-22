@@ -27,6 +27,24 @@ const cpfModel = computed({
 
 const amountValue = computed(() => parseCurrency(amount.value))
 
+function restrictNumericInput(event: KeyboardEvent, maxDigits: number): void {
+  if (event.ctrlKey || event.metaKey || event.altKey || event.key.length !== 1) return
+
+  if (!/\d/.test(event.key)) {
+    event.preventDefault()
+    return
+  }
+
+  const input = event.target
+  if (!(input instanceof HTMLInputElement)) return
+
+  const start = input.selectionStart ?? input.value.length
+  const end = input.selectionEnd ?? start
+  const remainingDigits = onlyDigits(input.value.slice(0, start) + input.value.slice(end)).length
+
+  if (remainingDigits >= maxDigits) event.preventDefault()
+}
+
 function validate(): string | null {
   if (!title.value.trim()) return 'Informe a descrição do pagamento.'
   if (!(Number(amountValue.value) > 0)) return 'Informe um valor maior que zero.'
@@ -81,6 +99,7 @@ function handleSubmit(): void {
             placeholder="0,00"
             icon="payments"
             inputmode="numeric"
+            @keydown="restrictNumericInput($event, 10)"
             required
           />
 
@@ -105,6 +124,7 @@ function handleSubmit(): void {
                 placeholder="000.000.000-00"
                 icon="badge"
                 inputmode="numeric"
+                @keydown="restrictNumericInput($event, 11)"
                 required
               />
             </div>
