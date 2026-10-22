@@ -6,6 +6,7 @@
 
 @theme {
   --font-jakarta: 'Plus Jakarta Sans', sans-serif;
+  --font-inter: 'Inter, sans-serif';
 
   --background: #ffffff;
   --background-inverse: #000000;
@@ -34,7 +35,7 @@
 html {
   width: 100%;
   overflow-x: hidden;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Inter', sans-serif;
   transition: color 0.05s ease-in;
   color: var(--text-primary);
   background-color: var(--background);

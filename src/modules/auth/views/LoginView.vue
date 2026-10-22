@@ -54,12 +54,12 @@ async function handleGoogleCredential(credential: string) {
 
 <template>
   <AuthSplitLayout>
-    <h1 class="text-[38px]! leading-[46px]! tracking-[-0.03em]!">Bem-vindo de volta</h1>
-    <p class="mt-[8px] text-[16px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
+    <h1 class="text-[38px]! leading-11.5! tracking-[-0.03em]!">Bem-vindo de volta</h1>
+    <p class="mt-2 text-[16px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
       Entre na sua conta para continuar.
     </p>
 
-    <form class="mt-[32px] flex flex-col gap-[20px]" @submit.prevent="handleSubmit">
+    <form class="mt-8 flex flex-col gap-5" @submit.prevent="handleSubmit">
       <AuthField
         id="login-email"
         v-model="email"
@@ -84,15 +84,13 @@ async function handleGoogleCredential(credential: string) {
         required
       >
         <template #after>
-          <div class="mt-[12px] flex justify-end leading-[20px]">
-            <RouterLink :to="{ name: 'ForgotPassword' }" class="auth-link text-[14px]">
+          <div class="mt-3 flex justify-end leading-5">
+            <RouterLink to="/esqueci-senha" class="auth-link text-[14px]">
               Esqueceu sua senha?
             </RouterLink>
           </div>
         </template>
       </AuthField>
-
-        <GoogleButton @credential="handleGoogleLogin" />
 
       <BaseButton
         type="submit"
@@ -103,20 +101,20 @@ async function handleGoogleCredential(credential: string) {
       />
     </form>
 
-    <div class="my-[24px] flex items-center gap-[16px] text-[13px] text-(--text-muted)">
+    <div class="my-6 flex items-center gap-4 text-[13px] text-(--text-muted)">
       <span class="h-px flex-1 bg-(--border-default) dark:bg-(--border-inverse)"></span>
       <span>ou</span>
       <span class="h-px flex-1 bg-(--border-default) dark:bg-(--border-inverse)"></span>
     </div>
 
     <GoogleButton @credential="handleGoogleCredential" />
-    <p v-if="googleErrorMessage" role="alert" class="auth-error mt-[12px]">
+    <p v-if="googleErrorMessage" role="alert" class="auth-error mt-3">
       {{ googleErrorMessage }}
     </p>
 
-    <p class="mt-[32px] text-[15px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
+    <p class="mt-8 text-[15px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
       Não tem uma conta?
-      <RouterLink :to="{ name: 'Register' }" class="auth-link">Criar conta</RouterLink>
+      <RouterLink to="/registrar" class="auth-link">Criar conta</RouterLink>
     </p>
   </AuthSplitLayout>
 </template>

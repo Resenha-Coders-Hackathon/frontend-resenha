@@ -7,7 +7,13 @@ import { AuthCardLayout, AuthField } from '../components'
 import { confirmPasswordReset } from '../services'
 import { useAuthFlowStore } from '../stores'
 
-const STRENGTH_LABELS = ['Senha muito fraca', 'Senha fraca', 'Senha média', 'Senha forte', 'Senha muito forte']
+const STRENGTH_LABELS = [
+  'Senha muito fraca',
+  'Senha fraca',
+  'Senha média',
+  'Senha forte',
+  'Senha muito forte',
+]
 
 const router = useRouter()
 const authFlow = useAuthFlowStore()
@@ -65,7 +71,7 @@ async function handleSubmit() {
       Use pelo menos 9 caracteres, combinando letras, números e símbolos.
     </template>
 
-    <form class="flex flex-col gap-[20px]" @submit.prevent="handleSubmit">
+    <form class="flex flex-col gap-5" @submit.prevent="handleSubmit">
       <AuthField
         id="reset-password"
         v-model="password"
@@ -79,12 +85,12 @@ async function handleSubmit() {
         required
       >
         <template #after>
-          <div class="mt-[16px] grid grid-cols-4 gap-[6px]" aria-hidden="true">
+          <div class="mt-4 grid grid-cols-4 gap-1.5" aria-hidden="true">
             <span
               v-for="bar in 4"
               :key="bar"
               :class="[
-                'h-[4px] rounded-full transition-colors',
+                'h-1 rounded-full transition-colors',
                 bar <= strength
                   ? 'bg-(--surface-inverse) dark:bg-(--surface)'
                   : 'bg-(--bg-muted) dark:bg-(--border-inverse)',
@@ -92,7 +98,7 @@ async function handleSubmit() {
             ></span>
           </div>
           <p
-            class="mt-[8px] text-[12px] leading-[16px] text-(--text-secondary) dark:text-(--text-inverse-muted)"
+            class="mt-2 text-[12px] leading-4 text-(--text-secondary) dark:text-(--text-inverse-muted)"
             aria-live="polite"
           >
             {{ password ? STRENGTH_LABELS[strength] : 'Força da senha' }}

@@ -1,15 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
-import { FooterComp } from '@/shared/components'
-
-const route = useRoute()
-const showFooter = computed(() => !route.matched.some((record) => record.meta.hideFooter))
+import { HeaderComp, FooterComp } from '@/shared/components'
 </script>
 
 <template>
+  <HeaderComp />
   <main>
     <RouterView />
   </main>
-  <FooterComp v-if="showFooter" />
+  <FooterComp />
 </template>

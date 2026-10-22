@@ -17,9 +17,9 @@ const model = defineModel<string>({ default: '' })
 
 <template>
   <div>
-    <label :for="id" class="mb-[8px] block text-[14px] font-medium leading-[20px]">{{ label }}</label>
+    <label :for="id" class="mb-2 block text-[14px] font-medium leading-5">{{ label }}</label>
     <div
-      class="flex h-[52px] items-center gap-[12px] rounded-[8px] border border-(--border-default) bg-(--surface) px-[16px] text-(--text-muted) transition-colors focus-within:border-(--border-strong) dark:border-(--border-inverse) dark:bg-black/30 dark:focus-within:border-(--text-inverse-muted)"
+      class="flex h-13 items-center gap-3 rounded-lg border border-(--border-default) bg-(--surface) px-4 text-(--text-muted) transition-colors focus-within:border-(--border-strong) dark:border-(--border-inverse) dark:bg-black/30 dark:focus-within:border-(--text-inverse-muted)"
     >
       <span class="material-symbols-outlined text-[20px]!" aria-hidden="true">{{ icon }}</span>
       <input
@@ -31,7 +31,10 @@ const model = defineModel<string>({ default: '' })
       />
     </div>
     <slot name="after" />
-    <p v-if="hint" class="mt-[8px] text-[12px] leading-[16px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
+    <p
+      v-if="hint"
+      class="mt-2 text-[12px] leading-4 text-(--text-secondary) dark:text-(--text-inverse-muted)"
+    >
       {{ hint }}
     </p>
   </div>

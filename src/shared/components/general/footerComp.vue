@@ -33,9 +33,7 @@ function subscribe() {
 
 <template>
   <!-- Cores e medidas fixas em px: o footer não acompanha o tema nem o font-size do html -->
-  <footer
-    class="bg-[#000000] font-['Inter',sans-serif] text-[14px] leading-[21px] text-[#ffffff]"
-  >
+  <footer class="bg-[#000000] font-['Inter',sans-serif] text-[14px] leading-[21px] text-[#ffffff]">
     <div
       class="mx-auto w-full max-w-[1440px] px-[20px] pt-[48px] pb-[56px] sm:px-[40px] lg:px-[80px] lg:pt-[72px] lg:pb-[72px]"
     >
@@ -43,7 +41,7 @@ function subscribe() {
         <div class="lg:max-w-[320px]">
           <RouterLink
             to="/"
-            class="inline-block w-fit rounded-[4px] font-jakarta text-[18px] leading-[32px] font-bold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#ffffff]"
+            class="inline-block w-fit rounded-[4px] text-[18px] leading-[32px] font-bold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#ffffff]"
           >
             Resenha<span class="text-[#a3a3a3]">Coders</span>
           </RouterLink>

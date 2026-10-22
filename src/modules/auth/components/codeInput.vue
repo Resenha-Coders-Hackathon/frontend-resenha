@@ -71,7 +71,7 @@ onMounted(() => focusCell(cells.value.findIndex((cell) => !cell)))
 </script>
 
 <template>
-  <div class="flex justify-between gap-[10px]" role="group" aria-label="Código de verificação">
+  <div class="flex justify-between gap-2.5" role="group" aria-label="Código de verificação">
     <input
       v-for="(cell, index) in cells"
       :key="index"
@@ -82,7 +82,7 @@ onMounted(() => focusCell(cells.value.findIndex((cell) => !cell)))
       :autocomplete="index === 0 ? 'one-time-code' : 'off'"
       :aria-label="`Dígito ${index + 1}`"
       :disabled="disabled"
-      class="h-[60px] w-full max-w-[52px] rounded-[8px] border border-(--border-default) bg-(--surface) text-center text-[24px] font-semibold text-(--text-primary) outline-none transition-colors focus:border-2 focus:border-(--border-strong) disabled:opacity-60 dark:border-(--border-inverse) dark:bg-black/30 dark:text-(--text-inverse) dark:focus:border-(--text-inverse)"
+      class="h-15 w-full max-w-13 rounded-lg border border-(--border-default) bg-(--surface) text-center text-[24px] font-semibold text-(--text-primary) outline-none transition-colors focus:border-2 focus:border-(--border-strong) disabled:opacity-60 dark:border-(--border-inverse) dark:bg-black/30 dark:text-(--text-inverse) dark:focus:border-(--text-inverse)"
       @input="handleInput(index, $event)"
       @keydown="handleKeydown(index, $event)"
       @focus="($event.target as HTMLInputElement).select()"

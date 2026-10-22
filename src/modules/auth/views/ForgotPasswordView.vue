@@ -32,12 +32,12 @@ async function handleSubmit() {
 
 <template>
   <AuthSplitLayout>
-    <h1 class="text-[38px]! leading-[46px]! tracking-[-0.03em]!">Esqueceu sua senha?</h1>
-    <p class="mt-[8px] text-[16px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
+    <h1 class="text-[38px]! leading-11.5! tracking-[-0.03em]!">Esqueceu sua senha?</h1>
+    <p class="mt-2 text-[16px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
       Sem problemas. Informe seu e-mail e enviaremos um código para você criar uma nova senha.
     </p>
 
-    <form class="mt-[32px] flex flex-col gap-[20px]" @submit.prevent="handleSubmit">
+    <form class="mt-8 flex flex-col gap-5" @submit.prevent="handleSubmit">
       <AuthField
         id="forgot-email"
         v-model="email"
@@ -52,17 +52,12 @@ async function handleSubmit() {
 
       <p v-if="errorMessage" role="alert" class="auth-error">{{ errorMessage }}</p>
 
-      <BaseButton
-        type="submit"
-        label="Enviar código"
-        :loading="isSubmitting"
-        class="auth-submit"
-      />
+      <BaseButton type="submit" label="Enviar código" :loading="isSubmitting" class="auth-submit" />
     </form>
 
-    <p class="mt-[32px] text-[15px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
+    <p class="mt-8 text-[15px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
       Lembrou sua senha?
-      <RouterLink :to="{ name: 'Login' }" class="auth-link">Voltar para o login</RouterLink>
+      <RouterLink to="/entrar" class="auth-link">Voltar para o login</RouterLink>
     </p>
   </AuthSplitLayout>
 </template>

@@ -102,24 +102,32 @@ onBeforeUnmount(() => clearInterval(timer))
   <AuthSplitLayout>
     <div
       v-if="props.flow === 'register'"
-      class="mb-[24px] flex items-center gap-[12px] text-[13px] font-medium"
+      class="mb-6 flex items-center gap-3 text-[13px] font-medium"
       aria-label="Etapa 2 de 2"
     >
-      <span class="inline-flex items-center gap-[8px] text-(--text-muted)">
-        <span class="grid size-[24px] place-items-center rounded-full bg-(--bg-subtle) text-[12px] dark:bg-black/30">1</span>
+      <span class="inline-flex items-center gap-2 text-(--text-muted)">
+        <span
+          class="grid size-6 place-items-center rounded-full bg-(--bg-subtle) text-[12px] dark:bg-black/30"
+          >1</span
+        >
         Dados
       </span>
-      <span class="h-px w-[24px] bg-(--border-default) dark:bg-(--border-inverse)"></span>
-      <span class="inline-flex items-center gap-[8px]" aria-current="step">
-        <span class="grid size-[24px] place-items-center rounded-full bg-(--surface-inverse) text-[12px] text-(--text-inverse) dark:bg-(--surface) dark:text-(--text-primary)">2</span>
+      <span class="h-px w-6 bg-(--border-default) dark:bg-(--border-inverse)"></span>
+      <span class="inline-flex items-center gap-2" aria-current="step">
+        <span
+          class="grid size-6 place-items-center rounded-full bg-(--surface-inverse) text-[12px] text-(--text-inverse) dark:bg-(--surface) dark:text-(--text-primary)"
+          >2</span
+        >
         Validação
       </span>
     </div>
 
-    <h1 class="text-[38px]! leading-[46px]! tracking-[-0.03em]!">
+    <h1 class="text-[38px]! leading-11.5! tracking-[-0.03em]!">
       {{ props.flow === 'register' ? 'Validação em duas etapas' : 'Confirme seu e-mail' }}
     </h1>
-    <p class="mt-[8px] text-[16px] leading-[26px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
+    <p
+      class="mt-2 text-[16px] leading-6.5 text-(--text-secondary) dark:text-(--text-inverse-muted)"
+    >
       {{
         props.flow === 'register'
           ? 'Para concluir seu cadastro, digite o código de 6 dígitos enviado para'
@@ -127,10 +135,11 @@ onBeforeUnmount(() => clearInterval(timer))
       }}
       <span class="font-semibold text-(--text-primary) dark:text-(--text-inverse)">{{
         authFlow.email
-      }}</span>.
+      }}</span
+      >.
     </p>
 
-    <form class="mt-[32px] flex flex-col gap-[20px]" @submit.prevent="handleSubmit">
+    <form class="mt-8 flex flex-col gap-5" @submit.prevent="handleSubmit">
       <CodeInput v-model="code" :disabled="isSubmitting" />
 
       <p v-if="errorMessage" role="alert" class="auth-error">{{ errorMessage }}</p>
@@ -144,7 +153,7 @@ onBeforeUnmount(() => clearInterval(timer))
     </form>
 
     <p
-      class="mt-[24px] text-center text-[14px] leading-[20px] text-(--text-secondary) dark:text-(--text-inverse-muted)"
+      class="mt-6 text-center text-[14px] leading-5 text-(--text-secondary) dark:text-(--text-inverse-muted)"
       aria-live="polite"
     >
       <template v-if="secondsLeft > 0">
@@ -166,7 +175,7 @@ onBeforeUnmount(() => clearInterval(timer))
       </template>
     </p>
 
-    <p class="mt-[24px] text-[14px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
+    <p class="mt-6 text-[14px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
       E-mail incorreto?
       <RouterLink
         :to="{ name: props.flow === 'register' ? 'Register' : 'ForgotPassword' }"
