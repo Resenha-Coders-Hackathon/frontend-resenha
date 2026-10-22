@@ -92,7 +92,7 @@ async function handleGoogleCredential(credential: string) {
         </template>
       </AuthField>
 
-      <p v-if="errorMessage" role="alert" class="auth-error">{{ errorMessage }}</p>
+        <GoogleButton @credential="handleGoogleLogin" />
 
       <BaseButton
         type="submit"

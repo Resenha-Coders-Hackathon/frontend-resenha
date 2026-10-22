@@ -15,6 +15,7 @@ const props = withDefaults(defineProps<IInputs>(), {
   icon: '',
   label: '',
   disabled: false,
+  inputmode: undefined,
 })
 
 const emit = defineEmits<{

@@ -6,4 +6,5 @@ export interface IInputs {
   label?: string
   disabled?: boolean
   required?: boolean
+  inputmode?: 'numeric' | 'text' | 'decimal' | 'search' | 'tel' | 'url' | 'email' | 'none'
 }
