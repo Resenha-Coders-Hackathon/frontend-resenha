@@ -4,7 +4,7 @@ import { authRoutes } from '@/modules/auth/router'
 import { geolocationRoutes } from '@/modules/geolocation/router'
 import { mapboxRoutes } from '@/modules/mapbox/router'
 import { notificationsRoutes } from '@/modules/notifications/router'
-import { useAuthStore } from '@/modules/auth/stores'
+import { paymentsRoutes } from '@/modules/payments/router'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -14,6 +14,7 @@ const router = createRouter({
     ...geolocationRoutes,
     ...mapboxRoutes,
     ...notificationsRoutes,
+    ...paymentsRoutes,
   ],
   scrollBehavior() {
     return { top: 0 }

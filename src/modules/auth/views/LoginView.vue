@@ -1,130 +1,122 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { GoogleButton } from '../components'
-import { useAuthStore } from '../stores'
-import { loginWithGoogle } from '../services'
-import { BaseInput, PasswordInput, SegmentedControl, BaseButton } from '@/shared/components'
+import { BaseButton } from '@/shared/components'
+import { AuthField, AuthSplitLayout, GoogleButton } from '../components'
+import { login, loginWithGoogle } from '../services'
+import { useAuthFlowStore } from '../stores'
 
 const router = useRouter()
-const route = useRoute()
-const auth = useAuthStore()
+const authFlow = useAuthFlowStore()
 const email = ref('')
 const password = ref('')
-const isLoading = ref(false)
+const isSubmitting = ref(false)
+const errorMessage = ref('')
+const isGoogleSubmitting = ref(false)
+const googleErrorMessage = ref('')
 
-async function handleLogin(): Promise<void> {
-  if (!email.value || !password.value) {
-    toast.error('Informe e-mail e senha.')
-    return
-  }
+async function handleSubmit() {
+  errorMessage.value = ''
+  isSubmitting.value = true
 
-  isLoading.value = true
   try {
-    await auth.signIn({ email: email.value, password: password.value })
-    toast.success('Login realizado com sucesso.')
-    const redirect = String(route.query.redirect ?? '')
-    // só caminhos internos, para não virar open redirect
-    await router.push(redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/notificacoes')
+    await login({ email: email.value.trim(), password: password.value })
+    toast.success('Que bom ter você de volta!')
+    await router.push({ name: 'Home' })
   } catch (error) {
-    toast.error(error instanceof Error ? error.message : 'Não foi possível entrar.')
+    errorMessage.value =
+      error instanceof Error ? error.message : 'Não foi possível entrar. Tente novamente.'
   } finally {
-    isLoading.value = false
+    isSubmitting.value = false
   }
 }
-async function handleGoogleLogin(credential: string): Promise<void> {
-  if (isLoading.value) return
-  isLoading.value = true
+
+async function handleGoogleCredential(credential: string) {
+  if (isGoogleSubmitting.value) return
+
+  googleErrorMessage.value = ''
+  isGoogleSubmitting.value = true
+
   try {
     await loginWithGoogle(credential)
-    const user = await auth.loadUser()
-    if (!user) throw new Error('O backend não confirmou a sessão. Verifique os cookies de autenticação.')
-    toast.success('Login com Google realizado com sucesso.')
-    const redirect = String(route.query.redirect ?? '')
-    await router.push(redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/notificacoes')
+    authFlow.clear()
+    toast.success('Você entrou com sua conta Google.')
+    await router.push({ name: 'Home' })
   } catch (error) {
-    toast.error(error instanceof Error ? error.message : 'Não foi possível entrar com Google.')
+    googleErrorMessage.value =
+      error instanceof Error ? error.message : 'Não foi possível entrar com Google.'
   } finally {
-    isLoading.value = false
+    isGoogleSubmitting.value = false
   }
 }
-const modelValue = ref('cliente')
-const modes = [
-  {
-    value: 'cliente',
-    label: 'Portal do Cliente / Embargador',
-  },
-  {
-    value: 'operador',
-    label: 'Operador / Transportador',
-  },
-]
 </script>
 
 <template>
-  <section class="px-4 py-5 sm:px-6 sm:py-8 md:px-12 xl:px-20 mt-[20vw] lg:mt-[3vw]">
-    <div
-      class="mx-auto flex flex-col lg:flex-row lg:max-h-170 w-full max-w-8xl rounded-2xl overflow-hidden shadow-2xl"
-    >
-      <div
-        style="
-          background-image: url(/login.svg);
-          background-repeat: no-repeat;
-          background-size: cover;
-          background-position: center;
-        "
-        class="flex flex-col justify-end w-full lg:w-[35%] min-h-64 lg:h-screen px-6 py-8 sm:px-10 sm:py-12 lg:px-10 lg:py-20 lg:justify-start"
-      >
-        <h2 class="text-3xl sm:text-4xl text-(--surface-container)">
-          A logística inteligente
-          <span
-            class="bg-linear-to-r from-(--primary) to-(--primary-container) bg-clip-text text-transparent dark:to-(--primary-dark) dark:from-(--primary-container-dark)"
-            >começa aqui.</span
-          >
-        </h2>
-        <p class="text-(--surface-container) text-sm mt-4">
-          Plataforma preditiva com telemetria avançada, governança de ponta a ponta e automação em
-          tempo real para frotas e embarcadores de alta performance.
-        </p>
-      </div>
+  <AuthSplitLayout>
+    <h1 class="text-[38px]! leading-[46px]! tracking-[-0.03em]!">Bem-vindo de volta</h1>
+    <p class="mt-[8px] text-[16px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
+      Entre na sua conta para continuar.
+    </p>
 
-      <div
-        class="lg:h-screen w-full lg:w-[65%] px-5 py-8 sm:px-10 sm:py-12 md:px-12 md:py-16 lg:px-40 lg:py-20 bg-(--surface-container) dark:bg-(--surface-dark)"
-      >
-        <h2 class="text-3xl sm:text-4xl">Bem-vindo de volta!</h2>
-        <p class="mt-2 dark:text-(--on-surface-variant-dark)">
-          Acesse seu workspace corporativo LogiFlow e gerencie suas operações.
-        </p>
+    <form class="mt-[32px] flex flex-col gap-[20px]" @submit.prevent="handleSubmit">
+      <AuthField
+        id="login-email"
+        v-model="email"
+        label="E-mail"
+        icon="mail"
+        type="email"
+        name="email"
+        autocomplete="username"
+        placeholder="voce@email.com"
+        required
+      />
 
-        <SegmentedControl v-model="modelValue" :options="modes" />
+      <AuthField
+        id="login-password"
+        v-model="password"
+        label="Senha"
+        icon="lock"
+        type="password"
+        name="password"
+        autocomplete="current-password"
+        placeholder="••••••••"
+        required
+      >
+        <template #after>
+          <div class="mt-[12px] flex justify-end leading-[20px]">
+            <RouterLink :to="{ name: 'ForgotPassword' }" class="auth-link text-[14px]">
+              Esqueceu sua senha?
+            </RouterLink>
+          </div>
+        </template>
+      </AuthField>
 
         <GoogleButton @credential="handleGoogleLogin" />
 
-        <div class="relative flex items-center justify-center py-1 mt-8">
-          <span
-            class="w-full h-0.5 bg-(--surface-container-low) dark:bg-(--surface-container-low-dark)"
-          />
-          <p
-            class="absolute px-3 py-1 bg-(--surface) dark:bg-(--surface-dark) text-xs text-on-surface-variant uppercase tracking-wider"
-          >
-            ou com e-mail
-          </p>
-        </div>
+      <BaseButton
+        type="submit"
+        label="Entrar"
+        :loading="isSubmitting"
+        :disabled="isGoogleSubmitting"
+        class="auth-submit"
+      />
+    </form>
 
-        <BaseInput v-model="email" label="E-mail" type="email" icon="alternate_email" />
-
-        <PasswordInput v-model="password" label="Senha" icon="lock" />
-
-        <BaseButton
-          label="Entrar"
-          icon="arrow_forward"
-          icon-position="right"
-          :loading="isLoading"
-          :disabled="isLoading"
-          @click="handleLogin"
-        />
-      </div>
+    <div class="my-[24px] flex items-center gap-[16px] text-[13px] text-(--text-muted)">
+      <span class="h-px flex-1 bg-(--border-default) dark:bg-(--border-inverse)"></span>
+      <span>ou</span>
+      <span class="h-px flex-1 bg-(--border-default) dark:bg-(--border-inverse)"></span>
     </div>
-  </section>
+
+    <GoogleButton @credential="handleGoogleCredential" />
+    <p v-if="googleErrorMessage" role="alert" class="auth-error mt-[12px]">
+      {{ googleErrorMessage }}
+    </p>
+
+    <p class="mt-[32px] text-[15px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
+      Não tem uma conta?
+      <RouterLink :to="{ name: 'Register' }" class="auth-link">Criar conta</RouterLink>
+    </p>
+  </AuthSplitLayout>
 </template>

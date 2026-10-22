@@ -50,22 +50,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section
-    class="mx-auto w-full max-w-xl rounded-3xl border border-(--outline-variant) bg-(--surface-container-low) p-6 shadow-lg sm:p-8"
-  >
-    <div
-      class="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-(--primary) text-white"
-      aria-hidden="true"
-    >
-      <span class="material-symbols-outlined">notifications</span>
-    </div>
-
-    <h1 class="text-2xl font-bold text-(--on-surface)">Notificações</h1>
-    <p class="mt-2 text-sm leading-6 text-(--on-surface-variant)">
-      Envie uma notificação para este dispositivo usando o Firebase Cloud Messaging. A permissão do
-      navegador será solicitada quando você clicar no botão.
-    </p>
-
+  <section>
     <BaseButton
       label="Enviar push de teste"
       icon="send"

@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -6,39 +7,28 @@
 @theme {
   --font-jakarta: 'Plus Jakarta Sans', sans-serif;
 
-  --surface: #f9f9ff;
-  --surface-dark: #0f131d;
+  --background: #ffffff;
+  --background-inverse: #000000;
 
-  --surface-container: #ffffff;
-  --surface-container-dark: #1e2939;
+  --surface: #ffffff;
+  --surface-inverse: #262626;
 
-  --surface-container-low: #f1f3ff;
-  --surface-container-low-dark: #0a0e18;
+  --bg-subtle: #f4f4f4;
 
-  --primary: #ab3500;
-  --primary-dark: #ffb59d;
+  --bg-muted: #e6e6e6;
 
-  --primary-container: #ff6b35;
-  --primary-container-dark: #ff8c53;
+  --text-primary: #000000;
+  --text-secondary: #525252;
+  --text-muted: #a3a3a3;
+  --text-inverse: #ffffff;
+  --text-inverse-muted: #a3a3a3;
 
-  --secondary-color: #1e2a78;
+  --sucess: #2590f6;
+  --destructive: #dc2626;
 
-  --tertiary-color: #2590f6;
-
-  --neutral-color: #1a202c;
-
-  --on-surface-variant: #594139;
-  --on-surface-variant-dark: #a6adbb;
-
-  --outline: #8d7168;
-  --surface-bright: #fff8f6;
-  --on-surface: #261814;
-  --on-surface-dark: #594139;
-
-  --surface-dim: #eed5cd;
-  --primary-fixed: #ffdbd0;
-  --on-primary-fixed: #390c00;
-  --surface-container-high: #fde3db;
+  --border-default: #e6e6e6;
+  --border-strong: #000000;
+  --border-inverse: #3a3a3a;
 }
 
 html {
@@ -46,8 +36,8 @@ html {
   overflow-x: hidden;
   font-family: 'Plus Jakarta Sans', sans-serif;
   transition: color 0.05s ease-in;
-  color: var(--neutral-color);
-  background-color: var(--surface);
+  color: var(--text-primary);
+  background-color: var(--background);
 
   font-size: 18px;
   line-height: 28px;
@@ -62,8 +52,8 @@ html {
 }
 
 .dark {
-  background-color: var(--surface-dark);
-  color: #ffffff;
+  background-color: var(--background-inverse);
+  color: var(--text-inverse);
 }
 
 h1 {

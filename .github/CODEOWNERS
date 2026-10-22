@@ -1,0 +1,7 @@
+# INACTIVE EXAMPLES. Set real owners before enabling.
+# * @your-org/maintainers
+# /src/modules/auth/ @your-org/auth
+# /src/shared/ @your-org/maintainers
+# /src/app/ @your-org/maintainers
+# /.github/ @your-org/maintainers
+# CODEOWNERS requests review when configured; it does not block simultaneous edits.

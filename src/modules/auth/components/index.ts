@@ -1,1 +1,5 @@
+export { default as AuthCardLayout } from './authCardLayout.vue'
+export { default as AuthField } from './authField.vue'
+export { default as AuthSplitLayout } from './authSplitLayout.vue'
+export { default as CodeInput } from './codeInput.vue'
 export { default as GoogleButton } from './googleButton.vue'

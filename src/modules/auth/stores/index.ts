@@ -1,26 +1,34 @@
-import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { fetchMe, login, logout, type LoginRequest } from '../services'
-import type { User } from '../types'
+import { ref } from 'vue'
 
-export const useAuthStore = defineStore('auth', () => {
-  const user = ref<User | null>(null)
+// Dados em memória entre as etapas de registro e de redefinição de senha.
+// Nada é persistido: ao recarregar a página o fluxo recomeça.
+export const useAuthFlowStore = defineStore('authFlow', () => {
+  const email = ref('')
+  const name = ref('')
+  const password = ref('')
+  const resetCode = ref('')
 
-  // Os cookies são HttpOnly: só o backend sabe se há sessão.
-  async function loadUser(): Promise<User | null> {
-    user.value = await fetchMe().catch(() => null)
-    return user.value
+  function startRegistration(data: { email: string; name: string; password: string }) {
+    email.value = data.email
+    name.value = data.name
+    password.value = data.password
+    resetCode.value = ''
   }
 
-  async function signIn(payload: LoginRequest): Promise<void> {
-    await login(payload)
-    await loadUser()
+  function startPasswordReset(value: string) {
+    email.value = value
+    name.value = ''
+    password.value = ''
+    resetCode.value = ''
   }
 
-  async function signOut(): Promise<void> {
-    await logout().catch(() => {}) // sessão já inválida: limpar o estado local basta
-    user.value = null
+  function clear() {
+    email.value = ''
+    name.value = ''
+    password.value = ''
+    resetCode.value = ''
   }
 
-  return { user, loadUser, signIn, signOut }
+  return { email, name, password, resetCode, startRegistration, startPasswordReset, clear }
 })

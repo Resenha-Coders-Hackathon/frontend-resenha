@@ -6,5 +6,8 @@
   },
   "categories": {
     "correctness": "error"
+  },
+  "rules": {
+    "unicorn/no-empty-file": "off"
   }
 }
