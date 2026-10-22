@@ -38,6 +38,7 @@ src/
 | `src/modules/mapbox/` | TBD | Mapbox map component | `mapboxRoutes` (`feat-mapbox`) | — |
 | `src/modules/notifications/` | TBD | Firebase push notifications; sends via backend | `notificationsRoutes` (`feat-notifications`) | — |
 | `src/modules/payments/` | TBD | Payment form, Pix and result screens | `paymentsRoutes` (`feat/payments`) | — |
+| `src/modules/ai/` | TBD | Ask the backend AI (`POST /ai/ask/`); service and store only | `useAiStore`, `askAi` | — |
 
 Rows for modules from feature branches stay until that branch is merged or dropped.
 When a new module is created, add its row and follow the same structure.
