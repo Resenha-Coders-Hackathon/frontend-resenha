@@ -21,4 +21,11 @@ const router = createRouter({
   },
 })
 
+router.beforeEach(async (to) => {
+  if (!to.meta.requiresAuth) return
+  const auth = useAuthStore()
+  if (auth.user || (await auth.loadUser())) return
+  return { path: '/entrar', query: { redirect: to.fullPath } }
+})
+
 export default router

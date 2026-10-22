@@ -3,7 +3,7 @@ import { onUnmounted, ref } from 'vue'
 import { toast } from 'vue-sonner'
 import { BaseButton } from '@/shared/components'
 import { listenForForegroundMessages, requestDeviceFcmToken } from '../composables'
-import { sendNotification, validateNotificationsConfiguration } from '../services'
+import { sendNotification } from '../services'
 
 const isSending = ref(false)
 const notification = {
@@ -17,7 +17,6 @@ async function handleSendNotification(): Promise<void> {
   isSending.value = true
 
   try {
-    validateNotificationsConfiguration()
     const { token, messaging } = await requestDeviceFcmToken()
 
     if (!stopListeningForMessages) {
