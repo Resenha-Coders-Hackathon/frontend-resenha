@@ -41,23 +41,21 @@ const authItems: IMenuItems[] = [
 </script>
 
 <template>
-  <header class="relative z-1">
+  <header class="relative z-1 pb-15">
     <div
-      class="flex inset-x-none w-full xl:w-auto xl:inset-x-30 xl:mt-5 absolute items-center justify-between gap-4 border-b border-gray-200 bg-(--surface-container) px-4 py-3 dark:border-gray-700 dark:bg-(--surface-container-dark) xl:rounded-full xl:border xl:px-8 xl:py-2"
+      class="flex inset-x-none w-full xl:w-auto xl:inset-x-30 xl:mt-5 absolute items-center justify-between gap-4 border-b border-(--border-default) bg-(--surface) px-4 py-3 dark:border-(--border-inverse) dark:bg-(--surface-inverse) xl:rounded-full xl:border xl:px-8 xl:py-2"
     >
       <RouterLink to="/" class="font-bold" @click="closeMenu">
-        Resenha<span
-          class="shrink-0 whitespace-nowrap bg-linear-to-r from-(--primary) to-(--primary-container) bg-clip-text text-transparent dark:from-(--primary-container-dark) dark:to-(--primary-dark)"
-          >Coders</span
-        >
+        Resenha<span class="shrink-0 whitespace-nowrap text-(--text-muted)">Coders</span>
       </RouterLink>
 
       <nav class="hidden min-w-0 flex-1 md:block">
-        <ul
-          class="flex items-center justify-center gap-3 text-sm lg:gap-6 dark:text-(--on-surface-variant-dark)"
-        >
+        <ul class="flex items-center justify-center gap-3 text-sm lg:gap-6">
           <li v-for="item in menuItems" :key="item.label">
-            <RouterLink :to="item.link" class="hover:text-(--primary) active:text-(--primary)">
+            <RouterLink
+              :to="item.link"
+              class="hover:text-(--text-muted) active:text-(--text-muted)"
+            >
               {{ item.label }}
             </RouterLink>
           </li>
@@ -66,16 +64,16 @@ const authItems: IMenuItems[] = [
 
       <div class="hidden items-center gap-6 lg:flex">
         <ul
-          class="flex items-center gap-4 text-sm font-semibold dark:text-(--on-surface-variant-dark) border-l pl-5 border-gray-200 dark:border-gray-700"
+          class="flex items-center gap-4 text-sm font-semibold border-l pl-5 border-gray-200 dark:border-gray-700"
         >
           <li v-for="item in authItems" :key="item.label">
             <RouterLink
               :to="item.link"
               :class="[
-                'flex items-center gap-1 transition-all duration-300',
+                'flex items-center gap-1',
                 item.label === 'Entrar'
-                  ? 'group rounded-full bg-(--primary) px-3 py-1.5 text-white hover:bg-(--primary)/80 active:bg-(--primary)/80'
-                  : 'hover:text-(--primary) active:text-(--primary)',
+                  ? 'group rounded-full bg-(--surface-inverse) text-(--text-inverse) dark:bg-(--surface) dark:text-(--text-primary) px-3 py-1.5 transition-all duration-300'
+                  : 'hover:text-(--text-muted) active:text-(--text-muted)',
               ]"
             >
               {{ item.label }}

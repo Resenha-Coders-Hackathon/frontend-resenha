@@ -1,13 +1,13 @@
 import { ref } from 'vue'
 
-const loading = ref(false)
+const loading = ref<boolean>(false)
 
 export const useLoading = () => {
-  function start() {
+  function start(): void {
     loading.value = true
   }
 
-  function stop() {
+  function stop(): void {
     loading.value = false
   }
 
