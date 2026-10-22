@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
 import { BaseButton } from '@/shared/components'
 import { PaymentCard, PaymentStatusBadge, PaymentSteps, PaymentSummary } from '../components'
 import { usePaymentsStore } from '../stores'
@@ -15,7 +16,17 @@ const payment = computed(() => store.find(props.id))
 const approved = computed(() => !!payment.value && isPaymentApproved(payment.value.status))
 
 // ainda não pago: volta para a tela do QR Code
-onMounted(() => {
+onMounted(async () => {
+  if (!payment.value) {
+    try {
+      await store.load(props.id)
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Não foi possível consultar o pagamento.',
+      )
+    }
+  }
+
   if (payment.value && !isPaymentFinal(payment.value.status)) {
     router.replace({ name: 'PaymentPix', params: { id: props.id } })
   }
@@ -29,7 +40,15 @@ onMounted(() => {
     <PaymentSteps :current="3" :completed="approved" />
 
     <div class="mt-10">
-      <h2>{{ !payment ? 'Pagamento indisponível' : approved ? 'Pagamento confirmado' : 'Pagamento não concluído' }}</h2>
+      <h2>
+        {{
+          !payment
+            ? 'Pagamento indisponível'
+            : approved
+              ? 'Pagamento confirmado'
+              : 'Pagamento não concluído'
+        }}
+      </h2>
       <p class="mt-3 max-w-2xl text-sm text-(--text-secondary) dark:text-(--text-inverse-muted)">
         {{
           !payment
@@ -64,7 +83,6 @@ onMounted(() => {
               {{ approved ? 'check' : 'close' }}
             </span>
           </span>
-
 
           <div class="mt-4">
             <PaymentStatusBadge :status="payment.status" />

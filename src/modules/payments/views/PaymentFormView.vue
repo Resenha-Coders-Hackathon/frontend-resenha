@@ -14,6 +14,7 @@ const title = ref('')
 const amount = ref('')
 const name = ref('')
 const cpf = ref('')
+const isSubmitting = ref(false)
 
 const amountModel = computed({
   get: () => amount.value,
@@ -53,20 +54,27 @@ function validate(): string | null {
   return null
 }
 
-function handleSubmit(): void {
+async function handleSubmit(): Promise<void> {
   const error = validate()
   if (error) {
     toast.error(error)
     return
   }
 
-  const payment = store.create({
-    title: title.value.trim(),
-    amount: amountValue.value,
-    name: name.value.trim(),
-    cpf: onlyDigits(cpf.value),
-  })
-  router.push({ name: 'PaymentPix', params: { id: payment.id } })
+  isSubmitting.value = true
+  try {
+    const payment = await store.create({
+      title: title.value.trim(),
+      amount: amountValue.value,
+      name: name.value.trim(),
+      cpf: onlyDigits(cpf.value),
+    })
+    router.push({ name: 'PaymentPix', params: { id: payment.id } })
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : 'Não foi possível gerar o pagamento Pix.')
+  } finally {
+    isSubmitting.value = false
+  }
 }
 </script>
 
@@ -143,6 +151,7 @@ function handleSubmit(): void {
             form="payment-form"
             label="Gerar QR Code Pix"
             icon="qr_code_2"
+            :loading="isSubmitting"
           />
 
           <p class="mt-4 flex items-center justify-center gap-1 text-xs text-(--text-muted)">

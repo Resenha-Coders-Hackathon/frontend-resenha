@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
 import { BaseButton } from '@/shared/components'
 import {
   PaymentCard,
@@ -10,12 +11,14 @@ import {
   PixCode,
 } from '../components'
 import { usePaymentsStore } from '../stores'
-import type { PaymentStatus } from '../types'
+import { isPaymentFinal } from '../utils'
 
 const props = defineProps<{ id: string }>()
 
 const router = useRouter()
 const store = usePaymentsStore()
+const isChecking = ref(false)
+let pollingTimer: ReturnType<typeof setInterval> | undefined
 
 const payment = computed(() => store.find(props.id))
 
@@ -25,10 +28,33 @@ const steps = [
   'Confirme o valor, finalize e clique em "Já paguei".',
 ]
 
-function finish(status: PaymentStatus): void {
-  store.setStatus(props.id, status)
-  router.push({ name: 'PaymentResult', params: { id: props.id } })
+async function refreshPayment(showError = false): Promise<void> {
+  if (isChecking.value) return
+
+  isChecking.value = true
+  try {
+    const updatedPayment = await store.load(props.id)
+    if (updatedPayment && isPaymentFinal(updatedPayment.status)) {
+      clearInterval(pollingTimer)
+      router.push({ name: 'PaymentResult', params: { id: props.id } })
+    }
+  } catch (error) {
+    if (showError) {
+      toast.error(
+        error instanceof Error ? error.message : 'Não foi possível consultar o pagamento.',
+      )
+    }
+  } finally {
+    isChecking.value = false
+  }
 }
+
+onMounted(async () => {
+  if (!payment.value) await refreshPayment(true)
+  pollingTimer = setInterval(() => refreshPayment(), 5000)
+})
+
+onBeforeUnmount(() => clearInterval(pollingTimer))
 </script>
 
 <template>
@@ -63,7 +89,7 @@ function finish(status: PaymentStatus): void {
           <PaymentStatusBadge :status="payment.status" />
 
           <div class="mx-auto mt-8 max-w-md">
-            <PixCode :qr-code="payment.qr_code" />
+            <PixCode :qr-code="payment.qr_code" :qr-code-base64="payment.qr_code_base64" />
           </div>
 
           <div class="mt-8 border-t border-(--border-default) pt-6 dark:border-(--border-inverse)">
@@ -93,16 +119,12 @@ function finish(status: PaymentStatus): void {
               />
             </div>
 
-            <BaseButton label="Já paguei" icon="check" @click="finish('approved')" />
-
-            <!-- só para demonstrar a tela de falha enquanto não há backend -->
-            <button
-              type="button"
-              class="mt-4 w-full cursor-pointer text-center text-xs text-(--text-muted) underline-offset-4 hover:underline active:underline"
-              @click="finish('rejected')"
-            >
-              Simular pagamento recusado
-            </button>
+            <BaseButton
+              label="Já paguei"
+              icon="check"
+              :loading="isChecking"
+              @click="refreshPayment(true)"
+            />
           </PaymentCard>
 
           <BaseButton

@@ -1,24 +1,27 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import type { CreatePaymentData, Payment, PaymentStatus } from '../types'
-
-// Somente front: o pagamento vive em memória e se perde ao recarregar a página.
-const FAKE_PIX_CODE =
-  '00020126580014br.gov.bcb.pix0136123e4567-e12b-12d1-a456-4266554400005204000053039865802BR5913ResenhaCoders6008Joinville62070503***6304ABCD'
+import { createPayment, listPayments } from '../services'
+import type { CreatePaymentData, Payment } from '../types'
 
 export const usePaymentsStore = defineStore('payments', () => {
   const current = ref<Payment | null>(null)
 
-  function create(data: CreatePaymentData): Payment {
+  async function create(data: CreatePaymentData): Promise<Payment> {
+    const response = await createPayment(data)
+    const now = new Date().toISOString()
+
     current.value = {
-      id: crypto.randomUUID(),
+      id: response.payment_id,
       title: data.title,
       amount: data.amount,
-      status: 'pending',
+      status: response.status,
       payer_name: data.name,
       payer_cpf: data.cpf,
-      qr_code: FAKE_PIX_CODE,
-      created_at: new Date().toISOString(),
+      qr_code: response.qr_code,
+      qr_code_base64: response.qr_code_base64,
+      ticket_url: response.ticket_url,
+      created_at: now,
+      updated_at: now,
     }
     return current.value
   }
@@ -27,10 +30,12 @@ export const usePaymentsStore = defineStore('payments', () => {
     return current.value?.id === id ? current.value : null
   }
 
-  function setStatus(id: string, status: PaymentStatus): void {
-    const payment = find(id)
-    if (payment) payment.status = status
+  async function load(id: string): Promise<Payment | null> {
+    const payments = await listPayments()
+    const payment = payments.results.find((item) => item.id === id) ?? null
+    if (payment) current.value = payment
+    return payment
   }
 
-  return { current, create, find, setStatus }
+  return { current, create, find, load }
 })

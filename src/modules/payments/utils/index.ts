@@ -38,7 +38,10 @@ export function maskCpf(value: string): string {
 export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
   pending: 'Aguardando pagamento',
   approved: 'Pagamento aprovado',
+  in_process: 'Pagamento em processamento',
   rejected: 'Pagamento recusado',
+  cancelled: 'Pagamento cancelado',
+  refunded: 'Pagamento estornado',
 }
 
 export function isPaymentApproved(status: PaymentStatus): boolean {
@@ -46,5 +49,5 @@ export function isPaymentApproved(status: PaymentStatus): boolean {
 }
 
 export function isPaymentFinal(status: PaymentStatus): boolean {
-  return status !== 'pending'
+  return !['pending', 'in_process'].includes(status)
 }

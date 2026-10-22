@@ -5,6 +5,7 @@ import { BaseButton } from '@/shared/components'
 
 interface Props {
   qrCode: string
+  qrCodeBase64: string
 }
 
 const props = defineProps<Props>()
@@ -32,7 +33,11 @@ async function copyCode(): Promise<void> {
       role="img"
       aria-label="QR Code Pix para pagamento"
     >
-      <span class="material-symbols-outlined text-[200px]! leading-none!">qr_code_2</span>
+      <img
+        :src="`data:image/png;base64,${qrCodeBase64}`"
+        alt="QR Code Pix para pagamento"
+        class="h-full w-full rounded-2xl object-contain"
+      />
     </div>
 
     <div class="mt-6 w-full">
