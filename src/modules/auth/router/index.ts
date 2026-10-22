@@ -4,6 +4,7 @@ export const authRoutes: RouteRecordRaw[] = [
   {
     path: '/',
     component: () => import('@/app/layouts/DefaultLayout.vue'),
+    meta: { hideFooter: true },
     children: [
       {
         path: '/entrar',
