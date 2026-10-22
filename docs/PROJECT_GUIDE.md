@@ -181,6 +181,6 @@ on `POST /api/v1/login/`; JavaScript never reads them.
 | `axios.ts` plugin is empty and `auth` has no service/store on this branch | `src/app/plugins`, `modules/auth` | Merge `feat-login` |
 | `feat-notifications` / `feat/payments` call the backend with `fetch` and read the CSRF cookie manually | `modules/notifications/services` | Switch to `api` once `feat-login` is merged |
 | Vitest is the documented standard but is not installed; no `test` script, no tests, CI does not run them | `package.json`, CI | Follow the Testing section above |
-| `oxlint` fails with `no-empty-file` on the empty stub files (`index.ts`, `axios.ts`), so CI lint fails | `src/modules/*/{composables,services,stores,types,utils}`, `src/shared/utils`, `src/app/plugins/axios.ts` | Delete the stubs (see Conventions) or add real code |
+| Empty stub files (`index.ts`, `axios.ts`) are part of the modular pattern | `.oxlintrc.json` | `unicorn/no-empty-file` is turned off so the stubs pass lint |
 | Module named `module` is a generic name (holds Home/404) | `src/modules/module` | Rename (e.g. `home`) when agreed |
 | `.gitignore` contains a stray `*.` line; `.serena/` is untracked | `.gitignore` | Remove the line; ignore `.serena/` |
