@@ -1,6 +1,6 @@
 import { ref, onMounted, watch } from 'vue'
 
-const isDark = ref(false)
+const isDark = ref<boolean>(false)
 
 const toggleTheme = () => {
   isDark.value = !isDark.value

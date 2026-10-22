@@ -17,7 +17,7 @@ const props = withDefaults(defineProps<Props>(), {
   variant: 'primary',
   label: '',
   icon: '',
-  iconPosition: 'left',
+  iconPosition: 'right',
   loading: false,
   disabled: false,
   fullWidth: true,
@@ -26,48 +26,53 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const buttonClasses = computed(() => [
-  'flex items-center justify-center gap-2 rounded-full font-semibold transition-all duration-300',
+  // BASE
+  'group inline-flex items-center justify-center gap-2 rounded-full',
+  'font-semibold transition-all duration-300 ease-out',
 
+  // WIDTH
   props.fullWidth ? 'w-full' : 'w-fit',
 
-  props.size === 'sm' ? 'px-4 py-2 text-xs' : 'px-5 py-3 text-sm',
+  // SIZE
+  props.size === 'sm' ? 'px-4 py-2 text-xs' : 'px-5 py-2.5 text-sm',
 
+  // VARIANTS
   {
     /* PRIMARY */
-    'bg-(--primary) text-white shadow-md hover:-translate-y-0.5 hover:shadow-lg hover:bg-(--primary-container) active:bg-(--primary-container)':
+    'bg-(--surface-inverse) text-(--text-inverse) dark:bg-(--surface) dark:text-(--text-primary) hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]':
       props.variant === 'primary',
 
     /* SECONDARY */
-    'bg-(--secondary-color) text-white hover:-translate-y-0.5 hover:shadow-md active:-translate-y-0.5 active:shadow-md':
+    'dark:bg-(--surface-inverse) dark:text-(--text-inverse) bg-(--surface) text-(--text-primary) border border-(--border-default) dark:border-(--border-inverse) hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]':
       props.variant === 'secondary',
 
     /* GHOST */
-    'bg-transparent text-(--on-surface) hover:bg-(--surface-container-low) active:bg-(--surface-container-low) dark:text-white dark:hover:bg-(--surface-container-dark) dark:active:bg-(--surface-container-dark)':
+    'bg-transparent text-(--text-primary) dark:text-(--text-inverse) hover:bg-(--bg-subtle) dark:hover:bg-(--bg-subtle)/20 active:scale-[0.98]':
       props.variant === 'ghost',
 
     /* DESTRUCTIVE */
-    'bg-(--primary) text-white hover:bg-(--primary-container) active:hover:bg-(--primary-container)':
+    'bg-(--destructive) text-(--text-inverse) shadow-sm hover:-translate-y-0.5 hover:brightness-110 hover:shadow-md active:translate-y-0 active:scale-[0.98]':
       props.variant === 'destructive',
 
     /* SUCCESS */
-    'bg-(--tertiary-color) text-white hover:brightness-110 hover:-translate-y-0.5 hover:shadow-md active:brightness-110 active:-translate-y-0.5 active:shadow-md':
+    'bg-(--sucess) text-(--text-inverse) shadow-sm hover:-translate-y-0.5 hover:brightness-110 hover:shadow-md active:translate-y-0 active:scale-[0.98]':
       props.variant === 'success',
 
     /* DISABLED */
-    'cursor-not-allowed opacity-50': props.disabled || props.loading,
+    'cursor-not-allowed opacity-50 shadow-none hover:translate-y-0 hover:shadow-none':
+      props.disabled || props.loading,
 
     /* LOADING */
     'cursor-wait': props.loading,
+
+    /* ENABLED */
+    'cursor-pointer': !props.disabled && !props.loading,
   },
 ])
 </script>
 
 <template>
-  <button
-    :type="type"
-    :disabled="disabled || loading"
-    :class="['mt-5 group cursor-pointer', buttonClasses]"
-  >
+  <button :type="type" :disabled="disabled || loading" :class="['mt-5 group', buttonClasses]">
     <span v-if="loading" class="material-symbols-outlined animate-spin text-[18px]">
       progress_activity
     </span>

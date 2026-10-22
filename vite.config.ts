@@ -20,11 +20,18 @@ export default defineConfig({
         sourcemap: false,
         maximumFileSizeToCacheInBytes: 5000000,
       },
+      strategies: 'injectManifest',
+      srcDir: 'service-worker',
+      filename: 'sw.ts',
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        maximumFileSizeToCacheInBytes: 5000000,
+      },
       manifest: {
-        id: '',
-        name: '',
-        short_name: '',
-        description: '',
+        id: 'resenhaCoders',
+        name: 'ResenhaCoders',
+        short_name: 'ResenhaCoders',
+        description: 'Hackathon 2026 - ResenhaCoders',
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
@@ -32,7 +39,7 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: '/icons/hackathon.png',
+            src: '/icons/hackathon-192.png',
             sizes: '192x192',
             type: 'image/png',
           },

@@ -1,80 +1,157 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { GoogleButton } from '../components'
-import { BaseInput, PasswordInput, SegmentedControl, BaseButton } from '@/shared/components'
+import { useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
+import { BaseButton } from '@/shared/components'
+import { AuthField, AuthSplitLayout, GoogleButton } from '../components'
+import { loginWithGoogle, requestRegistrationCode } from '../services'
+import { useAuthFlowStore } from '../stores'
 
-const email = ref('')
-const password = ref('')
-const modelValue = ref('cliente')
-const modes = [
-  {
-    value: 'cliente',
-    label: 'Portal do Cliente / Embargador',
-  },
-  {
-    value: 'operador',
-    label: 'Operador / Transportador',
-  },
-]
+const router = useRouter()
+const authFlow = useAuthFlowStore()
+const name = ref(authFlow.name)
+const email = ref(authFlow.email)
+const password = ref(authFlow.password)
+const acceptedTerms = ref(false)
+const isSubmitting = ref(false)
+const errorMessage = ref('')
+const isGoogleSubmitting = ref(false)
+const googleErrorMessage = ref('')
+
+async function handleSubmit() {
+  errorMessage.value = ''
+  isSubmitting.value = true
+
+  try {
+    const normalizedEmail = email.value.trim()
+    await requestRegistrationCode({ email: normalizedEmail })
+    authFlow.startRegistration({
+      email: normalizedEmail,
+      name: name.value.trim(),
+      password: password.value,
+    })
+    toast.success('Enviamos um código para o seu e-mail.')
+    await router.push({ name: 'RegisterCode' })
+  } catch (error) {
+    errorMessage.value =
+      error instanceof Error ? error.message : 'Não foi possível concluir o cadastro.'
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
+async function handleGoogleCredential(credential: string) {
+  if (isGoogleSubmitting.value) return
+
+  googleErrorMessage.value = ''
+  if (!acceptedTerms.value) {
+    googleErrorMessage.value = 'Aceite os Termos de uso e a Política de privacidade para continuar.'
+    return
+  }
+
+  isGoogleSubmitting.value = true
+
+  try {
+    await loginWithGoogle(credential)
+    authFlow.clear()
+    toast.success('Você entrou com sua conta Google.')
+    await router.push({ name: 'Home' })
+  } catch (error) {
+    googleErrorMessage.value =
+      error instanceof Error ? error.message : 'Não foi possível continuar com Google.'
+  } finally {
+    isGoogleSubmitting.value = false
+  }
+}
 </script>
 
 <template>
-  <section class="px-4 py-5 sm:px-6 sm:py-8 md:px-12 xl:px-20 mt-[20vw] lg:mt-[3vw]">
-    <div
-      class="mx-auto flex flex-col lg:flex-row lg:max-h-170 w-full max-w-8xl rounded-2xl overflow-hidden shadow-2xl"
+  <AuthSplitLayout compact>
+    <h1 class="text-[34px]! leading-[40px]! tracking-[-0.03em]!">Crie sua conta</h1>
+    <p
+      class="mt-[4px] text-[15px] leading-[22px] text-(--text-secondary) dark:text-(--text-inverse-muted)"
     >
-      <div
-        style="
-          background-image: url(/register.svg);
-          background-repeat: no-repeat;
-          background-size: cover;
-          background-position: center;
-        "
-        class="flex flex-col justify-end w-full lg:w-[35%] min-h-64 lg:h-screen px-6 py-8 sm:px-10 sm:py-12 lg:px-10 lg:py-20 lg:justify-start"
-      >
-        <h2 class="text-3xl sm:text-4xl text-(--surface-container)">
-          Infraestrutura logística inteligente para escalar
-          <span
-            class="bg-linear-to-r from-(--primary) to-(--primary-container) bg-clip-text text-transparent dark:to-(--primary-dark) dark:from-(--primary-container-dark)"
-            >sua operação.</span
-          >
-        </h2>
-        <p class="text-(--surface-container) text-sm mt-4">
-          Conectamos indústrias, distribuidores e e-commerces com inteligência de rotas e cobertura
-          multimodal nacional.
-        </p>
-      </div>
+      Comece grátis. Leva menos de um minuto.
+    </p>
 
-      <div
-        class="lg:h-screen w-full lg:w-[65%] px-5 py-8 sm:px-10 sm:py-12 md:px-12 md:py-16 lg:px-40 lg:py-20 bg-(--surface-container) dark:bg-(--surface-dark)"
-      >
-        <h2 class="text-3xl sm:text-4xl">Cadastre sua empresa</h2>
-        <p class="mt-2 dark:text-(--on-surface-variant-dark)">
-          Abra sua conta corporativa em poucos minutos e acesse tarifas de frete direto de
-          transportadora.
-        </p>
+    <form class="mt-[16px] flex flex-col gap-[12px]" @submit.prevent="handleSubmit">
+      <AuthField
+        id="register-name"
+        v-model="name"
+        label="Nome completo"
+        icon="person"
+        name="name"
+        autocomplete="name"
+        placeholder="Seu nome"
+        maxlength="255"
+        required
+      />
 
-        <SegmentedControl v-model="modelValue" :options="modes" />
+      <AuthField
+        id="register-email"
+        v-model="email"
+        label="E-mail"
+        icon="mail"
+        type="email"
+        name="email"
+        autocomplete="email"
+        placeholder="voce@email.com"
+        required
+      />
 
-        <GoogleButton />
+      <AuthField
+        id="register-password"
+        v-model="password"
+        label="Senha"
+        icon="lock"
+        type="password"
+        name="password"
+        autocomplete="new-password"
+        placeholder="Crie uma senha"
+        minlength="9"
+        hint="Mínimo de 9 caracteres, sem ser só números."
+        required
+      />
 
-        <div class="relative flex items-center justify-center py-1 mt-8">
-          <span
-            class="w-full h-0.5 bg-(--surface-container-low) dark:bg-(--surface-container-low-dark)"
-          />
-          <p
-            class="absolute px-3 py-1 bg-(--surface) dark:bg-(--surface-dark) text-xs text-on-surface-variant uppercase tracking-wider"
-          >
-            ou com e-mail
-          </p>
-        </div>
+      <label class="flex cursor-pointer items-center gap-[12px] text-[15px] leading-[20px]">
+        <input
+          v-model="acceptedTerms"
+          type="checkbox"
+          required
+          class="size-[20px] shrink-0 cursor-pointer accent-(--surface-inverse) dark:accent-(--surface)"
+        />
+        Aceito os Termos de uso e a Política de privacidade
+      </label>
 
-        <BaseInput v-model="email" label="E-mail" type="email" icon="alternate_email" />
+      <p v-if="errorMessage" role="alert" class="auth-error">{{ errorMessage }}</p>
 
-        <PasswordInput v-model="password" label="Senha" icon="lock" />
+      <BaseButton
+        type="submit"
+        label="Criar conta"
+        :loading="isSubmitting"
+        :disabled="isGoogleSubmitting"
+        class="auth-submit"
+      />
+    </form>
 
-        <BaseButton label="Cadastrar" icon="arrow_forward" icon-position="right" />
-      </div>
+    <div
+      class="my-[12px] flex items-center gap-[16px] text-[13px] leading-[20px] text-(--text-muted)"
+    >
+      <span class="h-px flex-1 bg-(--border-default) dark:bg-(--border-inverse)"></span>
+      <span>ou</span>
+      <span class="h-px flex-1 bg-(--border-default) dark:bg-(--border-inverse)"></span>
     </div>
-  </section>
+
+    <GoogleButton button-text="signup_with" @credential="handleGoogleCredential" />
+    <p v-if="googleErrorMessage" role="alert" class="auth-error mt-[12px]">
+      {{ googleErrorMessage }}
+    </p>
+
+    <p
+      class="mt-[16px] text-[14px] leading-[20px] text-(--text-secondary) dark:text-(--text-inverse-muted)"
+    >
+      Já tem uma conta?
+      <RouterLink :to="{ name: 'Login' }" class="auth-link">Entrar</RouterLink>
+    </p>
+  </AuthSplitLayout>
 </template>

@@ -1,0 +1,41 @@
+/* Estilos compartilhados pelas telas de autenticação (importado pelos layouts do módulo). */
+
+.auth-link {
+  font-weight: 500;
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+
+.dark .auth-link {
+  color: var(--text-inverse);
+}
+
+.auth-link:hover {
+  text-decoration-thickness: 2px;
+}
+
+.auth-error {
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--destructive) 8%, transparent);
+  padding: 10px 12px;
+  color: var(--destructive);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/* Ajusta o BaseButton ao formato do layout de autenticação. */
+.auth-submit {
+  height: 54px;
+  margin-top: 24px;
+  border-radius: 8px;
+  padding-block: 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Em formulários com gap entre campos, o gap já faz parte do respiro. */
+form.flex .auth-submit {
+  margin-top: 4px;
+}

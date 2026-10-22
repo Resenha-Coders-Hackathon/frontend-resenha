@@ -29,27 +29,24 @@ const value = computed({
 
 <template>
   <div
-    :class="[
-      'relative flex items-center rounded-2xl bg-(--surface-container-low) px-5 py-3 mt-5 shadow-inner transition-all duration-300 focus-within:bg-(--surface-bright) focus-within:ring-2 focus-within:ring-(--primary) dark:bg-(--surface-container-low-dark) dark:focus-within:bg-(--surface-container-dark)',
-      {
-        'cursor-not-allowed opacity-60': disabled,
-      },
-    ]"
+    class="relative flex items-center rounded-2xl px-5 py-3 mt-5 shadow-inner transition-all duration-300 focus-within:ring-2 border border-(--border-default)"
   >
-    <span class="material-symbols-outlined mr-2 text-[20px] text-(--outline)"> lock </span>
+    <span class="material-symbols-outlined mr-2 text-[20px] transition-colors duration-300">
+      lock
+    </span>
 
     <input
       v-model="value"
       :type="showPassword ? 'text' : 'password'"
       :placeholder="placeholder"
       :disabled="disabled"
-      class="input-autofill w-full border-0 bg-transparent text-sm outline-none text-(--on-surface) placeholder:text-(--outline) dark:text-(--on-surface-dark)"
+      class="input-autofill w-full text-sm outline-none placeholder:text-(--text-muted)"
     />
 
     <button
       type="button"
       :disabled="disabled"
-      class="material-symbols-outlined ml-2 text-(--outline) transition-colors duration-300 hover:text-(--primary) active:text-(--primary)"
+      class="material-symbols-outlined ml-2"
       @click="showPassword = !showPassword"
     >
       {{ showPassword ? 'visibility_off' : 'visibility' }}
@@ -59,19 +56,12 @@ const value = computed({
 
 <style scoped>
 .input-autofill:-webkit-autofill,
-.input-autofill:-webkit-autofill:hover,
 .input-autofill:-webkit-autofill:focus {
-  -webkit-text-fill-color: var(--on-surface);
-  -webkit-box-shadow: 0 0 0 1000px var(--surface-container-low) inset;
-  box-shadow: 0 0 0 1000px var(--surface-container-low) inset;
-  transition: background-color 9999s ease-out;
+  -webkit-text-fill-color: var(--text-primary);
 }
 
 .dark .input-autofill:-webkit-autofill,
-.dark .input-autofill:-webkit-autofill:hover,
 .dark .input-autofill:-webkit-autofill:focus {
-  -webkit-text-fill-color: var(--on-surface-dark);
-  -webkit-box-shadow: 0 0 0 1000px var(--surface-container-low-dark) inset;
-  box-shadow: 0 0 0 1000px var(--surface-container-low-dark) inset;
+  -webkit-text-fill-color: var(--text-inverse);
 }
 </style>
