@@ -4,10 +4,11 @@ import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { BaseButton } from '@/shared/components'
 import { AuthField, AuthSplitLayout, GoogleButton } from '../components'
-import { loginWithGoogle, requestRegistrationCode } from '../services'
-import { useAuthFlowStore } from '../stores'
+import { requestRegistrationCode } from '../services'
+import { useAuthFlowStore, useAuthStore } from '../stores'
 
 const router = useRouter()
+const auth = useAuthStore()
 const authFlow = useAuthFlowStore()
 const name = ref(authFlow.name)
 const email = ref(authFlow.email)
@@ -52,7 +53,7 @@ async function handleGoogleCredential(credential: string) {
   isGoogleSubmitting.value = true
 
   try {
-    await loginWithGoogle(credential)
+    await auth.signInWithGoogle(credential)
     authFlow.clear()
     toast.success('Você entrou com sua conta Google.')
     await router.push({ name: 'Home' })

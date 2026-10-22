@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { moduleRoutes } from '@/modules/module/router'
 import { authRoutes } from '@/modules/auth/router'
+import { useAuthStore } from '@/modules/auth/stores'
 import { geolocationRoutes } from '@/modules/geolocation/router'
 import { mapboxRoutes } from '@/modules/mapbox/router'
 import { notificationsRoutes } from '@/modules/notifications/router'

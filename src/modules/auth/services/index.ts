@@ -1,3 +1,6 @@
+import { api, getErrorMessage } from '@/app/plugins/axios'
+import type { User } from '../types'
+
 export interface LoginCredentials {
   email: string
   password: string
@@ -26,6 +29,8 @@ export interface PasswordResetConfirmation extends PasswordResetVerification {
 const API_PATHS = {
   login: '/login/',
   googleLogin: '/login/google/',
+  logout: '/me/logout/',
+  me: '/users/me/',
   registrationRequest: '/registration/request/',
   registrationConfirm: '/registration/confirm/',
   passwordResetRequest: '/password-reset/request/',
@@ -33,60 +38,19 @@ const API_PATHS = {
   passwordResetConfirm: '/password-reset/confirm/',
 } as const
 
-function getEndpoint(path: string): URL {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
-  if (!apiBaseUrl) {
-    throw new Error('Configure VITE_API_BASE_URL com a URL base do backend.')
-  }
+const DEFAULT_ERROR = 'Não foi possível concluir sua solicitação. Tente novamente.'
+const BAD_CREDENTIALS = 'E-mail ou senha incorretos.'
 
+// O backend grava os tokens em cookies HttpOnly; o corpo das respostas não é usado.
+async function post(path: string, payload: object, unauthorizedMessage = BAD_CREDENTIALS) {
   try {
-    return new URL(`${apiBaseUrl.replace(/\/+$/, '')}${path}`)
-  } catch {
-    throw new Error('VITE_API_BASE_URL não contém uma URL válida.')
+    await api.post(path, payload)
+  } catch (error) {
+    const status = (error as { response?: { status?: number } }).response?.status
+    if (status === 401 || status === 403) throw new Error(unauthorizedMessage)
+    if (status === 409) throw new Error('Este e-mail já está cadastrado.')
+    throw new Error(translateApiMessage(getErrorMessage(error, DEFAULT_ERROR)))
   }
-}
-
-async function post<T>(
-  path: string,
-  payload: T,
-  unauthorizedMessage = 'E-mail ou senha incorretos.',
-): Promise<void> {
-  const response = await fetch(getEndpoint(path), {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  })
-
-  if (response.ok) return
-
-  if (path === API_PATHS.googleLogin && response.status === 404) {
-    throw new Error('Login Google não está habilitado no backend. Integre a branch feat/google-auth.')
-  }
-
-  const body: unknown = await response.json().catch(() => null)
-  throw new Error(getErrorMessage(body, response.status, unauthorizedMessage))
-}
-
-function getErrorMessage(
-  body: unknown,
-  status: number,
-  unauthorizedMessage: string,
-): string {
-  if (status === 401 || status === 403) return unauthorizedMessage
-
-  if (body && typeof body === 'object') {
-    const record = body as Record<string, unknown>
-    if (typeof record.detail === 'string') return translateApiMessage(record.detail)
-
-    const firstError = Object.values(record).flatMap((value) =>
-      Array.isArray(value) ? value : [value],
-    )[0]
-    if (typeof firstError === 'string') return translateApiMessage(firstError)
-  }
-
-  if (status === 409) return 'Este e-mail já está cadastrado.'
-  return 'Não foi possível concluir sua solicitação. Tente novamente.'
 }
 
 function translateApiMessage(message: string): string {
@@ -103,34 +67,34 @@ function translateApiMessage(message: string): string {
   return message
 }
 
-export function login(credentials: LoginCredentials): Promise<void> {
-  return post(API_PATHS.login, credentials)
-}
+export const login = (credentials: LoginCredentials) => post(API_PATHS.login, credentials)
 
-export function loginWithGoogle(credential: string): Promise<void> {
-  return post(
+export const loginWithGoogle = (credential: string) =>
+  post(
     API_PATHS.googleLogin,
     { credential },
     'Não foi possível validar sua conta Google. Tente novamente.',
   )
+
+export async function fetchMe(): Promise<User> {
+  return (await api.get<User>(API_PATHS.me)).data
 }
 
-export function requestRegistrationCode(payload: RegistrationRequest): Promise<void> {
-  return post(API_PATHS.registrationRequest, payload)
+export async function logout(): Promise<void> {
+  await api.post(API_PATHS.logout)
 }
 
-export function confirmRegistration(payload: RegistrationConfirmation): Promise<void> {
-  return post(API_PATHS.registrationConfirm, payload)
-}
+export const requestRegistrationCode = (payload: RegistrationRequest) =>
+  post(API_PATHS.registrationRequest, payload)
 
-export function requestPasswordReset(payload: RegistrationRequest): Promise<void> {
-  return post(API_PATHS.passwordResetRequest, payload)
-}
+export const confirmRegistration = (payload: RegistrationConfirmation) =>
+  post(API_PATHS.registrationConfirm, payload)
 
-export function verifyPasswordReset(payload: PasswordResetVerification): Promise<void> {
-  return post(API_PATHS.passwordResetVerify, payload)
-}
+export const requestPasswordReset = (payload: RegistrationRequest) =>
+  post(API_PATHS.passwordResetRequest, payload)
 
-export function confirmPasswordReset(payload: PasswordResetConfirmation): Promise<void> {
-  return post(API_PATHS.passwordResetConfirm, payload)
-}
+export const verifyPasswordReset = (payload: PasswordResetVerification) =>
+  post(API_PATHS.passwordResetVerify, payload)
+
+export const confirmPasswordReset = (payload: PasswordResetConfirmation) =>
+  post(API_PATHS.passwordResetConfirm, payload)
