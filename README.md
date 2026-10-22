@@ -9,9 +9,9 @@ See the workspace `README.md` for environment variables, checks and persistent v
 
 ## Production
 
-The shared production infrastructure and main-branch deployment timer are versioned
+The shared production infrastructure and dev-branch deployment timer are versioned
 in the backend repository under `deployment/`. Production serves the compiled build
 at https://4000.michalski.app and uses its `/api/v1` proxy for authentication cookies.
 The API is also exposed at https://3009.michalski.app/api/v1/.
-After promotion to `main`, the server checks both repositories every two minutes
-and builds the exact main commits. Pushes to `dev` do not update production.
+The server checks the `dev` branch of both repositories every two minutes and
+builds the exact dev commits. Updates to `main` do not update production.
