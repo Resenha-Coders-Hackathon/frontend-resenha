@@ -9,7 +9,7 @@ export interface SendNotificationRequest {
 
 export async function sendNotification(payload: SendNotificationRequest): Promise<void> {
   try {
-    await api.post('/notifications/send/', payload)
+    await api.post('v1/notifications/send/', payload)
   } catch (error) {
     throw new Error(getErrorMessage(error, 'Não foi possível enviar a notificação.'))
   }
