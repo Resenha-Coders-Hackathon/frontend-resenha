@@ -44,7 +44,6 @@ const value = computed({
       :type="type"
       :placeholder="placeholder"
       :disabled="disabled"
-      :inputmode="inputmode"
       class="input-autofill w-full text-sm outline-none placeholder:text-(--text-muted)"
     />
   </div>
