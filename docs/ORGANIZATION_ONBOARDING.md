@@ -2,9 +2,9 @@
 
 ## Design and routes
 
-Creation follows Figma page **Frontend · App**, frames **F04** (`10:161`) and **F05**
-(`10:231`), both 1440 × 1024. The previous member-management frame was the wrong
-reference for this flow. See [Figma reference](FIGMA_REFERENCE.md).
+The current `dev` components and application theme define the presentation. Figma
+F04/F05 informed the fields and steps, but the owner requested the existing dev
+identity rather than a separate Inceptum layout. See [Figma reference](FIGMA_REFERENCE.md).
 
 - `/organizacoes`: organization list and entry to creation.
 - `/organizacoes/nova`: organization name, workspace address, team size and optional logo.
@@ -15,11 +15,17 @@ reference for this flow. See [Figma reference](FIGMA_REFERENCE.md).
 - `/w/:slug`: authorized workspace address, resolving to the organization.
 - `/invitations/accept?token=…`: existing public invitation entry point.
 
-The desktop onboarding has a dark left brand panel and a centered 400 px form. The
-prototype's 10 px form wrapper and 24 px decorative columns were corrected to natural
-heights so forms/cards do not overflow. Mobile uses the supplied dark/orange direction
-with scrolling content instead of a clipped fixed viewport. Original SVGs and Geist
-font/license are local. Existing management screens remain separate.
+Creation remains an explicit action through **Criar organização**; account
+registration does not redirect to onboarding. `AuthAside`, `AuthSplitLayout`,
+`AuthField` and `BaseButton` supply the existing ResenhaCoders structure. Organization
+management/acceptance use the dev `SidebarComp` and `FooterComp`. Both modules use
+global color tokens, the shared font and the active theme on desktop and mobile.
+No fixed Figma widths, separate branding or forced mobile theme remain.
+
+The router uses only `useAuthStore().loadUser()` to check the session. A duplicate
+`api.get` added in dev referenced an undefined variable, blocked protected routes
+and repeated `/users/me/`; that duplicate was removed. API calls still go through
+the shared Axios instance and the dev `/api` proxy with credentials and CSRF cookies.
 
 ## Backend contracts and migration
 
@@ -95,7 +101,7 @@ editor/viewer access, deleted sectors and rollback of failed acceptance. Authent
 regressions cover registration, password login and new/existing Google accounts.
 Node 24 runs the frontend utility tests without a new dependency; Vitest is not installed.
 
-Post-rebase results: all 50 backend tests (including migration, email and payment tests) passed;
+Earlier integration results: all 50 backend tests (including migration, email and payment tests) passed;
 all four frontend utility tests, Ruff, lint, type-check and build passed. All ten
 original onboarding SVGs were checked at their actual rendered dimensions and local
 file locations in desktop/mobile, including Vite-inlined assets. No unresolved Git
@@ -104,8 +110,14 @@ conflicts or temporary Figma asset URLs remain in application source.
 Browser checks use an isolated API/database and in-memory mail: three-step creation,
 logo payload, selected sectors, partial-send retry, custom address resolution, auth
 continuation through password recovery and animated login/signup, token refresh,
-wrong-account rejection and acceptance. F04/F05 geometry is checked at 1440 px
-(600 px panel, 400 px form) and screenshots at 390/320 px. The font is local.
+wrong-account rejection and acceptance. Those earlier screenshots used F04/F05 geometry. The dev-alignment verification instead
+checks the shared auth aside width, shared form width, existing ResenhaCoders branding
+and absence of horizontal overflow at 1440/390/320 px. All four utility tests, lint,
+type-check and build pass on the dev baseline. The complete browser regression also
+passed through the dev same-origin API proxy: creation, sector assignment, partial-send
+retry, explicit acceptance, account registration/recovery, switching accounts, token
+refresh, connection recovery, dark/mobile layouts and dialog dismissal. Provider
+verification/upload remain simulated and no real email is delivered.
 Google Identity/token verification and Cloudinary are simulated; real provider
 interaction and actual e-mail delivery remain unverified.
 

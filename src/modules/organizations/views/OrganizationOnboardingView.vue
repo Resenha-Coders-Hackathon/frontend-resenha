@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getErrorMessage } from '@/app/plugins/axios'
 import { BaseButton } from '@/shared/components'
+import { AuthField } from '@/modules/auth'
 import { createInvitation, type InviteRole } from '@/modules/invitations'
 import OnboardingLayout from '../components/onboardingLayout.vue'
 import {
@@ -243,21 +244,17 @@ watch(name, (value) => {
     "
   >
     <form v-if="step === 1" class="onboarding-form" @submit.prevent="create">
-      <label class="onboarding-field"
-        >Nome da organização<span class="onboarding-name-input"
-          ><img
-            src="/figma/onboarding-building.svg"
-            width="18"
-            height="18"
-            alt=""
-            class="onboarding-mobile-icon" /><input
-            v-model="name"
-            name="organization-name"
-            maxlength="255"
-            required
-            placeholder="Norte Studio"
-            :disabled="saving || !!createdId" /></span
-      ></label>
+      <AuthField
+        id="organization-name"
+        v-model="name"
+        label="Nome da organização"
+        icon="domain"
+        name="organization-name"
+        maxlength="255"
+        required
+        placeholder="Norte Studio"
+        :disabled="saving || !!createdId"
+      />
       <label class="onboarding-field"
         >Endereço do workspace<span class="onboarding-address"
           ><span>{{ workspacePrefix }}</span
@@ -309,7 +306,6 @@ watch(name, (value) => {
             alt=""
             class="onboarding-mobile-icon" /></template
       ></BaseButton>
-      <RouterLink to="/organizacoes" class="onboarding-skip">Voltar para organizações</RouterLink>
     </form>
     <p v-else-if="loading" role="status">Carregando organização…</p>
     <form
@@ -336,15 +332,17 @@ watch(name, (value) => {
           />{{ choice }}
         </button>
       </fieldset>
-      <label class="onboarding-field"
-        >Novo setor<input
-          v-model="newSector"
-          name="new-sector"
-          maxlength="255"
-          placeholder="Ex.: Atendimento"
-          :disabled="saving"
-          @keydown.enter.prevent="addSector"
-      /></label>
+      <AuthField
+        id="new-sector"
+        v-model="newSector"
+        label="Novo setor"
+        icon="workspaces"
+        name="new-sector"
+        maxlength="255"
+        placeholder="Ex.: Atendimento"
+        :disabled="saving"
+        @keydown.enter.prevent="addSector"
+      />
       <button
         type="button"
         class="onboarding-skip"
