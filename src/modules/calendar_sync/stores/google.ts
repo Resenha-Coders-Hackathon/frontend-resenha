@@ -102,6 +102,10 @@ export const useGoogleStore = defineStore('google', () => {
   return {
     status,
     files,
+    calendar,
+    loadTaskCalendar,
+    addTaskToCalendar,
+    removeTaskFromCalendarEvent,
     isLoading,
     error,
     loadStatus,

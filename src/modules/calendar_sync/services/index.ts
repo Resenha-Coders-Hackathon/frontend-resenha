@@ -6,6 +6,7 @@ import type {
   DriveUploadRequest,
   DriveUploadResult,
   GoogleConnectionStatus,
+  TaskCalendarStatus,
 } from '../types'
 
 const BASE = '/integrations/google/'
