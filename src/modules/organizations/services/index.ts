@@ -1,6 +1,13 @@
 import { api } from '@/app/plugins/axios'
 import type { Page } from '@/shared/types'
-import type { Organization, OrganizationMember, OrganizationSector } from '../types'
+import type {
+  AddOrganizationMemberRequest,
+  Organization,
+  OrganizationMember,
+  OrganizationSector,
+  UpdateOrganizationMemberRoleRequest,
+  UpdateOrganizationRequest,
+} from '../types'
 
 export async function listOrganizations(page = 1): Promise<Page<Organization>> {
   return (await api.get<Page<Organization>>('/organizations/', { params: { page } })).data
@@ -58,4 +65,36 @@ export async function listMembers(id: string, page = 1): Promise<Page<Organizati
       params: { page },
     })
   ).data
+}
+
+const orgPath = (id: string) => `/organizations/${encodeURIComponent(id)}/`
+
+export async function updateOrganization(
+  id: string,
+  payload: UpdateOrganizationRequest,
+): Promise<Organization> {
+  return (await api.patch<Organization>(orgPath(id), payload)).data
+}
+
+export async function deleteOrganization(id: string): Promise<void> {
+  await api.delete(orgPath(id))
+}
+
+export async function addMember(
+  id: string,
+  payload: AddOrganizationMemberRequest,
+): Promise<OrganizationMember> {
+  return (await api.post<OrganizationMember>(`${orgPath(id)}members/`, payload)).data
+}
+
+export async function updateMemberRole(
+  id: string,
+  memberId: number,
+  payload: UpdateOrganizationMemberRoleRequest,
+): Promise<OrganizationMember> {
+  return (await api.patch<OrganizationMember>(`${orgPath(id)}members/${memberId}/`, payload)).data
+}
+
+export async function removeMember(id: string, memberId: number): Promise<void> {
+  await api.delete(`${orgPath(id)}members/${memberId}/`)
 }
