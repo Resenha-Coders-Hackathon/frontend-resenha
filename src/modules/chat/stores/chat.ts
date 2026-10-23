@@ -125,16 +125,17 @@ export const useChatStore = defineStore('chat', () => {
     touchChannel(channelId, message, true)
   }
 
-  /** Posts a Google Meet link in the active channel; returns the error message, if any. */
-  async function meet(): Promise<string | undefined> {
+  /** Posts a Google Meet link in the active channel; returns the link or an error message. */
+  async function meet(): Promise<{ link?: string; error?: string }> {
     const channelId = activeId.value
-    if (!channelId) return
+    if (!channelId) return {}
     try {
       const message = await startMeet(channelId)
       upsert(channelId, message)
       touchChannel(channelId, message, true)
+      return { link: message.content.match(/https?:\/\/\S+/)?.[0] }
     } catch (e) {
-      return e instanceof Error ? e.message : 'Não foi possível iniciar o Meet.'
+      return { error: e instanceof Error ? e.message : 'Não foi possível iniciar o Meet.' }
     }
   }
 

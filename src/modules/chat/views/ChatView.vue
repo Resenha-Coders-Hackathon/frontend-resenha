@@ -107,15 +107,37 @@ async function send() {
   await chat.send(content)
 }
 
+// O Meet não pode ser embutido em iframe (o Google bloqueia), então abre numa janelinha no canto.
+// A janela é aberta no clique, antes dos awaits, para o navegador não bloquear o popup.
+function openMeetWindow(): Window | null {
+  const width = 460
+  const height = 640
+  const left = Math.max(0, window.screenX + window.outerWidth - width - 16)
+  const top = Math.max(0, window.screenY + window.outerHeight - height - 48)
+  return window.open(
+    '',
+    'resenha-meet',
+    `popup=yes,width=${width},height=${height},left=${left},top=${top}`,
+  )
+}
+
 async function startMeet() {
+  const popup = openMeetWindow()
+  let navigated = false
   try {
     if (!(await ensureGoogleConnected())) return // foi para o Google conectar a conta
+    const { link, error } = await chat.meet()
+    if (error) throw new Error(error)
+    if (link && popup) {
+      popup.location.href = link
+      navigated = true
+    } else if (link) window.open(link, '_blank', 'noopener') // popup bloqueado: abre em nova aba
   } catch (e) {
-    toast.error(e instanceof Error ? e.message : 'Não foi possível verificar o Google.')
-    return
+    toast.error(e instanceof Error ? e.message : 'Não foi possível iniciar o Meet.')
+  } finally {
+    // sem link (erro, ou indo conectar o Google) não deixa uma janela vazia aberta
+    if (popup && !navigated) popup.close()
   }
-  const failure = await chat.meet()
-  if (failure) toast.error(failure)
 }
 
 let lastTyping = 0

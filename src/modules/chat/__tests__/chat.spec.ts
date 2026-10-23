@@ -220,7 +220,8 @@ test('meet posts the link message in the active channel', async () => {
   })
   const chat = useChatStore()
   await chat.load('org')
-  assert.equal(await chat.meet(), undefined)
+  const result = await chat.meet()
+  assert.equal(result.link, 'https://meet.google.com/x')
   assert.match(chat.messages['c1']?.at(-1)?.content ?? '', /meet\.google\.com/)
 })
 
@@ -230,5 +231,5 @@ test('meet returns the backend error (e.g. Google not connected)', async () => {
   }
   const chat = useChatStore()
   await chat.load('org')
-  assert.equal(await chat.meet(), 'Google não conectado')
+  assert.deepEqual(await chat.meet(), { error: 'Google não conectado' })
 })
