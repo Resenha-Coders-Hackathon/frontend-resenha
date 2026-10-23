@@ -59,11 +59,11 @@ onBeforeUnmount(() => {
       <button
         type="button"
         disabled
-        class="h-[44px] w-full rounded-[4px] border border-(--border-default) bg-(--surface) text-[14px] font-medium text-(--text-secondary) opacity-60 dark:border-(--border-inverse) dark:bg-(--surface-inverse) dark:text-(--text-inverse-muted)"
+        class="h-11 w-full rounded-sm border border-(--border-default) bg-(--surface) text-[14px] font-medium text-(--text-secondary) opacity-60 dark:border-(--border-inverse) dark:bg-(--surface-inverse) dark:text-(--text-inverse-muted)"
       >
         {{ props.buttonText === 'signup_with' ? 'Cadastrar com Google' : 'Entrar com Google' }}
       </button>
-      <p class="mt-[8px] text-center text-[12px] leading-[18px] text-(--text-muted)">
+      <p class="mt-2 text-center text-[12px] leading-4.5 text-(--text-muted)">
         {{ setupMessage }}
       </p>
     </div>
@@ -71,10 +71,13 @@ onBeforeUnmount(() => {
     <div v-else class="w-full">
       <div
         v-if="isLoading"
-        class="h-[44px] w-full animate-pulse rounded-[4px] border border-(--border-default) bg-(--bg-subtle) dark:border-(--border-inverse) dark:bg-black/20"
+        class="h-11 w-full animate-pulse rounded-sm border border-(--border-default) bg-(--bg-subtle) dark:border-(--border-inverse) dark:bg-black/20"
         aria-hidden="true"
       ></div>
-      <div ref="buttonContainer" :class="['min-h-[44px] w-full', isLoading ? 'hidden' : '']"></div>
+      <div
+        ref="buttonContainer"
+        :class="['flex w-full justify-center', isLoading ? 'hidden' : '']"
+      ></div>
     </div>
   </div>
 </template>

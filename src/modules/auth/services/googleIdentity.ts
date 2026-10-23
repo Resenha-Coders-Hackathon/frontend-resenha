@@ -85,7 +85,7 @@ export async function mountGoogleButton(
 
   let renderedWidth = 0
   const render = () => {
-    const width = Math.min(Math.floor(container.getBoundingClientRect().width), 400)
+    const width = Math.floor(container.getBoundingClientRect().width)
     if (width <= 0 || width === renderedWidth) return
 
     container.replaceChildren()
