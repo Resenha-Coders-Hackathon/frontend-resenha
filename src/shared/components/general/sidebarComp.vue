@@ -29,7 +29,7 @@ const menuItems: IMenuItems[] = [
   },
   {
     link: '/notificacoes',
-    label: 'Notifications',
+    label: 'Notificações',
   },
   {
     link: '/pagamento',

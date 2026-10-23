@@ -17,6 +17,13 @@ export async function requestDeviceFcmToken(): Promise<{
     throw new Error('Configure VITE_VAPID_KEY com a chave Web Push do Firebase.')
   }
 
+  const serviceWorkerRegistration = await navigator.serviceWorker.getRegistration()
+  if (!serviceWorkerRegistration) {
+    throw new Error(
+      'O push está disponível na versão instalada/publicada. Use o build com preview para testar localmente.',
+    )
+  }
+
   let permission = Notification.permission
   if (permission === 'default') {
     permission = await Notification.requestPermission()
@@ -27,7 +34,7 @@ export async function requestDeviceFcmToken(): Promise<{
   }
 
   const messaging = await getFirebaseMessaging()
-  const serviceWorkerRegistration = await navigator.serviceWorker.ready
+  if (!serviceWorkerRegistration.active) await navigator.serviceWorker.ready
   const token = await getToken(messaging, {
     vapidKey: import.meta.env.VITE_VAPID_KEY,
     serviceWorkerRegistration,
