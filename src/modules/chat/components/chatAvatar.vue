@@ -26,7 +26,7 @@ const style = computed(() => ({
     :class="[
       'relative grid shrink-0 place-items-center rounded-full leading-none font-semibold text-white',
       variant === 'self'
-        ? 'bg-(--text-primary) dark:bg-(--surface) dark:text-(--text-primary)'
+        ? 'bg-(--text-primary) dark:bg-(--text-inverse) dark:text-(--text-primary)'
         : '',
       variant === 'ai' ? 'rounded-[10px]! bg-linear-to-br from-[#8b6bff] to-(--chat-ai)' : '',
     ]"

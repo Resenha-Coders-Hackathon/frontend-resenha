@@ -53,7 +53,7 @@ const authItems: IMenuItems[] = [
 <template>
   <aside
     :class="[
-      'bg-(--surface) dark:bg-(--surface-inverse) border-r border-(--border-default) p-5 relative transition-all duration-300 ease-in-out hidden md:block',
+      'bg-(--surface) dark:bg-(--surface-inverse) border-r border-(--border-default) dark:border-(--border-inverse) p-5 relative transition-all duration-300 ease-in-out hidden md:block',
       isOpen ? 'w-70' : 'w-20',
     ]"
   >
@@ -73,8 +73,8 @@ const authItems: IMenuItems[] = [
               :to="item.link"
               :class="[
                 route.name === item.label
-                  ? 'bg-(--background-inverse) text-(--text-inverse)'
-                  : 'hover:bg-(--background-inverse)/30',
+                  ? 'bg-(--background-inverse) text-(--text-inverse) dark:bg-white/10'
+                  : 'hover:bg-(--background-inverse)/30 dark:hover:bg-white/5',
                 'text-sm rounded-xl flex items-center gap-2 px-5 py-1.5 cursor-pointer font-medium transition-all duration-300',
               ]"
             >
@@ -94,8 +94,8 @@ const authItems: IMenuItems[] = [
               :to="item.link"
               :class="[
                 route.name === item.label
-                  ? 'bg-(--background-inverse) text-(--text-inverse)'
-                  : 'hover:bg-(--background-inverse)/30',
+                  ? 'bg-(--background-inverse) text-(--text-inverse) dark:bg-white/10'
+                  : 'hover:bg-(--background-inverse)/30 dark:hover:bg-white/5',
                 'text-sm rounded-xl flex items-center gap-2 px-5 py-1.5 cursor-pointer font-medium transition-all duration-300',
               ]"
             >
@@ -117,8 +117,8 @@ const authItems: IMenuItems[] = [
               :to="item.link"
               :class="[
                 route.name === item.label
-                  ? 'bg-(--background-inverse) text-(--text-inverse)'
-                  : 'hover:bg-(--background-inverse)/30',
+                  ? 'bg-(--background-inverse) text-(--text-inverse) dark:bg-white/10'
+                  : 'hover:bg-(--background-inverse)/30 dark:hover:bg-white/5',
                 'text-sm rounded-xl flex items-center gap-2 px-5 py-1.5 cursor-pointer font-medium transition-all duration-300',
               ]"
             >

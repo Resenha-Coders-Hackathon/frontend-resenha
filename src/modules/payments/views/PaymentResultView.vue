@@ -3,7 +3,13 @@ import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { BaseButton } from '@/shared/components'
-import { PaymentCard, PaymentStatusBadge, PaymentSteps, PaymentSummary } from '../components'
+import {
+  PaymentCard,
+  PaymentPage,
+  PaymentStatusBadge,
+  PaymentSteps,
+  PaymentSummary,
+} from '../components'
 import { usePaymentsStore } from '../stores'
 import { isPaymentApproved, isPaymentFinal } from '../utils'
 
@@ -14,10 +20,27 @@ const store = usePaymentsStore()
 
 const payment = computed(() => store.find(props.id))
 const approved = computed(() => !!payment.value && isPaymentApproved(payment.value.status))
+const method = computed(() => store.methodOf(props.id))
+
+const heading = computed(() =>
+  !payment.value
+    ? 'Pagamento indisponível'
+    : approved.value
+      ? 'Pagamento confirmado'
+      : 'Pagamento não concluído',
+)
+const message = computed(() => {
+  if (!payment.value) return 'Os dados deste pagamento não estão mais disponíveis. Comece um novo.'
+  if (!approved.value)
+    return 'O pagamento não foi aprovado. Nenhum valor foi cobrado; tente de novo.'
+  return method.value === 'card'
+    ? 'Cartão aprovado. Esta é uma demonstração: nenhum valor foi cobrado de verdade.'
+    : 'Recebemos a confirmação do seu Pix. Está tudo certo.'
+})
 
 // ainda não pago: volta para a tela do QR Code
 onMounted(async () => {
-  if (!payment.value) {
+  if (!payment.value && method.value === 'pix') {
     try {
       await store.load(props.id)
     } catch (error) {
@@ -34,83 +57,67 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section
-    class="mx-auto flex min-h-dvh w-full max-w-6xl flex-col justify-center px-4 pt-10 sm:px-6 md:px-12 xl:px-20"
+  <PaymentPage
+    :crumbs="['Norte Studio', 'Pagamentos', 'Confirmação']"
+    :title="heading"
+    :description="message"
   >
-    <PaymentSteps :current="3" :completed="approved" />
+    <template #top>
+      <PaymentSteps :current="3" :completed="approved" />
+    </template>
 
-    <div class="mt-10">
-      <h2>
-        {{
-          !payment
-            ? 'Pagamento indisponível'
-            : approved
-              ? 'Pagamento confirmado'
-              : 'Pagamento não concluído'
-        }}
-      </h2>
-      <p class="mt-3 max-w-2xl text-sm text-(--text-secondary) dark:text-(--text-inverse-muted)">
-        {{
-          !payment
-            ? 'Os dados deste pagamento não estão mais disponíveis. Comece um novo.'
-            : approved
-              ? 'Recebemos a confirmação do seu Pix. Está tudo certo.'
-              : 'O Pix não foi aprovado. Nenhum valor foi cobrado; gere um novo QR Code para tentar de novo.'
-        }}
-      </p>
-    </div>
-
-    <div class="mx-auto mt-8 w-full max-w-xl">
-      <PaymentCard
-        v-if="!payment"
-        title="Pagamento indisponível"
-        description="Os dados deste pagamento não estão mais disponíveis. Comece um novo."
-      >
-        <BaseButton label="Fazer novo pagamento" @click="router.push({ name: 'Payment' })" />
+    <div class="mx-auto w-full max-w-[520px]">
+      <PaymentCard v-if="!payment">
+        <BaseButton
+          label="Fazer novo pagamento"
+          class="mt-0! h-[44px]! rounded-[10px]! py-0! text-[14px]! [&_.material-symbols-outlined]:text-[17px]!"
+          @click="router.push({ name: 'Payment' })"
+        />
       </PaymentCard>
 
       <PaymentCard v-else>
-        <div class="flex flex-col items-center text-center">
+        <div class="flex flex-col items-center gap-[12px] pt-[6px] text-center">
           <span
             :class="[
-              'flex h-16 w-16 items-center justify-center rounded-full',
+              'flex size-[56px] items-center justify-center rounded-full',
               approved
-                ? 'bg-(--surface-inverse) text-(--text-inverse) dark:bg-(--surface) dark:text-(--text-primary)'
+                ? 'bg-[#e4f4ea] text-[#127a3e] dark:bg-[#127a3e]/25 dark:text-[#7ed9a2]'
                 : 'bg-(--destructive)/10 text-(--destructive)',
             ]"
           >
-            <span class="material-symbols-outlined text-[32px]">
+            <span class="material-symbols-outlined text-[28px]!" aria-hidden="true">
               {{ approved ? 'check' : 'close' }}
             </span>
           </span>
-
-          <div class="mt-4">
-            <PaymentStatusBadge :status="payment.status" />
-          </div>
+          <PaymentStatusBadge :status="payment.status" />
         </div>
 
-        <div class="mt-8 border-t border-(--border-default) pt-6 dark:border-(--border-inverse)">
+        <div class="border-t border-(--border-default) pt-[16px] dark:border-(--border-inverse)">
           <PaymentSummary
             :title="payment.title"
             :amount="payment.amount"
             :payer-name="payment.payer_name"
             :payer-cpf="payment.payer_cpf"
+            :method="method"
           />
         </div>
 
         <BaseButton
-          :label="approved ? 'Fazer novo pagamento' : 'Tentar novamente'"
-          :icon="approved ? 'add' : 'refresh'"
-          @click="router.push({ name: 'Payment' })"
+          :label="approved ? 'Ver planos' : 'Tentar novamente'"
+          :icon="approved ? 'workspace_premium' : 'refresh'"
+          icon-position="left"
+          class="mt-0! h-[44px]! rounded-[10px]! py-0! text-[14px]! [&_.material-symbols-outlined]:text-[17px]!"
+          @click="router.push({ name: approved ? 'Plans' : 'Payment' })"
         />
         <BaseButton
           variant="ghost"
           label="Voltar ao início"
           icon="home"
           icon-position="left"
+          class="mt-0! h-[40px]! rounded-[10px]! py-0! text-[13.5px]! [&_.material-symbols-outlined]:text-[17px]!"
           @click="router.push({ name: 'Home' })"
         />
       </PaymentCard>
     </div>
-  </section>
+  </PaymentPage>
 </template>

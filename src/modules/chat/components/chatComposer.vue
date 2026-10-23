@@ -50,7 +50,7 @@ function handleKeydown(event: KeyboardEvent) {
           'ml-auto flex h-[32px] cursor-pointer items-center gap-[6px] rounded-[8px] px-[12px] text-[13px] font-medium text-white transition-opacity hover:opacity-90',
           accent === 'ai'
             ? 'bg-(--chat-ai)'
-            : 'bg-(--text-primary) dark:bg-(--surface) dark:text-(--text-primary)',
+            : 'bg-(--text-primary) dark:bg-(--text-inverse) dark:text-(--text-primary)',
         ]"
       >
         <span class="material-symbols-outlined text-[16px]!" aria-hidden="true">{{

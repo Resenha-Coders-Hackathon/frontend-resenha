@@ -5,6 +5,7 @@ import { toast } from 'vue-sonner'
 import { BaseButton } from '@/shared/components'
 import {
   PaymentCard,
+  PaymentPage,
   PaymentStatusBadge,
   PaymentSteps,
   PaymentSummary,
@@ -58,12 +59,16 @@ onBeforeUnmount(() => clearInterval(pollingTimer))
 </script>
 
 <template>
-  <section
-    class="mx-auto flex min-h-dvh w-full max-w-6xl flex-col justify-center px-4 pt-10 sm:px-6 md:px-12 xl:px-20"
+  <PaymentPage
+    :crumbs="['Norte Studio', 'Pagamentos', 'Pix']"
+    :title="payment ? 'Pague com Pix' : ''"
+    description="Escaneie o QR Code ou use o código copia e cola no app do seu banco."
   >
-    <PaymentSteps :current="2" />
+    <template #top>
+      <PaymentSteps :current="2" />
+    </template>
 
-    <div v-if="!payment" class="mx-auto mt-10 max-w-xl">
+    <div v-if="!payment" class="mx-auto w-full max-w-[520px]">
       <PaymentCard
         title="Pagamento indisponível"
         description="Os dados deste pagamento não estão mais disponíveis. Comece um novo."
@@ -71,71 +76,65 @@ onBeforeUnmount(() => clearInterval(pollingTimer))
         <BaseButton
           label="Fazer novo pagamento"
           icon="arrow_forward"
+          class="mt-0! h-[42px]! rounded-[10px]! py-0! text-[14px]!"
           @click="router.push({ name: 'Payment' })"
         />
       </PaymentCard>
     </div>
 
-    <template v-else>
-      <div class="mt-10">
-        <h2>Pague com Pix</h2>
-        <p class="mt-3 max-w-2xl text-sm text-(--text-secondary) dark:text-(--text-inverse-muted)">
-          Escaneie o QR Code ou use o código copia e cola no app do seu banco.
-        </p>
-      </div>
+    <div v-else class="grid items-start gap-[20px] lg:grid-cols-[minmax(0,1fr)_360px]">
+      <PaymentCard>
+        <PaymentStatusBadge :status="payment.status" class="w-fit" />
 
-      <div class="mt-8 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <PaymentCard>
-          <PaymentStatusBadge :status="payment.status" />
+        <div class="mx-auto w-full max-w-[420px]">
+          <PixCode :qr-code="payment.qr_code" :qr-code-base64="payment.qr_code_base64" />
+        </div>
 
-          <div class="mx-auto mt-8 max-w-md">
-            <PixCode :qr-code="payment.qr_code" :qr-code-base64="payment.qr_code_base64" />
-          </div>
+        <ol
+          class="grid gap-[14px] border-t border-(--border-default) pt-[16px] sm:grid-cols-3 dark:border-(--border-inverse)"
+        >
+          <li
+            v-for="(step, index) in steps"
+            :key="step"
+            class="flex gap-[10px] text-[13px] leading-[19px]"
+          >
+            <span
+              class="flex size-[22px] shrink-0 items-center justify-center rounded-full border border-(--border-default) text-[11px] font-semibold dark:border-(--border-inverse)"
+            >
+              {{ index + 1 }}
+            </span>
+            <span class="text-(--text-secondary) dark:text-(--text-inverse-muted)">{{ step }}</span>
+          </li>
+        </ol>
+      </PaymentCard>
 
-          <div class="mt-8 border-t border-(--border-default) pt-6 dark:border-(--border-inverse)">
-            <ol class="grid gap-4 sm:grid-cols-3">
-              <li v-for="(step, index) in steps" :key="step" class="flex gap-3 text-sm">
-                <span
-                  class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-(--border-default) text-xs font-semibold dark:border-(--border-inverse)"
-                >
-                  {{ index + 1 }}
-                </span>
-                <span class="text-(--text-secondary) dark:text-(--text-inverse-muted)">
-                  {{ step }}
-                </span>
-              </li>
-            </ol>
-          </div>
+      <aside class="flex flex-col gap-[10px] lg:sticky lg:top-[24px]">
+        <PaymentCard title="Resumo">
+          <PaymentSummary
+            :title="payment.title"
+            :amount="payment.amount"
+            :payer-name="payment.payer_name"
+            :payer-cpf="payment.payer_cpf"
+          />
+          <BaseButton
+            label="Já paguei"
+            icon="check"
+            icon-position="left"
+            :loading="isChecking"
+            class="mt-0! h-[44px]! rounded-[10px]! py-0! text-[14px]! [&_.material-symbols-outlined]:text-[17px]!"
+            @click="refreshPayment(true)"
+          />
         </PaymentCard>
 
-        <aside class="lg:sticky lg:top-28">
-          <PaymentCard title="Resumo">
-            <div class="mt-5">
-              <PaymentSummary
-                :title="payment.title"
-                :amount="payment.amount"
-                :payer-name="payment.payer_name"
-                :payer-cpf="payment.payer_cpf"
-              />
-            </div>
-
-            <BaseButton
-              label="Já paguei"
-              icon="check"
-              :loading="isChecking"
-              @click="refreshPayment(true)"
-            />
-          </PaymentCard>
-
-          <BaseButton
-            variant="ghost"
-            label="Cancelar e voltar"
-            icon="arrow_back"
-            icon-position="left"
-            @click="router.push({ name: 'Payment' })"
-          />
-        </aside>
-      </div>
-    </template>
-  </section>
+        <BaseButton
+          variant="ghost"
+          label="Cancelar e voltar"
+          icon="arrow_back"
+          icon-position="left"
+          class="mt-0! h-[40px]! rounded-[10px]! py-0! text-[13.5px]! [&_.material-symbols-outlined]:text-[17px]!"
+          @click="router.push({ name: 'Payment' })"
+        />
+      </aside>
+    </div>
+  </PaymentPage>
 </template>
