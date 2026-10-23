@@ -16,8 +16,7 @@ const label = computed(() =>
 )
 const isLoading = ref(true)
 const setupMessage = ref('')
-let unmountGoogleButton: (() => void) | undefined
-let isDisposed = false
+const abortController = new AbortController()
 
 function handleCredential(credential: string) {
   emit('credential', credential)
@@ -33,14 +32,13 @@ onMounted(async () => {
 
   try {
     if (buttonContainer.value) {
-      const cleanup = await mountGoogleButton(
+      await mountGoogleButton(
         buttonContainer.value,
         clientId,
         props.buttonText,
         handleCredential,
+        abortController.signal,
       )
-      if (isDisposed) cleanup()
-      else unmountGoogleButton = cleanup
     }
   } catch (error) {
     setupMessage.value =
@@ -51,8 +49,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-  isDisposed = true
-  unmountGoogleButton?.()
+  abortController.abort()
 })
 </script>
 

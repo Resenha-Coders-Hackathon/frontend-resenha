@@ -47,11 +47,21 @@ function loadGoogleIdentity(): Promise<GoogleIdentityClient> {
     script.src = 'https://accounts.google.com/gsi/client'
     script.async = true
     script.defer = true
+    const timeout = window.setTimeout(() => {
+      script.remove()
+      reject(
+        new Error(
+          'O login do Google demorou para carregar. Recarregue a página e tente novamente.',
+        ),
+      )
+    }, 15_000)
     script.onload = () => {
+      window.clearTimeout(timeout)
       if (window.google?.accounts.id) resolve(window.google)
       else reject(new Error('A biblioteca de login do Google não foi carregada.'))
     }
     script.onerror = () => {
+      window.clearTimeout(timeout)
       script.remove()
       reject(new Error('Não foi possível carregar o login do Google.'))
     }
@@ -69,9 +79,10 @@ export async function mountGoogleButton(
   clientId: string,
   text: GoogleButtonText,
   onCredential: (credential: string) => void,
+  signal?: AbortSignal,
 ): Promise<() => void> {
   const google = await loadGoogleIdentity()
-  activeCredentialHandler = onCredential
+  if (signal?.aborted) return () => {}
 
   if (initializedClientId !== clientId) {
     google.accounts.id.initialize({
@@ -85,7 +96,8 @@ export async function mountGoogleButton(
 
   let renderedWidth = 0
   const render = () => {
-    const width = Math.floor(container.getBoundingClientRect().width)
+    // clientWidth excludes the invisible overlay's CSS scale; Google caps width at 400px.
+    const width = Math.min(400, container.clientWidth)
     if (width <= 0 || width === renderedWidth) return
 
     container.replaceChildren()
@@ -106,8 +118,16 @@ export async function mountGoogleButton(
   const resizeObserver = new ResizeObserver(render)
   resizeObserver.observe(container)
 
-  return () => {
-    resizeObserver.disconnect()
-    if (activeCredentialHandler === onCredential) activeCredentialHandler = undefined
+  const credentialHandler = (credential: string) => {
+    if (!signal?.aborted) onCredential(credential)
   }
+  activeCredentialHandler = credentialHandler
+
+  const cleanup = () => {
+    resizeObserver.disconnect()
+    signal?.removeEventListener('abort', cleanup)
+    if (activeCredentialHandler === credentialHandler) activeCredentialHandler = undefined
+  }
+  signal?.addEventListener('abort', cleanup, { once: true })
+  return cleanup
 }
