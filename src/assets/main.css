@@ -6,6 +6,7 @@
 @theme {
   --font-geist: 'Geist, sans-serif';
 
+  --auth-background: #ffffff;
   --background: #f3f2ef;
   --background-inverse: #000000;
 
