@@ -2,14 +2,18 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { UUID } from '@/shared/types'
 import {
+  createTeamsChannel,
+  deleteMessage,
+  editMessage,
   listChannels,
   listMessages,
+  listOnlineMembers,
   markRead,
   openDirect,
   sendMessage,
   startMeet,
 } from '../services'
-import type { ChatChannel, ChatMessage } from '../types'
+import type { ChatChannel, ChatMessage, WriteChatMessageRequest } from '../types'
 
 const TYPING_MS = 4000
 
@@ -29,6 +33,10 @@ export const useChatStore = defineStore('chat', () => {
   const activeId = ref<UUID | null>(null)
   const typing = ref<Record<UUID, string>>({})
   const error = ref('')
+  // ids of the organization members online (refreshPresence)
+  const online = ref<UUID[]>([])
+  // next page of older messages per channel (absent: nothing more to load)
+  const olderPage = ref<Record<UUID, number>>({})
   const timers = new Map<UUID, ReturnType<typeof setTimeout>>()
   let generation = 0
 
@@ -41,6 +49,8 @@ export const useChatStore = defineStore('chat', () => {
     messages.value = {}
     activeId.value = null
     typing.value = {}
+    online.value = []
+    olderPage.value = {}
     error.value = ''
   }
 
@@ -81,6 +91,8 @@ export const useChatStore = defineStore('chat', () => {
     const current = generation
     const page = await run(() => listMessages(channelId))
     if (!page || current !== generation) return
+    if (page.next) olderPage.value[channelId] = 2
+    else delete olderPage.value[channelId]
     const fetched = [...page.results].reverse()
     // keep anything pushed over the socket while the request was in flight
     const known = new Set(fetched.map((m) => m.id))
@@ -115,14 +127,84 @@ export const useChatStore = defineStore('chat', () => {
     }
   }
 
-  async function send(content: string): Promise<void> {
+  /** `content` may be empty when files are attached. */
+  async function send(
+    content: string,
+    extra: Omit<WriteChatMessageRequest, 'content'> = {},
+  ): Promise<void> {
     const channelId = activeId.value
     const text = content.trim()
-    if (!channelId || !text) return
-    const message = await run(() => sendMessage(channelId, text))
+    if (!channelId || (!text && !extra.files?.length)) return
+    const message = await run(() => sendMessage(channelId, text, extra))
     if (!message) return
     upsert(channelId, message)
     touchChannel(channelId, message, true)
+  }
+
+  /** Loads the next page of older messages of the active channel; false when there is nothing more. */
+  async function loadOlder(): Promise<boolean> {
+    const channelId = activeId.value
+    const page = channelId ? olderPage.value[channelId] : undefined
+    if (!channelId || !page) return false
+    const current = generation
+    const result = await run(() => listMessages(channelId, page))
+    if (!result || current !== generation) return false
+    const known = new Set((messages.value[channelId] ?? []).map((m) => m.id))
+    const older = [...result.results].reverse().filter((m) => !known.has(m.id))
+    messages.value[channelId] = [...older, ...(messages.value[channelId] ?? [])]
+    if (result.next) olderPage.value[channelId] = page + 1
+    else delete olderPage.value[channelId]
+    return true
+  }
+
+  function hasOlder(channelId: UUID): boolean {
+    return !!olderPage.value[channelId]
+  }
+
+  async function edit(messageId: UUID, content: string): Promise<boolean> {
+    const channelId = activeId.value
+    const text = content.trim()
+    if (!channelId || !text) return false
+    const message = await run(() => editMessage(messageId, text))
+    if (message) upsert(channelId, message)
+    return !!message
+  }
+
+  async function remove(messageId: UUID): Promise<boolean> {
+    const channelId = activeId.value
+    if (!channelId) return false
+    const done = await run(async () => {
+      await deleteMessage(messageId)
+      return true
+    })
+    if (done) {
+      messages.value[channelId] = (messages.value[channelId] ?? []).filter(
+        (m) => m.id !== messageId,
+      )
+    }
+    return !!done
+  }
+
+  /** Creates a conversation shared by two or more teams and selects it. */
+  async function openTeamsChannel(
+    teamIds: UUID[],
+    name?: string,
+  ): Promise<ChatChannel | undefined> {
+    const orgId = organizationId.value
+    if (!orgId) return
+    const channel = await run(() => createTeamsChannel(orgId, { team_ids: teamIds, name }))
+    if (!channel) return
+    await refreshChannels()
+    await select(channel.id)
+    return channel
+  }
+
+  async function refreshPresence(): Promise<void> {
+    const orgId = organizationId.value
+    if (!orgId) return
+    const current = generation
+    const ids = await run(() => listOnlineMembers(orgId))
+    if (ids && current === generation) online.value = ids
   }
 
   /** Posts a Google Meet link in the active channel; returns the link or an error message. */
@@ -171,6 +253,7 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   return {
+    online,
     organizationId,
     channels,
     messages,
@@ -180,6 +263,12 @@ export const useChatStore = defineStore('chat', () => {
     load,
     select,
     send,
+    edit,
+    remove,
+    loadOlder,
+    hasOlder,
+    openTeamsChannel,
+    refreshPresence,
     meet,
     handleEvent,
     reset,

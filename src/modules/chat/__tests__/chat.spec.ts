@@ -42,6 +42,11 @@ const api = {
   }),
   sendMessage: async (_id: string, _content: string) => message('new', 'c1', 'me') as unknown,
   markRead: async (_id: string) => {},
+  editMessage: async (id: string, content: string) =>
+    ({ ...message(id, 'c1', 'me'), content }) as unknown,
+  deleteMessage: async (_id: string) => {},
+  createTeamsChannel: async (_org: string, _p: unknown) => channel('t1', 'teams') as unknown,
+  listOnlineMembers: async (_org: string) => ['u1'],
   startMeet: async (_id: string) => message('meet', 'c1', 'me') as unknown,
 }
 Object.assign(globalThis, { chatTestApi: api })
@@ -77,7 +82,7 @@ beforeEach(() => {
     // backend order: newest first
     results: [message('b', 'c1', 'other', '2026-01-01T10:01:00Z'), message('a', 'c1')],
   })
-  api.sendMessage = async () => message('new', 'c1', 'me')
+  api.sendMessage = async (_id: string, _c: string, _e?: unknown) => message('new', 'c1', 'me')
   api.markRead = async (id) => {
     calls.push(`read:${id}`)
   }
@@ -232,4 +237,66 @@ test('meet returns the backend error (e.g. Google not connected)', async () => {
   const chat = useChatStore()
   await chat.load('org')
   assert.deepEqual(await chat.meet(), { error: 'Google não conectado' })
+})
+
+test('send with only files (no text) is allowed and forwards the extras', async () => {
+  let received: unknown
+  api.sendMessage = async (_id, _c, extra) => {
+    received = extra
+    return message('f', 'c1', 'me')
+  }
+  const chat = useChatStore()
+  await chat.load('org')
+  const file = new Blob(['x']) as File
+  await chat.send('', { files: [file], reply_to: 'r1', mentions: ['u1'] })
+  assert.deepEqual(received, { files: [file], reply_to: 'r1', mentions: ['u1'] })
+  assert.ok(chat.messages['c1']?.some((m) => m.id === 'f'))
+})
+
+test('edit replaces the message and remove drops it; failures keep the list', async () => {
+  const chat = useChatStore()
+  await chat.load('org')
+  assert.equal(await chat.edit('a', '  novo  '), true)
+  assert.equal(chat.messages['c1']?.find((m) => m.id === 'a')?.content, 'novo')
+  api.deleteMessage = async () => {
+    throw new Error('nao pode')
+  }
+  assert.equal(await chat.remove('a'), false)
+  assert.ok(chat.messages['c1']?.some((m) => m.id === 'a'))
+  assert.equal(chat.error, 'nao pode')
+  api.deleteMessage = async () => {}
+  assert.equal(await chat.remove('a'), true)
+  assert.equal(
+    chat.messages['c1']?.some((m) => m.id === 'a'),
+    false,
+  )
+})
+
+test('loadOlder pages backwards and stops when there is no next page', async () => {
+  const pages: Record<number, unknown> = {
+    1: { count: 3, next: 'p2', previous: null, results: [message('c', 'c1')] },
+    2: { count: 3, next: null, previous: 'p1', results: [message('b', 'c1'), message('a', 'c1')] },
+  }
+  api.listMessages = async (_id, page = 1) => pages[page] as never
+  const chat = useChatStore()
+  await chat.load('org')
+  assert.equal(chat.hasOlder('c1'), true)
+  assert.equal(await chat.loadOlder(), true)
+  assert.deepEqual(
+    chat.messages['c1']?.map((m) => m.id),
+    ['a', 'b', 'c'],
+  )
+  assert.equal(chat.hasOlder('c1'), false)
+  assert.equal(await chat.loadOlder(), false)
+})
+
+test('openTeamsChannel creates, refreshes and selects; presence is stored', async () => {
+  const chat = useChatStore()
+  await chat.load('org')
+  api.listChannels = async () => [channel('c1'), channel('t1', 'teams')]
+  const created = await chat.openTeamsChannel(['x', 'y'], 'Squad')
+  assert.equal(created?.id, 't1')
+  assert.equal(chat.activeId, 't1')
+  await chat.refreshPresence()
+  assert.deepEqual(chat.online, ['u1'])
 })
