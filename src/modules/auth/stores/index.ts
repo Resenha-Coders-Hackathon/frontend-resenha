@@ -13,6 +13,7 @@ import {
   updateMe,
 } from '../services'
 import type { LoginCredentials, UpdateUserRequest, User, UserSession } from '../types'
+import { useNotificationsStore } from '@/modules/notifications'
 
 // Dados em memória entre as etapas de registro e de redefinição de senha.
 // Nada é persistido: ao recarregar a página o fluxo recomeça.
@@ -73,6 +74,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function signOut(): Promise<void> {
+    await useNotificationsStore().disablePush()
     try {
       await logout()
     } catch (error) {
@@ -97,12 +99,14 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function endAllSessions(): Promise<void> {
+    await useNotificationsStore().disablePush()
     await revokeAllSessions()
     user.value = null
     sessions.value = []
   }
 
   async function deactivateAccount(): Promise<void> {
+    await useNotificationsStore().disablePush()
     await deactivateMe()
     user.value = null
     sessions.value = []

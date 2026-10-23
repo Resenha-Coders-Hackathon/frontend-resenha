@@ -36,7 +36,7 @@ src/
 | `src/app/` | TBD | Router, layouts, axios plugin, `useTheme` | `router/index.ts` | — |
 | `src/modules/geolocation/ | TBD | Browser geolocation store and screen | `geolocationRoutes` (`feat-geolocation`) | — |
 | `src/modules/mapbox/` | TBD | Mapbox map component | `mapboxRoutes` (`feat-mapbox`) | — |
-| `src/modules/notifications/` | TBD | Firebase push notifications; sends via backend | `notificationsRoutes` (`feat-notifications`) | — |
+| `src/modules/notifications/` | TBD | Inbox, unread/read actions, realtime and browser FCM lifecycle ([integration](NOTIFICATIONS.md)) | `notificationsRoutes` | `useNotificationsStore`, `useNotificationSession`, `NotificationLink` |
 | `src/modules/payments/` | TBD | Payment form, Pix and result screens | `paymentsRoutes` (`feat/payments`) | — |
 | `src/modules/ai/` | TBD | Ask the backend AI (`POST /ai/ask/`); service and store only | `useAiStore`, `askAi` | — |
 
