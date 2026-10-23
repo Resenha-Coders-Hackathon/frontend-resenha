@@ -23,6 +23,7 @@ export interface ListNotificationsParams {
 export interface PushMessage {
   title: string
   body: string
+  notification_id?: string
 }
 
 export interface DeviceTokenRequest {

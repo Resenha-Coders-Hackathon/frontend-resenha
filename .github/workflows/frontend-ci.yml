@@ -23,5 +23,8 @@ jobs:
     - name: Lint (eslint)
       run: npx eslint .
 
+    - name: Test notifications
+      run: node --test src/modules/notifications/__tests__/notifications.spec.ts
+
     - name: Type-check and build
       run: npm run build

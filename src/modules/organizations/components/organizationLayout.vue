@@ -2,6 +2,7 @@
 import { SidebarComp, FooterComp, ThemeSwitcher } from '@/shared/components'
 import { useOrganizationsStore } from '../stores'
 import '../organizations.css'
+import { NotificationLink } from '@/modules/notifications'
 
 defineProps<{ title: string; organizationId?: string }>()
 const organizations = useOrganizationsStore()
@@ -36,6 +37,7 @@ const organizations = useOrganizationsStore()
             </select>
           </label>
           <span class="sr-only">{{ title }}</span>
+          <NotificationLink />
           <ThemeSwitcher />
         </header>
         <div class="workspace-content"><slot /></div>
