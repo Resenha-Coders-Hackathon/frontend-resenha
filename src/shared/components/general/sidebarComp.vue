@@ -13,6 +13,7 @@ const toggleSidebar = () => {
 const menuItems: IMenuItems[] = [
   {
     link: '/',
+    icon: 'home',
     label: 'Home',
   },
   {
@@ -63,17 +64,19 @@ const authItems: IMenuItems[] = [
         </h3>
 
         <ul class="grid gap-2">
-          <li
-            v-for="(item, index) in menuItems"
-            :key="index"
-            :class="[
-              route.name === item.label
-                ? 'bg-(--background-inverse) text-(--text-inverse)'
-                : 'hover:bg-(--background-inverse)/30',
-              'text-sm rounded-xl px-5 py-1.5 cursor-pointer font-medium transition-all duration-300',
-            ]"
-          >
-            <RouterLink :to="item.link">{{ item.label }}</RouterLink>
+          <li v-for="(item, index) in menuItems" :key="index">
+            <RouterLink
+              :to="item.link"
+              :class="[
+                route.name === item.label
+                  ? 'bg-(--background-inverse) text-(--text-inverse)'
+                  : 'hover:bg-(--background-inverse)/30',
+                'text-sm rounded-xl flex items-center gap-2 px-5 py-1.5 cursor-pointer font-medium transition-all duration-300',
+              ]"
+            >
+              <span class="material-symbols-outlined">{{ item.icon }}</span>
+              <span>{{ item.label }}</span>
+            </RouterLink>
           </li>
         </ul>
 
@@ -82,17 +85,19 @@ const authItems: IMenuItems[] = [
         </h3>
 
         <ul class="grid gap-2">
-          <li
-            v-for="(item, index) in menuItems"
-            :key="index"
-            :class="[
-              route.name === item.label
-                ? 'bg-(--background-inverse) text-(--text-inverse)'
-                : 'hover:bg-(--background-inverse)/30',
-              'text-sm rounded-xl px-5 py-1.5 cursor-pointer font-medium transition-all duration-300',
-            ]"
-          >
-            <RouterLink :to="item.link">{{ item.label }}</RouterLink>
+          <li v-for="(item, index) in menuItems" :key="index">
+            <RouterLink
+              :to="item.link"
+              :class="[
+                route.name === item.label
+                  ? 'bg-(--background-inverse) text-(--text-inverse)'
+                  : 'hover:bg-(--background-inverse)/30',
+                'text-sm rounded-xl flex items-center gap-2 px-5 py-1.5 cursor-pointer font-medium transition-all duration-300',
+              ]"
+            >
+              <span class="material-symbols-outlined">{{ item.icon }}</span>
+              <span>{{ item.label }}</span>
+            </RouterLink>
           </li>
         </ul>
       </div>
@@ -103,17 +108,19 @@ const authItems: IMenuItems[] = [
         </h3>
 
         <ul class="grid gap-2">
-          <li
-            v-for="(item, index) in authItems"
-            :key="index"
-            :class="[
-              route.name === item.label
-                ? 'bg-(--background-inverse) text-(--text-inverse)'
-                : 'hover:bg-(--background-inverse)/30',
-              'text-sm rounded-xl px-5 py-1.5 cursor-pointer font-medium transition-all duration-300',
-            ]"
-          >
-            <RouterLink :to="item.link">{{ item.label }}</RouterLink>
+          <li v-for="(item, index) in authItems" :key="index">
+            <RouterLink
+              :to="item.link"
+              :class="[
+                route.name === item.label
+                  ? 'bg-(--background-inverse) text-(--text-inverse)'
+                  : 'hover:bg-(--background-inverse)/30',
+                'text-sm rounded-xl flex items-center gap-2 px-5 py-1.5 cursor-pointer font-medium transition-all duration-300',
+              ]"
+            >
+              <span class="material-symbols-outlined">{{ item.icon }}</span>
+              <span>{{ item.label }}</span>
+            </RouterLink>
           </li>
         </ul>
       </div>
