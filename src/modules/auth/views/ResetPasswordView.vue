@@ -66,66 +66,68 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <AuthCardLayout icon="shield" title="Defina uma nova senha">
-    <template #description>
-      Use pelo menos 9 caracteres, combinando letras, números e símbolos.
-    </template>
+  <section>
+    <AuthCardLayout icon="shield" title="Defina uma nova senha">
+      <template #description>
+        Use pelo menos 9 caracteres, combinando letras, números e símbolos.
+      </template>
 
-    <form class="flex flex-col gap-5" @submit.prevent="handleSubmit">
-      <AuthField
-        id="reset-password"
-        v-model="password"
-        label="Nova senha"
-        icon="lock"
-        type="password"
-        name="new-password"
-        autocomplete="new-password"
-        placeholder="••••••••"
-        minlength="9"
-        required
-      >
-        <template #after>
-          <div class="mt-4 grid grid-cols-4 gap-1.5" aria-hidden="true">
-            <span
-              v-for="bar in 4"
-              :key="bar"
-              :class="[
-                'h-1 rounded-full transition-colors',
-                bar <= strength
-                  ? 'bg-(--surface-inverse) dark:bg-(--surface)'
-                  : 'bg-(--bg-muted) dark:bg-(--border-inverse)',
-              ]"
-            ></span>
-          </div>
-          <p
-            class="mt-2 text-[12px] leading-4 text-(--text-secondary) dark:text-(--text-inverse-muted)"
-            aria-live="polite"
-          >
-            {{ password ? STRENGTH_LABELS[strength] : 'Força da senha' }}
-          </p>
-        </template>
-      </AuthField>
+      <form class="flex flex-col gap-5" @submit.prevent="handleSubmit">
+        <AuthField
+          id="reset-password"
+          v-model="password"
+          label="Nova senha"
+          icon="lock"
+          type="password"
+          name="new-password"
+          autocomplete="new-password"
+          placeholder="••••••••"
+          minlength="9"
+          required
+        >
+          <template #after>
+            <div class="mt-4 grid grid-cols-4 gap-1.5" aria-hidden="true">
+              <span
+                v-for="bar in 4"
+                :key="bar"
+                :class="[
+                  'h-1 rounded-full transition-colors',
+                  bar <= strength
+                    ? 'bg-(--surface-inverse) dark:bg-(--surface)'
+                    : 'bg-(--bg-muted) dark:bg-(--border-inverse)',
+                ]"
+              ></span>
+            </div>
+            <p
+              class="mt-2 text-[12px] leading-4 text-(--text-secondary) dark:text-(--text-inverse-muted)"
+              aria-live="polite"
+            >
+              {{ password ? STRENGTH_LABELS[strength] : 'Força da senha' }}
+            </p>
+          </template>
+        </AuthField>
 
-      <AuthField
-        id="reset-password-confirmation"
-        v-model="confirmation"
-        label="Confirmar nova senha"
-        icon="lock"
-        type="password"
-        name="new-password-confirmation"
-        autocomplete="new-password"
-        placeholder="••••••••"
-        required
-      />
+        <AuthField
+          id="reset-password-confirmation"
+          v-model="confirmation"
+          label="Confirmar nova senha"
+          icon="lock"
+          type="password"
+          name="new-password-confirmation"
+          autocomplete="new-password"
+          placeholder="••••••••"
+          required
+        />
 
-      <p v-if="errorMessage" role="alert" class="auth-error">{{ errorMessage }}</p>
+        <p v-if="errorMessage" role="alert" class="auth-error">{{ errorMessage }}</p>
 
-      <BaseButton
-        type="submit"
-        label="Redefinir senha"
-        :loading="isSubmitting"
-        class="auth-submit"
-      />
-    </form>
-  </AuthCardLayout>
+        <BaseButton
+          type="submit"
+          label="Redefinir senha"
+          :loading="isSubmitting"
+          class="auth-submit"
+        />
+      </form>
+    </AuthCardLayout>
+  </section>
 </template>

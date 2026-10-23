@@ -2,11 +2,11 @@ import type { RouteRecordRaw } from 'vue-router'
 
 export const geolocationRoutes: RouteRecordRaw[] = [
   {
-    path: '/',
+    path: '/localizacao',
     component: () => import('@/app/layouts/DefaultLayout.vue'),
     children: [
       {
-        path: '/localizacao',
+        path: '',
         name: 'Geolocation',
         component: () => import('../views/HomeView.vue'),
       },

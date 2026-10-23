@@ -6,7 +6,7 @@ export const moduleRoutes: RouteRecordRaw[] = [
     component: () => import('@/app/layouts/DefaultLayout.vue'),
     children: [
       {
-        path: '/',
+        path: '',
         name: 'Home',
         component: () => import('../views/HomeView.vue'),
       },

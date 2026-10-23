@@ -60,70 +60,72 @@ async function handleGoogleCredential(credential: string) {
 </script>
 
 <template>
-  <AuthSplitLayout>
-    <h1 class="text-[38px]! leading-11.5! tracking-[-0.03em]!">Bem-vindo de volta</h1>
-    <p class="mt-2 text-[16px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
-      Entre na sua conta para continuar.
-    </p>
+  <section>
+    <AuthSplitLayout>
+      <h1 class="text-[38px]! leading-11.5! tracking-[-0.03em]!">Bem-vindo de volta</h1>
+      <p class="mt-2 text-[16px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
+        Entre na sua conta para continuar.
+      </p>
 
-    <form class="mt-8 flex flex-col gap-5" @submit.prevent="handleSubmit">
-      <AuthField
-        id="login-email"
-        v-model="email"
-        label="E-mail"
-        icon="mail"
-        type="email"
-        name="email"
-        autocomplete="username"
-        placeholder="voce@email.com"
-        required
-      />
+      <form class="mt-8 flex flex-col gap-5" @submit.prevent="handleSubmit">
+        <AuthField
+          id="login-email"
+          v-model="email"
+          label="E-mail"
+          icon="mail"
+          type="email"
+          name="email"
+          autocomplete="username"
+          placeholder="voce@email.com"
+          required
+        />
 
-      <AuthField
-        id="login-password"
-        v-model="password"
-        label="Senha"
-        icon="lock"
-        type="password"
-        name="password"
-        autocomplete="current-password"
-        placeholder="••••••••"
-        required
-      >
-        <template #after>
-          <div class="mt-3 flex justify-end leading-5">
-            <RouterLink to="/esqueci-senha" class="auth-link text-[14px]">
-              Esqueceu sua senha?
-            </RouterLink>
-          </div>
-        </template>
-      </AuthField>
+        <AuthField
+          id="login-password"
+          v-model="password"
+          label="Senha"
+          icon="lock"
+          type="password"
+          name="password"
+          autocomplete="current-password"
+          placeholder="••••••••"
+          required
+        >
+          <template #after>
+            <div class="mt-3 flex justify-end leading-5">
+              <RouterLink to="/esqueci-senha" class="auth-link text-[14px]">
+                Esqueceu sua senha?
+              </RouterLink>
+            </div>
+          </template>
+        </AuthField>
 
-      <p v-if="errorMessage" role="alert" class="auth-error">{{ errorMessage }}</p>
+        <p v-if="errorMessage" role="alert" class="auth-error">{{ errorMessage }}</p>
 
-      <BaseButton
-        type="submit"
-        label="Entrar"
-        :loading="isSubmitting"
-        :disabled="isGoogleSubmitting"
-        class="auth-submit"
-      />
-    </form>
+        <BaseButton
+          type="submit"
+          label="Entrar"
+          :loading="isSubmitting"
+          :disabled="isGoogleSubmitting"
+          class="auth-submit"
+        />
+      </form>
 
-    <div class="my-6 flex items-center gap-4 text-[13px] text-(--text-muted)">
-      <span class="h-px flex-1 bg-(--border-default) dark:bg-(--border-inverse)"></span>
-      <span>ou</span>
-      <span class="h-px flex-1 bg-(--border-default) dark:bg-(--border-inverse)"></span>
-    </div>
+      <div class="my-6 flex items-center gap-4 text-[13px] text-(--text-muted)">
+        <span class="h-px flex-1 bg-(--border-default) dark:bg-(--border-inverse)"></span>
+        <span>ou</span>
+        <span class="h-px flex-1 bg-(--border-default) dark:bg-(--border-inverse)"></span>
+      </div>
 
-    <GoogleButton @credential="handleGoogleCredential" />
-    <p v-if="googleErrorMessage" role="alert" class="auth-error mt-3">
-      {{ googleErrorMessage }}
-    </p>
+      <GoogleButton @credential="handleGoogleCredential" />
+      <p v-if="googleErrorMessage" role="alert" class="auth-error mt-3">
+        {{ googleErrorMessage }}
+      </p>
 
-    <p class="mt-8 text-[15px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
-      Não tem uma conta?
-      <RouterLink to="/registrar" class="auth-link">Criar conta</RouterLink>
-    </p>
-  </AuthSplitLayout>
+      <p class="mt-8 text-[15px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
+        Não tem uma conta?
+        <RouterLink to="/registrar" class="auth-link">Criar conta</RouterLink>
+      </p>
+    </AuthSplitLayout>
+  </section>
 </template>

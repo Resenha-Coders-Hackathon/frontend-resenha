@@ -41,7 +41,7 @@ const authItems: IMenuItems[] = [
 </script>
 
 <template>
-  <header class="relative z-1 pb-15">
+  <header class="relative z-1">
     <div
       class="flex inset-x-none w-full xl:w-auto xl:inset-x-30 xl:mt-5 absolute items-center justify-between gap-4 border-b border-(--border-default) bg-(--surface) px-4 py-3 dark:border-(--border-inverse) dark:bg-(--surface-inverse) xl:rounded-full xl:border xl:px-8 xl:py-2"
     >
@@ -110,18 +110,15 @@ const authItems: IMenuItems[] = [
     <Transition name="sidebar">
       <aside
         v-if="isMenuOpen"
-        class="fixed right-0 top-0 z-50 flex flex-col h-dvh w-[min(85vw,360px)] overflow-y-auto border-l border-gray-200 bg-(--surface-container) p-6 shadow-2xl dark:border-gray-700 dark:bg-(--surface-container-dark) md:hidden"
+        class="fixed right-0 top-0 z-50 flex flex-col h-dvh w-[min(85vw,360px)] overflow-y-auto border-l border-(--border-default) bg-(--surface) p-6 shadow-2xl dark:border-(--border-inverse) dark:bg-(--surface-inverse) md:hidden"
       >
         <div class="flex items-center justify-between">
           <RouterLink to="/" class="font-bold" @click="closeMenu">
-            Resenha<span
-              class="bg-linear-to-r from-(--primary) to-(--primary-container) bg-clip-text text-transparent dark:from-(--primary-container-dark) dark:to-(--primary-dark)"
-              >Coders</span
-            >
+            Resenha<span class="shrink-0 whitespace-nowrap text-(--text-muted)">Coders</span>
           </RouterLink>
 
           <button
-            class="material-symbols-outlined flex items-center justify-center rounded-full text-(--on-surface) hover:bg-(--surface-container-low) active:bg-(--surface-container-low) dark:text-white dark:hover:bg-(--surface) dark:active:bg-(--surface)"
+            class="material-symbols-outlined flex items-center justify-center rounded-full"
             @click="closeMenu"
           >
             close
@@ -129,15 +126,13 @@ const authItems: IMenuItems[] = [
         </div>
 
         <nav class="mt-10">
-          <p class="mb-3 text-xs font-semibold uppercase tracking-widest text-(--outline)">
-            Navegação
-          </p>
+          <p class="mb-3 text-xs font-semibold uppercase tracking-widest">Navegação</p>
 
           <ul>
             <li v-for="item in menuItems" :key="item.label">
               <RouterLink
                 :to="item.link"
-                class="block rounded-xl px-4 py-3 text-sm font-medium text-(--on-surface) transition-colors hover:bg-(--surface-container-low) hover:text-(--primary) active:bg-(--surface-container-low) active:text-(--primary) dark:text-white dark:hover:bg-(--surface) dark:hover:text-(--primary-dark) dark:active:bg-(--surface) dark:active:text-(--primary-dark)"
+                class="block rounded-xl px-4 py-3 text-sm font-medium hover:text-(--text-muted) active:text-(--text-muted)"
                 @click="closeMenu"
               >
                 {{ item.label }}
@@ -146,28 +141,30 @@ const authItems: IMenuItems[] = [
           </ul>
         </nav>
 
-        <div class="mt-auto mb-5 border-t border-gray-200 pt-6 dark:border-gray-700">
-          <p class="mb-3 text-xs font-semibold uppercase tracking-widest text-(--outline)">
-            Sua conta
-          </p>
+        <div
+          class="mt-auto mb-5 border-t border-(--border-default) pt-6 dark:border-(--border-inverse)"
+        >
+          <p class="mb-3 text-xs font-semibold uppercase tracking-widest">Sua conta</p>
 
           <ul>
             <li v-for="item in authItems" :key="item.label">
               <RouterLink
                 :to="item.link"
                 :class="[
-                  'flex items-center gap-2 rounded-full px-4 py-3 text-sm font-semibold transition-all duration-300',
+                  'flex justify-between items-center gap-2 rounded-full px-4 py-3 text-sm font-semibold',
                   item.label === 'Entrar'
-                    ? 'bg-(--primary) text-white hover:bg-(--primary)/80 active:bg-(--primary)/80'
-                    : 'text-(--on-surface) hover:bg-(--surface-container-low) active:bg-(--surface-container-low) dark:text-white dark:hover:bg-(--surface) dark:active:bg-(--surface)',
+                    ? 'group rounded-full bg-(--surface-inverse) text-(--text-inverse) dark:bg-(--surface) dark:text-(--text-primary) px-3 py-1.5 transition-all duration-300'
+                    : 'hover:text-(--text-muted) active:text-(--text-muted)',
                 ]"
                 @click="closeMenu"
               >
-                <span v-if="item.label === 'Entrar'" class="material-symbols-outlined">
+                {{ item.label }}
+                <span
+                  v-if="item.label === 'Entrar'"
+                  class="material-symbols-outlined transition-transform duration-300 group-hover:translate-x-1 group-active:translate-x-1"
+                >
                   login
                 </span>
-
-                {{ item.label }}
               </RouterLink>
             </li>
           </ul>

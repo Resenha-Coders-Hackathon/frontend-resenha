@@ -35,7 +35,7 @@ onMounted(async () => {
 
 <template>
   <section
-    class="mx-auto flex min-h-[calc(100svh_-_60px)] w-full max-w-6xl flex-col justify-center px-4 py-8 sm:px-6 md:px-12 xl:px-20"
+    class="mx-auto flex min-h-dvh w-full max-w-6xl flex-col justify-center px-4 pt-10 sm:px-6 md:px-12 xl:px-20"
   >
     <PaymentSteps :current="3" :completed="approved" />
 

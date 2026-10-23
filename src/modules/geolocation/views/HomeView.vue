@@ -17,11 +17,7 @@ onMounted(async () => {
           class="mt-6 text-center text-4xl leading-tight font-bold tracking-tight sm:text-5xl sm:leading-tight md:text-6xl md:leading-[1.12]"
         >
           Sua localização,
-          <span
-            class="bg-linear-to-r from-(--primary) to-(--primary-container) bg-clip-text text-transparent dark:to-(--primary-dark) dark:from-(--primary-container-dark)"
-          >
-            em tempo real
-          </span>
+          <span class="text-(--text-muted)"> em tempo real </span>
         </h1>
 
         <p

@@ -7,7 +7,7 @@ const props = withDefaults(defineProps<{ compact?: boolean }>(), { compact: fals
 <template>
   <div
     :class="[
-      '-mt-15 grid lg:grid-cols-[minmax(0,1fr)_36vw]',
+      'grid lg:grid-cols-[minmax(0,1fr)_36vw]',
       props.compact ? 'h-dvh overflow-hidden' : 'min-h-dvh',
     ]"
   >

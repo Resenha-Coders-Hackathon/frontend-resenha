@@ -1,38 +1,33 @@
 <script setup lang="ts"></script>
 
 <template>
-  <section class="px-4 sm:px-6 md:px-12 xl:px-20 mt-[25vw] lg:mt-[5vw]">
+  <section
+    class="mx-auto flex min-h-dvh w-full max-w-6xl flex-col justify-center px-4 pt-10 sm:px-6 md:px-12 xl:px-20"
+  >
     <div
-      class="mx-auto flex min-h-[70dvh] w-full max-w-8xl flex-col items-center justify-center overflow-hidden rounded-2xl bg-(--surface-container) px-5 py-12 text-center shadow-2xl dark:bg-(--surface-dark) sm:px-8 sm:py-16 md:px-12 lg:min-h-170 lg:px-20"
+      class="mx-auto flex w-full max-w-8xl flex-col items-center justify-center px-5 py-12 text-center"
     >
-      <h3
-        class="bg-linear-to-r from-(--primary) to-(--primary-container) bg-clip-text text-5xl leading-none font-bold text-transparent sm:text-6xl md:text-7xl dark:to-(--primary-dark) dark:from-(--primary-container-dark)"
-      >
-        404
-      </h3>
+      <h3 class="text-7xl leading-none font-bold sm:text-8xl md:text-9xl">404</h3>
 
       <h2 class="my-4 w-full max-w-2xl text-2xl font-bold sm:text-3xl md:text-4xl">
-        Ops! Parece que esta rota saiu do radar logístico.
+        Página não encontrada
       </h2>
 
-      <p
-        class="w-full max-w-3xl text-sm text-(--on-surface-variant) dark:text-(--on-surface-variant-dark)"
-      >
-        A página ou recurso que você tentou acessar não existe, foi movida para outro endereço ou
-        sua URL expirou. Mas não se preocupe: sua telemetria operacional continua ativa e
-        rastreável.
+      <p class="w-full max-w-3xl text-sm text-(--text-muted)">
+        O endereço pode ter mudado ou a página não existe mais. Verifique o link ou volte para o
+        início.
       </p>
 
       <RouterLink
         to="/"
-        class="group mt-8 flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-(--primary) px-5 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-(--primary)/80 active:bg-(--primary)/80 sm:mt-10"
+        class="mt-8 sm:mt-10 flex w-full text-sm font-semibold justify-center max-w-xs items-center gap-2 group rounded-lg bg-(--background-inverse) text-(--text-inverse) dark:bg-(--surface) dark:text-(--text-primary) px-5 py-3 transition-all duration-300"
       >
+        Voltar ao início
         <span
-          class="material-symbols-outlined transition-transform duration-300 group-hover:-translate-x-1"
+          class="material-symbols-outlined transition-transform duration-300 group-hover:translate-x-1 group-active:translate-x-1"
         >
           home
         </span>
-        Voltar ao início
       </RouterLink>
     </div>
   </section>

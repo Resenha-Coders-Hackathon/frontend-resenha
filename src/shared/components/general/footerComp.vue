@@ -2,7 +2,6 @@
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
 
-const currentYear = new Date().getFullYear()
 const email = ref('')
 
 const columns = [
@@ -32,25 +31,22 @@ function subscribe() {
 </script>
 
 <template>
-  <!-- Cores e medidas fixas em px: o footer não acompanha o tema nem o font-size do html -->
-  <footer class="bg-[#000000] font-['Inter',sans-serif] text-[14px] leading-[21px] text-[#ffffff]">
-    <div
-      class="mx-auto w-full max-w-[1440px] px-[20px] pt-[48px] pb-[56px] sm:px-[40px] lg:px-[80px] lg:pt-[72px] lg:pb-[72px]"
-    >
-      <div class="flex flex-col gap-[44px] lg:flex-row lg:justify-between lg:gap-[64px]">
+  <footer class="bg-(--background-inverse) text-[14px] leading-5.25 text-(--text-inverse)">
+    <div class="mx-auto w-full max-w-360 px-5 pt-12 pb-14 sm:px-10 lg:px-20 lg:pt-18 lg:pb-18">
+      <div class="flex flex-col gap-11 lg:flex-row lg:justify-between lg:gap-16">
         <div class="lg:max-w-[320px]">
           <RouterLink
             to="/"
-            class="inline-block w-fit rounded-[4px] text-[18px] leading-[32px] font-bold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#ffffff]"
+            class="inline-block w-fit rounded-sm text-[18px] leading-8 font-bold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--text-inverse)"
           >
-            Resenha<span class="text-[#a3a3a3]">Coders</span>
+            Resenha<span class="text-(--text-muted)">Coders</span>
           </RouterLink>
 
-          <p class="mt-[22px] max-w-[300px] text-[#b5b5b5]">
+          <p class="mt-5.5 max-w-75 text-(--text-muted)">
             Uma frase curta que resume a proposta de valor da marca.
           </p>
 
-          <form class="mt-[20px] flex items-center gap-[9px]" @submit.prevent="subscribe">
+          <form class="mt-5 flex items-center gap-2.25" @submit.prevent="subscribe">
             <label for="footer-email" class="sr-only">Seu e-mail</label>
             <input
               id="footer-email"
@@ -58,11 +54,11 @@ function subscribe() {
               type="email"
               required
               placeholder="seu@email.com"
-              class="h-[45px] min-w-0 flex-1 rounded-[6px] border border-[#3a3a3a] bg-[#000000] px-[14px] text-[14px] text-[#ffffff] placeholder:text-[#8c8c8c] focus:border-[#8c8c8c] focus:outline-none lg:w-[220px] lg:flex-none"
+              class="h-11.25 min-w-0 flex-1 rounded-md border border-(--border-inverse) bg-(--background-inverse) px-3.5 text-[14px] text-(--text-inverse) placeholder:text-[#8c8c8c] focus:border-[#8c8c8c] focus:outline-none lg:w-55 lg:flex-none"
             />
             <button
               type="submit"
-              class="h-[42px] shrink-0 rounded-[6px] bg-[#ffffff] px-[18px] text-[14px] font-medium text-[#000000] transition-colors hover:bg-[#e5e5e5] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ffffff]"
+              class="h-10.5 shrink-0 rounded-md bg-[#ffffff] px-4.5 text-[14px] font-medium text-[#000000] transition-colors hover:bg-[#e5e5e5] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--text-inverse)"
             >
               Assinar
             </button>
@@ -71,15 +67,15 @@ function subscribe() {
 
         <nav
           aria-label="Navegação do rodapé"
-          class="grid grid-cols-2 gap-x-[32px] gap-y-[44px] lg:w-[704px] lg:shrink-0 lg:grid-cols-[188px_188px_188px_1fr] lg:gap-0 lg:pt-[2px]"
+          class="grid grid-cols-2 gap-x-8 gap-y-11 lg:w-176 lg:shrink-0 lg:grid-cols-[188px_188px_188px_1fr] lg:gap-0 lg:pt-0.5"
         >
           <div v-for="column in columns" :key="column.title">
-            <p class="font-medium text-[#ffffff]">{{ column.title }}</p>
-            <ul class="mt-[14px] flex flex-col gap-[14px]">
+            <p class="font-medium text-(--text-inverse)">{{ column.title }}</p>
+            <ul class="mt-3.5 flex flex-col gap-3.5">
               <li v-for="link in column.links" :key="link">
                 <a
                   href="#"
-                  class="text-[#a3a3a3] transition-colors hover:text-[#ffffff] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#ffffff]"
+                  class="text-[#a3a3a3] transition-colors hover:text-(--text-inverse) focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--text-inverse)"
                 >
                   {{ link }}
                 </a>
@@ -89,9 +85,9 @@ function subscribe() {
         </nav>
       </div>
 
-      <div class="mt-[40px] border-t border-[#262626] pt-[48px] lg:mt-[56px] lg:pt-[57px]">
-        <p class="text-[12px] leading-[18px] text-[#b5b5b5]">
-          © {{ currentYear }} ResenhaCoders. Todos os direitos reservados.
+      <div class="mt-10 border-t border-[#262626] pt-12 lg:mt-14 lg:pt-14.25">
+        <p class="text-[12px] leading-4.5 text-[#b5b5b5]">
+          © {{ new Date().getFullYear() }} ResenhaCoders. Todos os direitos reservados.
         </p>
       </div>
     </div>
