@@ -1,3 +1,5 @@
 export * from './buttons'
+export * from './content'
 export * from './forms'
 export * from './general'
+export * from './tables'
