@@ -1,5 +1,11 @@
 # ResenhaCoders Frontend
 
+## Figma interface development
+
+See the [design reference](docs/FIGMA_REFERENCE.md) for the source Figma file, access
+status and implementation workflow, and the [figma-interface agent](.claude/agents/figma-interface.md)
+for specialized interface implementation instructions.
+
 ## Integrated Docker development
 
 Use the workspace-level `docker-compose.yml` with both repositories side by side.
