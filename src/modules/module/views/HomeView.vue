@@ -9,6 +9,9 @@ import {
   ChartComp,
 } from '@/shared/components'
 import type { ICards } from '@/shared/types'
+import { useAuthStore } from '@/modules/auth/stores'
+
+const authStore = useAuthStore()
 
 const cards: ICards[] = [
   {
@@ -61,7 +64,7 @@ const chartData = computed(() => {
 <template>
   <section class="mx-auto flex min-h-dvh w-full flex-col px-4 pt-10 sm:px-6 md:px-8 xl:px-10">
     <SubheaderComp
-      title="Bom dia, Nicole"
+      :title="`Bom dia, ${authStore.user?.name}`"
       description="Sexta, 23 de outubro · você tem 6 tarefas abertas"
     >
       <BaseButton label="Nova tarefa" icon="add" icon-position="left" />
