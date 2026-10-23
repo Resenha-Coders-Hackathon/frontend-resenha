@@ -3,6 +3,9 @@
 Using AI and multiple agents is optional. Follow [`docs/TEAM_WORKFLOW.md`](docs/TEAM_WORKFLOW.md),
 [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md) and [`docs/PROJECT_GUIDE.md`](docs/PROJECT_GUIDE.md).
 
+For Figma interface tasks, read [`docs/FIGMA_REFERENCE.md`](docs/FIGMA_REFERENCE.md) and
+the specialized [figma-interface agent](.claude/agents/figma-interface.md).
+
 ## Before you start
 1. Read the Issue: acceptance criteria, owner, scope, dependencies.
 2. Check active Issues/PRs (and the GitHub Project, if you have access) for
