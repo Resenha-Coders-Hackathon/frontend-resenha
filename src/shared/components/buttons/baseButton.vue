@@ -94,5 +94,6 @@ const buttonClasses = computed(() => [
     >
       {{ icon }}
     </span>
+    <slot name="after" />
   </button>
 </template>

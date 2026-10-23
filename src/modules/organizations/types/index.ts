@@ -4,6 +4,9 @@ export type OrganizationRole = 'owner' | 'admin' | 'member' | 'viewer'
 export interface Organization {
   id: UUID
   name: string
+  slug: string
+  team_size: '' | '1' | '2-10' | '11-50' | '51-200' | '201+'
+  current_role: OrganizationRole
   description: string
   logo_url: string
   is_personal: boolean
@@ -11,6 +14,8 @@ export interface Organization {
 }
 export interface CreateOrganizationRequest {
   name: string
+  slug?: string
+  team_size?: Organization['team_size']
   description?: string
   logo_url?: string
 }
@@ -29,4 +34,11 @@ export interface AddOrganizationMemberRequest {
 }
 export interface UpdateOrganizationMemberRoleRequest {
   role: OrganizationRole
+}
+
+export interface OrganizationSector {
+  id: UUID
+  organization_id: UUID
+  name: string
+  is_private: boolean
 }

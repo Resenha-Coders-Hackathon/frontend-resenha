@@ -64,6 +64,7 @@ const chartData = computed(() => {
       title="Bom dia, Nicole"
       description="Sexta, 23 de outubro · você tem 6 tarefas abertas"
     >
+      <RouterLink to="/organizacoes" class="text-sm underline">Organizações</RouterLink>
       <BaseButton label="Nova tarefa" icon="add" icon-position="left" />
     </SubheaderComp>
 
