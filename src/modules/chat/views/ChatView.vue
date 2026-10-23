@@ -17,6 +17,7 @@ import {
   ChatTyping,
 } from '../components'
 import { useChatSocket } from '../composables/useChatSocket'
+import { ensureGoogleConnected } from '../composables/useGoogleConnect'
 import { useChatStore } from '../stores/chat'
 import type { ChatChannel, ChatMessage, DemoMessage } from '../types'
 import { formatDayLabel } from '../utils'
@@ -107,6 +108,12 @@ async function send() {
 }
 
 async function startMeet() {
+  try {
+    if (!(await ensureGoogleConnected())) return // foi para o Google conectar a conta
+  } catch (e) {
+    toast.error(e instanceof Error ? e.message : 'Não foi possível verificar o Google.')
+    return
+  }
   const failure = await chat.meet()
   if (failure) toast.error(failure)
 }
