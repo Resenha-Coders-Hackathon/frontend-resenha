@@ -11,6 +11,11 @@ export const moduleRoutes: RouteRecordRaw[] = [
         component: () => import('../views/HomeView.vue'),
       },
       {
+        path: '/kanban',
+        name: 'Mural',
+        component: () => import('../views/KanbanView.vue'),
+      },
+      {
         path: '/:pathMatch(.*)*',
         name: 'NotFound',
         component: () => import('../views/NotFoundView.vue'),

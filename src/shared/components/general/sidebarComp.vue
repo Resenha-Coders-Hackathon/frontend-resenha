@@ -17,8 +17,9 @@ const menuItems: IMenuItems[] = [
     label: 'Home',
   },
   {
-    link: '/localizacao',
-    label: 'Geolocation',
+    link: '/kanban',
+    icon: 'view_kanban',
+    label: 'Mural',
   },
   {
     link: '/mapbox',
