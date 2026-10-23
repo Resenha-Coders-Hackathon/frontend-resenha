@@ -31,6 +31,8 @@ const router = createRouter({
 router.beforeEach(async (to) => {
   if (!to.meta.requiresAuth) return
   try {
+    await api.get('/users/me/')
+
     if (!(await useAuthStore().loadUser())) {
       return { path: '/entrar', query: { redirect: to.fullPath } }
     }
