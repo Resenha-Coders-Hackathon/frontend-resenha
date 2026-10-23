@@ -103,7 +103,8 @@ onBeforeUnmount(() => {
 /* O iframe do Google tem no máximo 400px x 44px: ampliamos para cobrir o botão todo.
    Fica invisível, mas continua clicável e acessível por teclado. */
 .google-button__overlay {
-  opacity: 0;
+  /* Chrome skips pointer input on fully transparent cross-origin iframes. */
+  opacity: 0.001;
   transform: scale(1.6);
 }
 </style>
