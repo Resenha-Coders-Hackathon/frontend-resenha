@@ -55,27 +55,3 @@ export async function startMeet(channelId: UUID): Promise<ChatMessage> {
     throw new Error(getErrorMessage(error, 'Não foi possível iniciar o Meet.'))
   }
 }
-
-export async function googleConnected(): Promise<boolean> {
-  try {
-    return (await api.get<{ connected: boolean }>('/integrations/google/')).data.connected
-  } catch (error) {
-    throw new Error(getErrorMessage(error, 'Não foi possível verificar o Google.'))
-  }
-}
-
-export async function googleAuthorizeUrl(): Promise<string> {
-  try {
-    return (await api.get<{ url: string }>('/integrations/google/authorize/')).data.url
-  } catch (error) {
-    throw new Error(getErrorMessage(error, 'Não foi possível conectar ao Google.'))
-  }
-}
-
-export async function googleConnect(code: string, state: string): Promise<void> {
-  try {
-    await api.post('/integrations/google/connect/', { code, state })
-  } catch (error) {
-    throw new Error(getErrorMessage(error, 'Não foi possível concluir a conexão com o Google.'))
-  }
-}

@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { BaseButton } from '@/shared/components'
 import { useAuthStore } from '@/modules/auth'
+import { ensureGoogleConnected } from '@/modules/calendar_sync'
 import { useOrganizationsStore } from '@/modules/organizations'
 import {
   ChatChannelItem,
@@ -17,7 +18,6 @@ import {
   ChatTyping,
 } from '../components'
 import { useChatSocket } from '../composables/useChatSocket'
-import { ensureGoogleConnected } from '../composables/useGoogleConnect'
 import { useChatStore } from '../stores/chat'
 import type { ChatChannel, ChatMessage, DemoMessage } from '../types'
 import { formatDayLabel } from '../utils'
@@ -125,7 +125,7 @@ async function startMeet() {
   const popup = openMeetWindow()
   let navigated = false
   try {
-    if (!(await ensureGoogleConnected())) return // foi para o Google conectar a conta
+    if (!(await ensureGoogleConnected({ returnTo: '/chat' }))) return // foi para o Google conectar a conta
     const { link, error } = await chat.meet()
     if (error) throw new Error(error)
     if (link && popup) {

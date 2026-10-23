@@ -4,9 +4,10 @@ import { registerHooks } from 'node:module'
 
 const calls: string[] = []
 const api = {
-  googleConnected: async () => false,
-  googleAuthorizeUrl: async () => 'https://accounts.google.com/consent',
-  googleConnect: async (code: string, state: string) => {
+  getGoogleStatus: async () => ({ connected: false, drive: false }),
+  getGoogleAuthorizeUrl: async (drive?: boolean) =>
+    `https://accounts.google.com/consent?drive=${!!drive}`,
+  connectGoogle: async (code: string, state: string) => {
     calls.push(`connect:${code}:${state}`)
   },
 }
@@ -46,33 +47,44 @@ function setup(search = '') {
 beforeEach(() => {
   store.clear()
   calls.length = 0
-  api.googleConnected = async () => false
+  api.getGoogleStatus = async () => ({ connected: false, drive: false })
   setup()
 })
 
 test('already connected: no redirect', async () => {
-  api.googleConnected = async () => true
+  api.getGoogleStatus = async () => ({ connected: true, drive: false })
   assert.equal(await ensureGoogleConnected(), true)
   assert.deepEqual(calls, [])
 })
 
-test('not connected: remembers the chat origin and goes to Google', async () => {
-  assert.equal(await ensureGoogleConnected(), false)
-  assert.deepEqual(calls, ['go:https://accounts.google.com/consent'])
-  assert.equal(store.size, 1)
+test('connected without Drive, Drive required: asks for consent again', async () => {
+  api.getGoogleStatus = async () => ({ connected: true, drive: false })
+  assert.equal(await ensureGoogleConnected({ drive: true }), false)
+  assert.deepEqual(calls, ['go:https://accounts.google.com/consent?drive=true'])
 })
 
-test('returning from Google finishes the connection once', async () => {
-  await ensureGoogleConnected()
+test('connected with Drive, Drive required: no redirect', async () => {
+  api.getGoogleStatus = async () => ({ connected: true, drive: true })
+  assert.equal(await ensureGoogleConnected({ drive: true }), true)
+})
+
+test('not connected: goes to Google remembering where to return', async () => {
+  assert.equal(await ensureGoogleConnected({ returnTo: '/chat' }), false)
+  assert.deepEqual(calls, ['go:https://accounts.google.com/consent?drive=false'])
+  assert.deepEqual(JSON.parse([...store.values()][0]!), { returnTo: '/chat' })
+})
+
+test('returning from Google finishes the connection once and gives the route back', async () => {
+  await ensureGoogleConnected({ returnTo: '/chat' })
   calls.length = 0
   setup('?code=abc&state=xyz')
-  assert.equal(await finishGoogleConnect(), true)
+  assert.equal(await finishGoogleConnect(), '/chat')
   assert.deepEqual(calls, ['connect:abc:xyz'])
-  assert.equal(await finishGoogleConnect(), false) // flag consumed
+  assert.equal(await finishGoogleConnect(), null) // flag consumed
 })
 
-test('a code without a pending chat request is ignored', async () => {
+test('a code without a pending request is ignored', async () => {
   setup('?code=abc&state=xyz')
-  assert.equal(await finishGoogleConnect(), false)
+  assert.equal(await finishGoogleConnect(), null)
   assert.deepEqual(calls, [])
 })
