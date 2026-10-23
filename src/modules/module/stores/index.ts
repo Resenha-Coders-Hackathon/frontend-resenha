@@ -1,0 +1,152 @@
+import { ref } from 'vue'
+import { defineStore } from 'pinia'
+import { fetchAllPages } from '@/shared/utils'
+import {
+  createSector,
+  createStatus,
+  createTask,
+  deleteSector,
+  deleteStatus,
+  deleteTask,
+  getSectorProgress,
+  listSectors,
+  listStatuses,
+  listTasks,
+  moveTask,
+  updateSector,
+  updateTask,
+} from '../services'
+import type {
+  CreateSectorRequest,
+  CreateStatusRequest,
+  CreateTaskRequest,
+  Sector,
+  SectorProgress,
+  Status,
+  Task,
+  UpdateSectorRequest,
+  UpdateTaskRequest,
+} from '../types'
+
+export const useSectorsStore = defineStore('sectors', () => {
+  const sectors = ref<Sector[]>([])
+  const organizationId = ref<string | null>(null)
+
+  async function load(orgId: string): Promise<void> {
+    // limpa antes de buscar: evita mostrar setores de outra organização
+    if (organizationId.value !== orgId) sectors.value = []
+    organizationId.value = orgId
+    const items = await fetchAllPages((page) => listSectors(orgId, page))
+    if (organizationId.value === orgId) sectors.value = items
+  }
+
+  async function create(orgId: string, payload: CreateSectorRequest): Promise<Sector> {
+    const created = await createSector(orgId, payload)
+    if (organizationId.value === orgId) sectors.value = [...sectors.value, created]
+    return created
+  }
+
+  async function update(id: string, payload: UpdateSectorRequest): Promise<Sector> {
+    const updated = await updateSector(id, payload)
+    sectors.value = sectors.value.map((s) => (s.id === id ? updated : s))
+    return updated
+  }
+
+  async function remove(id: string): Promise<void> {
+    await deleteSector(id)
+    sectors.value = sectors.value.filter((s) => s.id !== id)
+  }
+
+  const progress = (id: string): Promise<SectorProgress> => getSectorProgress(id)
+
+  return { sectors, organizationId, load, create, update, remove, progress }
+})
+
+// Quadro (colunas + tasks) de um setor por vez.
+export const useKanbanStore = defineStore('kanban', () => {
+  const sectorId = ref<string | null>(null)
+  const statuses = ref<Status[]>([])
+  const tasks = ref<Task[]>([])
+
+  async function load(id: string): Promise<void> {
+    if (sectorId.value !== id) {
+      statuses.value = []
+      tasks.value = []
+    }
+    sectorId.value = id
+    const [loadedStatuses, loadedTasks] = await Promise.all([
+      fetchAllPages((page) => listStatuses(id, page)),
+      fetchAllPages((page) => listTasks(id, { page, ordering: 'position' })),
+    ])
+    if (sectorId.value !== id) return
+    statuses.value = [...loadedStatuses].sort((a, b) => a.position - b.position)
+    tasks.value = loadedTasks
+  }
+
+  const tasksByStatus = (statusId: string) =>
+    tasks.value.filter((t) => t.status_id === statusId).sort((a, b) => a.position - b.position)
+
+  async function addStatus(payload: CreateStatusRequest): Promise<Status> {
+    const created = await createStatus(requireSector(), payload)
+    statuses.value = [...statuses.value, created].sort((a, b) => a.position - b.position)
+    return created
+  }
+
+  async function removeStatus(statusId: string): Promise<void> {
+    await deleteStatus(requireSector(), statusId)
+    statuses.value = statuses.value.filter((s) => s.id !== statusId)
+  }
+
+  async function addTask(payload: CreateTaskRequest): Promise<Task> {
+    const created = await createTask(requireSector(), payload)
+    tasks.value = [...tasks.value, created]
+    return created
+  }
+
+  async function editTask(id: string, payload: UpdateTaskRequest): Promise<Task> {
+    return replace(await updateTask(id, payload))
+  }
+
+  async function removeTask(id: string): Promise<void> {
+    await deleteTask(id)
+    tasks.value = tasks.value.filter((t) => t.id !== id)
+  }
+
+  // Atualização otimista; em erro volta ao estado anterior e relança.
+  async function move(id: string, statusId: string, position?: number): Promise<Task> {
+    const previous = tasks.value
+    const current = previous.find((t) => t.id === id)
+    if (!current) throw new Error('Tarefa não encontrada.')
+    replace({ ...current, status_id: statusId, position: position ?? current.position })
+    try {
+      return replace(await moveTask(id, { status: statusId, position }))
+    } catch (error) {
+      tasks.value = previous
+      throw error
+    }
+  }
+
+  function replace(task: Task): Task {
+    tasks.value = tasks.value.map((t) => (t.id === task.id ? task : t))
+    return task
+  }
+
+  function requireSector(): string {
+    if (!sectorId.value) throw new Error('Nenhum setor carregado.')
+    return sectorId.value
+  }
+
+  return {
+    sectorId,
+    statuses,
+    tasks,
+    load,
+    tasksByStatus,
+    addStatus,
+    removeStatus,
+    addTask,
+    editTask,
+    removeTask,
+    move,
+  }
+})

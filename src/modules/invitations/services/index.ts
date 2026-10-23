@@ -1,6 +1,6 @@
 import { api } from '@/app/plugins/axios'
 import type { Page } from '@/shared/types'
-import type { Invitation, InviteRole } from '../types'
+import type { CreateInviteRequest, Invitation } from '../types'
 
 export async function listInvitations(id: string, page = 1): Promise<Page<Invitation>> {
   return (
@@ -11,7 +11,7 @@ export async function listInvitations(id: string, page = 1): Promise<Page<Invita
 }
 export async function createInvitation(
   id: string,
-  payload: { email: string; role: InviteRole; sector_ids?: string[] },
+  payload: CreateInviteRequest,
 ): Promise<Invitation> {
   return (
     await api.post<Invitation>(`/organizations/${encodeURIComponent(id)}/invitations/`, payload)
@@ -24,4 +24,8 @@ export async function revokeInvitation(id: string, invitationId: string): Promis
 }
 export async function acceptInvitation(token: string): Promise<{ organization_id: string }> {
   return (await api.post<{ organization_id: string }>('/invitations/accept/', { token })).data
+}
+
+export async function listMyInvitations(page = 1): Promise<Page<Invitation>> {
+  return (await api.get<Page<Invitation>>('/invitations/mine/', { params: { page } })).data
 }

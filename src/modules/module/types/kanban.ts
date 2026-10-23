@@ -114,3 +114,19 @@ export interface CreateResourceLinkRequest {
   url: string
 }
 export type UpdateResourceLinkRequest = Partial<CreateResourceLinkRequest>
+
+/** Query params of GET /sectors/:id/tasks/ (django-filter + search + ordering). */
+export interface TaskFilters {
+  status?: string
+  assignee?: string
+  priority?: Task['priority']
+  parent?: string
+  parent__isnull?: boolean
+  due_before?: string
+  due_after?: string
+  overdue?: boolean
+  completed?: boolean
+  search?: string
+  ordering?: string
+  page?: number
+}
