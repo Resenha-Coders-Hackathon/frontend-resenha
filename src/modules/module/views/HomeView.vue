@@ -1,7 +1,16 @@
 <script setup lang="ts">
-import { SubheaderComp, BaseButton, CardComp, PendingTasksTable } from '@/shared/components'
+import { computed } from 'vue'
+import {
+  SubheaderComp,
+  BaseButton,
+  CardComp,
+  PendingTasksTable,
+  UserTable,
+  ChartComp,
+} from '@/shared/components'
+import type { ICards } from '@/shared/types'
 
-const cards = [
+const cards: ICards[] = [
   {
     title: 'Minhas tarefas abertas',
     data: '6',

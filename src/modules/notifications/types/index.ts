@@ -24,3 +24,12 @@ export interface PushMessage {
   title: string
   body: string
 }
+
+export interface DeviceTokenRequest {
+  token: string
+}
+export interface SendPushRequest {
+  token: string
+  title: string
+  body?: string
+}

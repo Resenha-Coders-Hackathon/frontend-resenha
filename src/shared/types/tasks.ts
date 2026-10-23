@@ -1,14 +1,21 @@
+import type { UUID, ISODate, ISODateTime } from './api'
+
+export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent'
+
+/** TaskSerializer response; dates remain strings at the JSON boundary. */
 export interface ITasks {
-  id: string
-  sector_id: string
-  status_id: string
+  id: UUID
+  sector_id: UUID
+  status_id: UUID
+  parent_id: UUID | null
   title: string
   description: string
-  priority: string
-  due_data: Date
-  completed_at: Date
-  assignee_id: string
-  created_by: string
+  priority: TaskPriority
+  due_date: ISODate | null
+  completed_at: ISODateTime | null
+  assignee_id: UUID | null
+  assignee_name: string | null
   position: number
-  created_at: Date
+  is_overdue: boolean
+  created_at: ISODateTime
 }

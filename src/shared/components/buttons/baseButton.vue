@@ -27,7 +27,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const buttonClasses = computed(() => [
   // BASE
-  'group inline-flex items-center justify-center gap-2 rounded-full',
+  'group inline-flex items-center justify-center gap-2 rounded-xl',
   'font-semibold transition-all duration-300 ease-out',
 
   // WIDTH
