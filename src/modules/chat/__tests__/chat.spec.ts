@@ -42,6 +42,7 @@ const api = {
   }),
   sendMessage: async (_id: string, _content: string) => message('new', 'c1', 'me') as unknown,
   markRead: async (_id: string) => {},
+  startMeet: async (_id: string) => message('meet', 'c1', 'me') as unknown,
 }
 Object.assign(globalThis, { chatTestApi: api })
 
@@ -49,7 +50,7 @@ Object.assign(globalThis, { chatTestApi: api })
 const hooks = registerHooks({
   resolve(specifier, context, nextResolve) {
     if (context.parentURL?.endsWith('/chat/stores/chat.ts') && specifier === '../services') {
-      const names = [...Object.keys(api), 'startMeet']
+      const names = Object.keys(api)
       return {
         url: `data:text/javascript,${encodeURIComponent(names.map((n) => `export const ${n} = (...a) => globalThis.chatTestApi.${n}(...a);`).join('\n'))}`,
         shortCircuit: true,
@@ -210,4 +211,24 @@ test('switching organization drops the previous conversations', async () => {
     ['z1'],
   )
   assert.equal(chat.messages['c1'], undefined)
+})
+
+test('meet posts the link message in the active channel', async () => {
+  api.startMeet = async () => ({
+    ...message('meet', 'c1', 'me'),
+    content: 'Join the meeting: https://meet.google.com/x',
+  })
+  const chat = useChatStore()
+  await chat.load('org')
+  assert.equal(await chat.meet(), undefined)
+  assert.match(chat.messages['c1']?.at(-1)?.content ?? '', /meet\.google\.com/)
+})
+
+test('meet returns the backend error (e.g. Google not connected)', async () => {
+  api.startMeet = async () => {
+    throw new Error('Google não conectado')
+  }
+  const chat = useChatStore()
+  await chat.load('org')
+  assert.equal(await chat.meet(), 'Google não conectado')
 })

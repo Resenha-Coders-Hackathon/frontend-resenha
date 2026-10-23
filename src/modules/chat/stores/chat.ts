@@ -1,7 +1,14 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { UUID } from '@/shared/types'
-import { listChannels, listMessages, markRead, openDirect, sendMessage } from '../services'
+import {
+  listChannels,
+  listMessages,
+  markRead,
+  openDirect,
+  sendMessage,
+  startMeet,
+} from '../services'
 import type { ChatChannel, ChatMessage } from '../types'
 
 const TYPING_MS = 4000
@@ -118,6 +125,19 @@ export const useChatStore = defineStore('chat', () => {
     touchChannel(channelId, message, true)
   }
 
+  /** Posts a Google Meet link in the active channel; returns the error message, if any. */
+  async function meet(): Promise<string | undefined> {
+    const channelId = activeId.value
+    if (!channelId) return
+    try {
+      const message = await startMeet(channelId)
+      upsert(channelId, message)
+      touchChannel(channelId, message, true)
+    } catch (e) {
+      return e instanceof Error ? e.message : 'Não foi possível iniciar o Meet.'
+    }
+  }
+
   async function handleEvent(event: ChatEvent, currentUserId: UUID): Promise<void> {
     if (event.type === 'chat.typing') {
       if (event.user_id === currentUserId) return
@@ -159,6 +179,7 @@ export const useChatStore = defineStore('chat', () => {
     load,
     select,
     send,
+    meet,
     handleEvent,
     reset,
   }

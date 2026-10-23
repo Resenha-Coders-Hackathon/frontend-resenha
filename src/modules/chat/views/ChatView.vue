@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
 import { BaseButton } from '@/shared/components'
 import { useAuthStore } from '@/modules/auth'
 import { useOrganizationsStore } from '@/modules/organizations'
@@ -105,6 +106,11 @@ async function send() {
   await chat.send(content)
 }
 
+async function startMeet() {
+  const failure = await chat.meet()
+  if (failure) toast.error(failure)
+}
+
 let lastTyping = 0
 watch(draft, (value) => {
   if (!value || !chat.activeId || Date.now() - lastTyping < 2000) return
@@ -193,6 +199,7 @@ watch(() => [chat.activeId, items.value.length], scrollToEnd, { immediate: true 
             icon-position="left"
             size="sm"
             :full-width="false"
+            @click="startMeet"
             class="mt-0! hidden rounded-[10px]! h-[34px]! gap-[6px]! px-[12px]! py-0! text-[13px]! [&_.material-symbols-outlined]:text-[17px]! sm:inline-flex"
           />
           <button
