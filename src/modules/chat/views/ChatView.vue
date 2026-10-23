@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { BaseButton } from '@/shared/components'
+import { useAuthStore } from '@/modules/auth'
+import { useOrganizationsStore } from '@/modules/organizations'
 import {
   ChatChannelItem,
   ChatComposer,
@@ -13,41 +15,76 @@ import {
   ChatTopbar,
   ChatTyping,
 } from '../components'
-import type { ChatChannel, DemoMessage } from '../types'
+import { useChatSocket } from '../composables/useChatSocket'
+import { useChatStore } from '../stores/chat'
+import type { ChatChannel, ChatMessage, DemoMessage } from '../types'
 import { formatDayLabel } from '../utils'
-import { CHANNELS, CURRENT_USER, MESSAGES, TYPING } from '../utils/mocks'
-
-// Página só de interface: as mensagens enviadas ficam locais, sem backend.
 
 const router = useRouter()
+const auth = useAuthStore()
+const organizations = useOrganizationsStore()
+const chat = useChatStore()
 const search = ref('')
-const channels = ref<ChatChannel[]>(structuredClone(CHANNELS))
-const messages = ref<Record<string, DemoMessage[]>>(structuredClone(MESSAGES))
-const activeId = ref('marketing')
 const draft = ref('')
 const scroller = useTemplateRef<HTMLElement>('scroller')
 
-const sectors = computed(() => channels.value.filter((channel) => channel.kind !== 'direct'))
-const directs = computed(() => channels.value.filter((channel) => channel.kind === 'direct'))
-const active = computed(() => channels.value.find((channel) => channel.id === activeId.value)!)
-const typing = computed(() => TYPING[activeId.value])
+const me = computed(() => auth.user?.id)
+// sem organização "atual" global ainda: prefere a primeira que não é o workspace pessoal
+const organization = computed(
+  () => organizations.organizations.find((o) => !o.is_personal) ?? organizations.organizations[0],
+)
+const { sendTyping } = useChatSocket((event) => {
+  if (me.value) void chat.handleEvent(event, me.value)
+})
+
+const EMPTY_CHANNEL: ChatChannel = {
+  id: '',
+  kind: 'organization',
+  name: '',
+  team_id: null,
+  team_ids: [],
+  sector_id: null,
+  unread_count: 0,
+  member_count: 0,
+  online: null,
+  last_message: null,
+}
+
+const needle = computed(() => search.value.trim().toLowerCase())
+const visible = computed(() =>
+  chat.channels.filter((channel) => channel.name.toLowerCase().includes(needle.value)),
+)
+const sectors = computed(() => visible.value.filter((channel) => channel.kind !== 'direct'))
+const directs = computed(() => visible.value.filter((channel) => channel.kind === 'direct'))
+const activeId = computed(() => chat.activeId ?? '')
+const active = computed(() => chat.channels.find((c) => c.id === chat.activeId) ?? EMPTY_CHANNEL)
+const typing = computed(() => chat.typing[activeId.value])
+const items = computed(() => chat.messages[activeId.value] ?? [])
 
 const subtitle = computed(() =>
   active.value.kind === 'direct'
     ? active.value.online
       ? 'Online agora'
       : 'Offline'
-    : `${active.value.member_count} membros · Board: Sprint de Outubro`,
+    : `${active.value.member_count} membros`,
 )
+
+// a API não manda o código da tarefa, só o card precisa dele
+function toView(message: ChatMessage): DemoMessage {
+  return {
+    ...message,
+    task: message.task && { ...message.task, code: `#${message.task.id.slice(0, 4)}` },
+  }
+}
 
 // agrupa as mensagens por dia para mostrar os divisores "Ontem" / "Hoje"
 const groups = computed(() => {
   const result: { label: string; items: DemoMessage[] }[] = []
-  for (const item of messages.value[activeId.value] ?? []) {
+  for (const item of items.value) {
     const label = formatDayLabel(item.created_at)
     const last = result.at(-1)
-    if (last?.label === label) last.items.push(item)
-    else result.push({ label, items: [item] })
+    if (last?.label === label) last.items.push(toView(item))
+    else result.push({ label, items: [toView(item)] })
   }
   return result
 })
@@ -58,42 +95,37 @@ async function scrollToEnd() {
 }
 
 function select(channel: ChatChannel) {
-  activeId.value = channel.id
-  channel.unread_count = 0
+  void chat.select(channel.id)
 }
 
-function send() {
-  const content = draft.value.trim()
-  if (!content) return
-  const created = new Date().toISOString()
-  const list = (messages.value[activeId.value] ??= [])
-  list.push({
-    id: `local-${Date.now()}`,
-    channel_id: activeId.value,
-    author_id: CURRENT_USER.id,
-    author_name: CURRENT_USER.name,
-    content,
-    reply_to_id: null,
-    task: null,
-    mentions: [],
-    attachments: [],
-    created_at: created,
-    edited_at: null,
-    deleted_at: null,
-  })
-  active.value.last_message = {
-    id: `lm-${Date.now()}`,
-    author_name: CURRENT_USER.name,
-    content: active.value.kind === 'direct' ? `Você: ${content}` : content,
-    has_attachments: false,
-    created_at: created,
-  }
+async function send() {
+  const content = draft.value
+  if (!content.trim()) return
   draft.value = ''
+  await chat.send(content)
 }
 
-watch(() => [activeId.value, messages.value[activeId.value]?.length], scrollToEnd, {
-  immediate: true,
+let lastTyping = 0
+watch(draft, (value) => {
+  if (!value || !chat.activeId || Date.now() - lastTyping < 2000) return
+  lastTyping = Date.now()
+  sendTyping(chat.activeId)
 })
+
+async function init() {
+  if (!auth.user) await auth.loadUser() // a full reload on /chat has no user yet
+  if (!organizations.organizations.length) await organizations.load()
+  const org = organization.value
+  if (!org || !me.value) return
+  chat.reset() // never show another account's conversations
+  await organizations.loadMembers(org.id)
+  const others = organizations.members.map((m) => m.user_id).filter((id) => id !== me.value)
+  await chat.load(org.id, others)
+}
+
+onMounted(init)
+
+watch(() => [chat.activeId, items.value.length], scrollToEnd, { immediate: true })
 </script>
 
 <template>
@@ -101,7 +133,7 @@ watch(() => [activeId.value, messages.value[activeId.value]?.length], scrollToEn
     <ChatTopbar
       v-model:search="search"
       :crumbs="[
-        'Norte Studio',
+        organization?.name ?? 'Organização',
         'Mensagens',
         active.kind === 'direct' ? active.name : `#${active.name}`,
       ]"
@@ -181,7 +213,7 @@ watch(() => [activeId.value, messages.value[activeId.value]?.length], scrollToEn
               v-for="item in group.items"
               :key="item.id"
               :message="item"
-              :own="item.author_id === CURRENT_USER.id"
+              :own="item.author_id === me"
             />
           </template>
           <p v-if="!groups.length" class="py-[40px] text-center text-[13px] text-(--text-muted)">
