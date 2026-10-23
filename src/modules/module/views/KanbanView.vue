@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SubheaderKanban } from '../components'
+import { SubheaderKanban, KanbanColumn } from '../components'
 </script>
 
 <template>
@@ -8,5 +8,11 @@ import { SubheaderKanban } from '../components'
       title="Nome do projeto"
       description="Setor de Marketing · campanha de lançamento do app"
     />
+
+    <div class="flex gap-5 my-5">
+      <KanbanColumn title="Backlog" :cards="['item', 'item']" />
+      <KanbanColumn title="Backlog" :cards="['item', 'item']" />
+      <KanbanColumn title="Backlog" :cards="['item', 'item']" />
+    </div>
   </section>
 </template>

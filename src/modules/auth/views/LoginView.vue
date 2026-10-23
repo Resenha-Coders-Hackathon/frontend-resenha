@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
+import { useAuthNavigation } from '../composables'
 import { BaseButton } from '@/shared/components'
 import { AuthAside, AuthField, AuthSplitLayout, GoogleButton } from '../components'
 import { useAuthSwap } from '../composables'
 import { useAuthFlowStore, useAuthStore } from '../stores'
 
 const router = useRouter()
-const route = useRoute()
+const navigation = useAuthNavigation()
 const auth = useAuthStore()
 const authFlow = useAuthFlowStore()
 const { swapTo } = useAuthSwap()
@@ -19,20 +20,15 @@ const errorMessage = ref('')
 const isGoogleSubmitting = ref(false)
 const googleErrorMessage = ref('')
 
-// só aceita caminhos internos, para o ?redirect= não virar open redirect
-function redirectTarget(): string {
-  const target = route.query.redirect
-  return typeof target === 'string' && /^\/(?!\/)/.test(target) ? target : '/'
-}
-
 async function handleSubmit() {
   errorMessage.value = ''
   isSubmitting.value = true
 
   try {
     await auth.signIn({ email: email.value.trim(), password: password.value })
+    authFlow.clear()
     toast.success('Que bom ter você de volta!')
-    await router.push(redirectTarget())
+    await router.push(navigation.destination.value)
   } catch (error) {
     errorMessage.value =
       error instanceof Error ? error.message : 'Não foi possível entrar. Tente novamente.'
@@ -51,7 +47,7 @@ async function handleGoogleCredential(credential: string) {
     await auth.signInWithGoogle(credential)
     authFlow.clear()
     toast.success('Você entrou com sua conta Google.')
-    await router.push(redirectTarget())
+    await router.push(navigation.destination.value)
   } catch (error) {
     googleErrorMessage.value =
       error instanceof Error ? error.message : 'Não foi possível entrar com Google.'
@@ -95,7 +91,7 @@ async function handleGoogleCredential(credential: string) {
         >
           <template #after>
             <div class="mt-3 flex justify-end leading-5">
-              <RouterLink to="/esqueci-senha" class="auth-link text-[14px]">
+              <RouterLink :to="navigation.to('ForgotPassword')" class="auth-link text-[14px]">
                 Esqueceu sua senha?
               </RouterLink>
             </div>
@@ -126,9 +122,12 @@ async function handleGoogleCredential(credential: string) {
 
       <p class="mt-8 text-[15px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
         Não tem uma conta?
-        <a href="/registrar" class="auth-link" @click.prevent="swapTo({ name: 'Register' })">
-          Criar conta
-        </a>
+        <a
+          :href="router.resolve(navigation.to('Register')).href"
+          class="auth-link"
+          @click.prevent="swapTo(navigation.to('Register'))"
+          >Criar conta</a
+        >
       </p>
     </AuthSplitLayout>
     <AuthAside side="right" />

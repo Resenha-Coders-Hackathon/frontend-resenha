@@ -166,12 +166,16 @@ on `POST /api/v1/login/`; JavaScript never reads them.
 
 ## 6. Environment
 
-- Variables are read through `import.meta.env` and must start with `VITE_`:
-  `VITE_API_BASE_URL` (backend URL, e.g. `http://localhost:8000/api/v1`), Firebase (`VITE_API_KEY`,
+- Browser variables are read through `import.meta.env` and must start with `VITE_`:
+  `VITE_API_BASE_URL` (optional in production, defaults to `/api/v1`; always `/api/v1` in dev),
+  Firebase (`VITE_API_KEY`,
   `VITE_AUTH_DOMAIN`, `VITE_PROJECT_ID`, `VITE_STORAGE_BUCKET`, `VITE_MESSAGING_SENDER_ID`,
   `VITE_APP_ID`, `VITE_MEASUREMENT_ID`), and any Mapbox/Google ids.
 - `.env` is git-ignored: document every new variable in the committed `.env.example`.
 - Never put secrets in the frontend; anything `VITE_*` is public.
+- Vite’s development-only proxy uses the server-side `API_PROXY_TARGET` environment
+  variable (default `http://127.0.0.1:8000`; `http://backend:8000` in Docker).
+  See the README for cookie requirements and the matching Django dev settings.
 
 ## 7. Known issues
 

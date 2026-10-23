@@ -2,13 +2,15 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { BaseButton } from '@/shared/components'
+import { BaseButton, BaseSwitch } from '@/shared/components'
+import { useAuthNavigation } from '../composables'
 import { AuthAside, AuthField, AuthSplitLayout, GoogleButton } from '../components'
 import { useAuthSwap } from '../composables'
 import { requestRegistrationCode } from '../services'
 import { useAuthFlowStore, useAuthStore } from '../stores'
 
 const router = useRouter()
+const navigation = useAuthNavigation()
 const auth = useAuthStore()
 const authFlow = useAuthFlowStore()
 const { swapTo } = useAuthSwap()
@@ -23,6 +25,10 @@ const googleErrorMessage = ref('')
 
 async function handleSubmit() {
   errorMessage.value = ''
+  if (!acceptedTerms.value) {
+    errorMessage.value = 'Aceite os Termos de uso e a Política de privacidade para continuar.'
+    return
+  }
   isSubmitting.value = true
 
   try {
@@ -34,7 +40,7 @@ async function handleSubmit() {
       password: password.value,
     })
     toast.success('Enviamos um código para o seu e-mail.')
-    await router.push({ name: 'RegisterCode' })
+    await router.push(navigation.to('RegisterCode'))
   } catch (error) {
     errorMessage.value =
       error instanceof Error ? error.message : 'Não foi possível concluir o cadastro.'
@@ -58,7 +64,7 @@ async function handleGoogleCredential(credential: string) {
     await auth.signInWithGoogle(credential)
     authFlow.clear()
     toast.success('Você entrou com sua conta Google.')
-    await router.push({ name: 'Home' })
+    await router.push(navigation.destination.value)
   } catch (error) {
     googleErrorMessage.value =
       error instanceof Error ? error.message : 'Não foi possível continuar com Google.'
@@ -118,15 +124,11 @@ async function handleGoogleCredential(credential: string) {
           required
         />
 
-        <label class="flex cursor-pointer items-center gap-3 text-[15px] leading-5">
-          <input
-            v-model="acceptedTerms"
-            type="checkbox"
-            required
-            class="size-5 shrink-0 cursor-pointer accent-(--surface-inverse) dark:accent-(--surface)"
-          />
-          Aceito os Termos de uso e a Política de privacidade
-        </label>
+        <BaseSwitch
+          v-model="acceptedTerms"
+          label="Aceito os Termos de uso e a Política de privacidade"
+          class="mt-0!"
+        />
 
         <p v-if="errorMessage" role="alert" class="auth-error">{{ errorMessage }}</p>
 
@@ -154,9 +156,12 @@ async function handleGoogleCredential(credential: string) {
         class="mt-4 text-[14px] leading-5 text-(--text-secondary) dark:text-(--text-inverse-muted)"
       >
         Já tem uma conta?
-        <a href="/entrar" class="auth-link" @click.prevent="swapTo({ name: 'Login' })">
-          Entrar
-        </a>
+        <a
+          :href="router.resolve(navigation.to('Login')).href"
+          class="auth-link"
+          @click.prevent="swapTo(navigation.to('Login'))"
+          >Entrar</a
+        >
       </p>
     </AuthSplitLayout>
   </section>
