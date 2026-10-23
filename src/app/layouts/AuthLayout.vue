@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { HeaderComp } from '@/shared/components'
 </script>
 
 <template>
-  <HeaderComp />
-  <main>
+  <main class="min-h-dvh bg-(--auth-background) dark:bg-(--background-inverse)">
     <RouterView />
   </main>
 </template>
