@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { HeaderComp, FooterComp } from '@/shared/components'
+import { HeaderComp, SidebarComp, FooterComp } from '@/shared/components'
 </script>
 
 <template>
-  <HeaderComp />
-  <main>
+  <!-- <HeaderComp /> -->
+  <main class="flex">
+    <SidebarComp />
     <RouterView />
   </main>
   <FooterComp />
