@@ -3,13 +3,15 @@ import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { BaseButton } from '@/shared/components'
-import { AuthField, AuthSplitLayout, GoogleButton } from '../components'
+import { AuthAside, AuthField, AuthSplitLayout, GoogleButton } from '../components'
+import { useAuthSwap } from '../composables'
 import { useAuthFlowStore, useAuthStore } from '../stores'
 
 const router = useRouter()
 const route = useRoute()
 const auth = useAuthStore()
 const authFlow = useAuthFlowStore()
+const { swapTo } = useAuthSwap()
 const email = ref('')
 const password = ref('')
 const isSubmitting = ref(false)
@@ -60,7 +62,7 @@ async function handleGoogleCredential(credential: string) {
 </script>
 
 <template>
-  <section>
+  <section class="grid lg:grid-cols-[minmax(0,1fr)_36vw]">
     <AuthSplitLayout>
       <h1 class="text-[38px]! leading-11.5! tracking-[-0.03em]!">Bem-vindo de volta</h1>
       <p class="mt-2 text-[16px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
@@ -124,8 +126,11 @@ async function handleGoogleCredential(credential: string) {
 
       <p class="mt-8 text-[15px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
         Não tem uma conta?
-        <RouterLink to="/registrar" class="auth-link">Criar conta</RouterLink>
+        <a href="/registrar" class="auth-link" @click.prevent="swapTo({ name: 'Register' })">
+          Criar conta
+        </a>
       </p>
     </AuthSplitLayout>
+    <AuthAside />
   </section>
 </template>

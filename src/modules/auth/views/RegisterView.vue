@@ -3,13 +3,15 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { BaseButton } from '@/shared/components'
-import { AuthField, AuthSplitLayout, GoogleButton } from '../components'
+import { AuthAside, AuthField, AuthSplitLayout, GoogleButton } from '../components'
+import { useAuthSwap } from '../composables'
 import { requestRegistrationCode } from '../services'
 import { useAuthFlowStore, useAuthStore } from '../stores'
 
 const router = useRouter()
 const auth = useAuthStore()
 const authFlow = useAuthFlowStore()
+const { swapTo } = useAuthSwap()
 const name = ref(authFlow.name)
 const email = ref(authFlow.email)
 const password = ref(authFlow.password)
@@ -67,7 +69,8 @@ async function handleGoogleCredential(credential: string) {
 </script>
 
 <template>
-  <section>
+  <section class="grid lg:grid-cols-[minmax(0,1fr)_64vw]">
+    <AuthAside />
     <AuthSplitLayout compact>
       <h1 class="text-[34px]! leading-10! tracking-[-0.03em]!">Crie sua conta</h1>
       <p
@@ -151,7 +154,9 @@ async function handleGoogleCredential(credential: string) {
         class="mt-4 text-[14px] leading-5 text-(--text-secondary) dark:text-(--text-inverse-muted)"
       >
         Já tem uma conta?
-        <RouterLink to="/entrar" class="auth-link">Entrar</RouterLink>
+        <a href="/entrar" class="auth-link" @click.prevent="swapTo({ name: 'Login' })">
+          Entrar
+        </a>
       </p>
     </AuthSplitLayout>
   </section>
