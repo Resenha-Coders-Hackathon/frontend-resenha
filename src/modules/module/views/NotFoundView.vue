@@ -20,7 +20,7 @@
 
       <RouterLink
         to="/"
-        class="mt-8 sm:mt-10 flex w-full text-sm font-semibold justify-center max-w-xs items-center gap-2 group rounded-lg bg-(--background-inverse) text-(--text-inverse) dark:bg-(--surface) dark:text-(--text-primary) px-5 py-3 transition-all duration-300"
+        class="mt-8 sm:mt-10 flex w-full text-sm font-semibold justify-center max-w-xs items-center gap-2 group rounded-lg bg-(--background-inverse) text-(--text-inverse) dark:bg-(--text-inverse) dark:text-(--text-primary) px-5 py-3 transition-all duration-300"
       >
         Voltar ao início
         <span

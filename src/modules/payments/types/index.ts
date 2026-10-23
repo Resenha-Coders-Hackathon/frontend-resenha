@@ -36,3 +36,5 @@ export interface PaginatedPayments {
   previous: string | null
   results: Payment[]
 }
+
+export type * from './ui'

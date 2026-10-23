@@ -12,13 +12,13 @@ withDefaults(defineProps<Props>(), {
 
 <template>
   <section
-    class="rounded-2xl border border-(--border-default) bg-(--surface) p-6 sm:p-8 dark:border-(--border-inverse) dark:bg-(--surface-inverse)"
+    class="flex flex-col gap-[14px] rounded-[16px] border border-(--border-default) bg-(--surface) p-[18px] sm:p-[22px] dark:border-(--border-inverse) dark:bg-(--surface-inverse)"
   >
-    <header v-if="title" class="mb-1">
-      <h3 class="text-lg leading-7 font-semibold">{{ title }}</h3>
+    <header v-if="title" class="flex flex-col gap-[2px] leading-normal">
+      <h2 class="text-[15px]! leading-normal! font-semibold! tracking-normal!">{{ title }}</h2>
       <p
         v-if="description"
-        class="mt-1 text-sm leading-6 text-(--text-secondary) dark:text-(--text-inverse-muted)"
+        class="text-[13px] text-(--text-secondary) dark:text-(--text-inverse-muted)"
       >
         {{ description }}
       </p>

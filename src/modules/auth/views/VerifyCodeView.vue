@@ -118,7 +118,7 @@ onBeforeUnmount(() => clearInterval(timer))
         <span class="h-px w-6 bg-(--border-default) dark:bg-(--border-inverse)"></span>
         <span class="inline-flex items-center gap-2" aria-current="step">
           <span
-            class="grid size-6 place-items-center rounded-full bg-(--surface-inverse) text-[12px] text-(--text-inverse) dark:bg-(--surface) dark:text-(--text-primary)"
+            class="grid size-6 place-items-center rounded-full bg-(--surface-inverse) text-[12px] text-(--text-inverse) dark:bg-(--text-inverse) dark:text-(--text-primary)"
             >2</span
           >
           Validação
