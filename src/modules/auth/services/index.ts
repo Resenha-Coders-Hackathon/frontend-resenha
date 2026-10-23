@@ -1,6 +1,6 @@
 import { isAxiosError } from 'axios'
 import { api, getErrorMessage } from '@/app/plugins/axios'
-import type { DetailResponse } from '@/shared/types'
+import type { DetailResponse, Page } from '@/shared/types'
 import type {
   GoogleLoginRequest,
   LoginCredentials,
@@ -112,4 +112,19 @@ export async function revokeAllSessions(): Promise<DetailResponse> {
 
 export async function deactivateMe(): Promise<DetailResponse> {
   return (await api.post<DetailResponse>(API_PATHS.deactivateMe)).data
+}
+
+export interface ListUsersParams {
+  search?: string
+  page?: number
+}
+
+/** Paginated user directory (name/e-mail search). */
+export async function listUsers({ search, page = 1 }: ListUsersParams = {}): Promise<Page<User>> {
+  const params = { page, ...(search && { search }) }
+  return (await api.get<Page<User>>('/users/list/', { params })).data
+}
+
+export async function getUser(id: string): Promise<User> {
+  return (await api.get<User>(`/users/${encodeURIComponent(id)}/`)).data
 }
