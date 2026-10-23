@@ -1,36 +1,27 @@
+import { isAxiosError } from 'axios'
 import { api, getErrorMessage } from '@/app/plugins/axios'
-import type { User } from '../types'
-
-export interface LoginCredentials {
-  email: string
-  password: string
-}
-
-export interface RegistrationRequest {
-  email: string
-}
-
-export interface RegistrationConfirmation {
-  email: string
-  code: string
-  name: string
-  password: string
-}
-
-export interface PasswordResetVerification {
-  email: string
-  code: string
-}
-
-export interface PasswordResetConfirmation extends PasswordResetVerification {
-  new_password: string
-}
+import type { DetailResponse } from '@/shared/types'
+import type {
+  GoogleLoginRequest,
+  LoginCredentials,
+  PasswordResetConfirmation,
+  PasswordResetVerification,
+  RegistrationConfirmation,
+  RegistrationRequest,
+  UpdateUserRequest,
+  User,
+  UserSession,
+} from '../types'
 
 const API_PATHS = {
   login: '/login/',
   googleLogin: '/login/google/',
   logout: '/me/logout/',
   me: '/users/me/',
+  updateMe: '/users/me/update/',
+  deactivateMe: '/me/deactivate/',
+  revokeSessions: '/me/revoke-sessions/',
+  sessions: '/sessions/',
   registrationRequest: '/registration/request/',
   registrationConfirm: '/registration/confirm/',
   passwordResetRequest: '/password-reset/request/',
@@ -42,11 +33,15 @@ const DEFAULT_ERROR = 'Não foi possível concluir sua solicitação. Tente nova
 const BAD_CREDENTIALS = 'E-mail ou senha incorretos.'
 
 // O backend grava os tokens em cookies HttpOnly; o corpo das respostas não é usado.
-async function post(path: string, payload: object, unauthorizedMessage = BAD_CREDENTIALS) {
+async function post(
+  path: string,
+  payload: Record<string, unknown> | object,
+  unauthorizedMessage = BAD_CREDENTIALS,
+) {
   try {
     await api.post(path, payload)
   } catch (error) {
-    const status = (error as { response?: { status?: number } }).response?.status
+    const status = isAxiosError(error) ? error.response?.status : undefined
     if (status === 401 || status === 403) throw new Error(unauthorizedMessage)
     if (status === 409) throw new Error('Este e-mail já está cadastrado.')
     throw new Error(translateApiMessage(getErrorMessage(error, DEFAULT_ERROR)))
@@ -69,10 +64,10 @@ function translateApiMessage(message: string): string {
 
 export const login = (credentials: LoginCredentials) => post(API_PATHS.login, credentials)
 
-export const loginWithGoogle = (credential: string) =>
+export const loginWithGoogle = (credential: GoogleLoginRequest['credential']) =>
   post(
     API_PATHS.googleLogin,
-    { credential },
+    { credential } satisfies GoogleLoginRequest,
     'Não foi possível validar sua conta Google. Tente novamente.',
   )
 
@@ -98,3 +93,23 @@ export const verifyPasswordReset = (payload: PasswordResetVerification) =>
 
 export const confirmPasswordReset = (payload: PasswordResetConfirmation) =>
   post(API_PATHS.passwordResetConfirm, payload)
+
+export async function updateMe(payload: UpdateUserRequest): Promise<User> {
+  return (await api.patch<User>(API_PATHS.updateMe, payload)).data
+}
+
+export async function listSessions(): Promise<UserSession[]> {
+  return (await api.get<UserSession[]>(API_PATHS.sessions)).data
+}
+
+export async function revokeSession(id: number): Promise<void> {
+  await api.delete(`${API_PATHS.sessions}${id}/`)
+}
+
+export async function revokeAllSessions(): Promise<DetailResponse> {
+  return (await api.post<DetailResponse>(API_PATHS.revokeSessions)).data
+}
+
+export async function deactivateMe(): Promise<DetailResponse> {
+  return (await api.post<DetailResponse>(API_PATHS.deactivateMe)).data
+}

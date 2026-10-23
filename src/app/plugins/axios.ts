@@ -44,6 +44,8 @@ api.interceptors.response.use(undefined, async (error: AxiosError) => {
   } catch {
     // import dinâmico: o router importa este módulo indiretamente (evita ciclo)
     const { default: router } = await import('@/app/router')
+    const { useAuthStore } = await import('@/modules/auth')
+    useAuthStore().user = null
     const { currentRoute } = router
     // só expulsa de página protegida; o guard cuida da navegação inicial
     if (currentRoute.value.meta.requiresAuth) {

@@ -28,9 +28,14 @@ const router = createRouter({
   },
 })
 
+// Só a primeira navegação protegida consulta o backend; depois o interceptor do axios
+// (refresh + redirecionamento) cuida de sessões que expiram.
 router.beforeEach(async (to) => {
   if (!to.meta.requiresAuth) return
+  const auth = useAuthStore()
+  if (auth.user) return
   try {
+    
     if (!(await useAuthStore().loadUser())) {
       return { path: '/entrar', query: { redirect: to.fullPath } }
     }
