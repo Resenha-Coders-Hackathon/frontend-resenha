@@ -235,6 +235,8 @@ export const useChatStore = defineStore('chat', () => {
     const { channel_id: channelId, message } = event
     // a conversation opened by someone else is not in our list yet
     if (!channels.value.some((c) => c.id === channelId)) await refreshChannels()
+    // the socket delivers every organization's events; this store only shows the selected one
+    if (!channels.value.some((c) => c.id === channelId)) return
     if (event.type === 'chat.message_deleted') {
       messages.value[channelId] = (messages.value[channelId] ?? []).filter(
         (m) => m.id !== message.id,

@@ -31,10 +31,7 @@ const draft = ref('')
 const scroller = useTemplateRef<HTMLElement>('scroller')
 
 const me = computed(() => auth.user?.id)
-// sem organização "atual" global ainda: prefere a primeira que não é o workspace pessoal
-const organization = computed(
-  () => organizations.organizations.find((o) => !o.is_personal) ?? organizations.organizations[0],
-)
+const organization = computed(() => organizations.current)
 const { sendTyping } = useChatSocket((event) => {
   if (me.value) void chat.handleEvent(event, me.value)
 })
@@ -159,6 +156,14 @@ async function init() {
 }
 
 onMounted(init)
+
+// trocou a organização selecionada: o chat passa a ser o dela
+watch(
+  () => organization.value?.id,
+  (id, previous) => {
+    if (previous && id && id !== previous) void init()
+  },
+)
 
 watch(() => [chat.activeId, items.value.length], scrollToEnd, { immediate: true })
 </script>

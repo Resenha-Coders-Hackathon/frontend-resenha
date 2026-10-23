@@ -300,3 +300,21 @@ test('openTeamsChannel creates, refreshes and selects; presence is stored', asyn
   await chat.refreshPresence()
   assert.deepEqual(chat.online, ['u1'])
 })
+
+test('events from another organization are ignored', async () => {
+  const chat = useChatStore()
+  await chat.load('org')
+  await chat.handleEvent(
+    {
+      type: 'chat.message',
+      channel_id: 'other-org-channel',
+      message: message('o', 'other-org-channel'),
+    },
+    'me',
+  )
+  assert.equal(chat.messages['other-org-channel'], undefined)
+  assert.equal(
+    chat.channels.some((c) => c.id === 'other-org-channel'),
+    false,
+  )
+})
