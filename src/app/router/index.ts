@@ -12,6 +12,9 @@ import { mapboxRoutes } from '@/modules/mapbox/router'
 import { moduleRoutes } from '@/modules/module/router'
 import { notificationsRoutes } from '@/modules/notifications/router'
 import { paymentsRoutes } from '@/modules/payments/router'
+import { reportsRoutes } from '@/modules/reports'
+import { teamsRoutes } from '@/modules/teams'
+import { uploadsRoutes } from '@/modules/uploads'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,6 +29,9 @@ const router = createRouter({
     ...moduleRoutes,
     ...notificationsRoutes,
     ...paymentsRoutes,
+    ...reportsRoutes,
+    ...teamsRoutes,
+    ...uploadsRoutes,
   ],
   scrollBehavior() {
     return { top: 0 }
