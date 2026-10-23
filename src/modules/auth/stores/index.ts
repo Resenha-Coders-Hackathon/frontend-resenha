@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { isAxiosError } from 'axios'
 import { fetchMe, login, loginWithGoogle, logout, type LoginCredentials } from '../services'
 import type { User } from '../types'
+import { useNotificationsStore } from '@/modules/notifications'
 
 // Dados em memória entre as etapas de registro e de redefinição de senha.
 // Nada é persistido: ao recarregar a página o fluxo recomeça.
@@ -61,6 +62,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function signOut(): Promise<void> {
+    await useNotificationsStore().disablePush()
     try {
       await logout()
     } catch (error) {
