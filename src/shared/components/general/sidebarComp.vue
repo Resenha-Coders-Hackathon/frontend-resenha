@@ -22,6 +22,11 @@ const menuItems: IMenuItems[] = [
     label: 'Mural',
   },
   {
+    link: '/configuracoes',
+    icon: 'discover_tune',
+    label: 'Configurações',
+  },
+  {
     link: '/mapbox',
     label: 'Mapbox',
   },
@@ -33,6 +38,7 @@ const menuItems: IMenuItems[] = [
     link: '/pagamento',
     label: 'Pagamento',
   },
+  
 ]
 
 const authItems: IMenuItems[] = [
