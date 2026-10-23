@@ -17,6 +17,12 @@ const api = {
   listDriveFiles: async (_q?: string) => [file('a'), file('b')],
   uploadToDrive: async (_p: unknown) => ({ file: file('c'), link: null }) as unknown,
   attachDriveFile: async (_t: string, _f: string) => ({ id: 'l1' }) as unknown,
+  getTaskCalendarStatus: async (_t: string) => ({ synced: false, last_synced_at: null }),
+  syncTaskToCalendar: async (_t: string) => ({
+    synced: true,
+    last_synced_at: '2026-01-01T00:00:00Z',
+  }),
+  removeTaskFromCalendar: async (_t: string) => {},
 }
 Object.assign(globalThis, { driveTestApi: api })
 
@@ -98,4 +104,21 @@ test('disconnect clears status and files; a failed one keeps them', async () => 
 test('attach returns the task link', async () => {
   const google = useGoogleStore()
   assert.deepEqual(await google.attach('t', 'f'), { id: 'l1' })
+})
+
+test('task calendar: add, remove and failure keep calendar state coherent', async () => {
+  const google = useGoogleStore()
+  await google.loadTaskCalendar('t1')
+  assert.equal(google.calendar['t1']?.synced, false)
+  assert.equal(await google.addTaskToCalendar('t1'), true)
+  assert.equal(google.calendar['t1']?.synced, true)
+  api.removeTaskFromCalendar = async () => {
+    throw new Error('Google fora')
+  }
+  assert.equal(await google.removeTaskFromCalendarEvent('t1'), false)
+  assert.equal(google.calendar['t1']?.synced, true)
+  assert.equal(google.error, 'Google fora')
+  api.removeTaskFromCalendar = async () => {}
+  assert.equal(await google.removeTaskFromCalendarEvent('t1'), true)
+  assert.equal(google.calendar['t1']?.synced, false)
 })

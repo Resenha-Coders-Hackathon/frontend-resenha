@@ -72,3 +72,28 @@ export async function attachDriveFile(task: UUID, fileId: string): Promise<Drive
     throw new Error(getErrorMessage(error, 'Não foi possível anexar o arquivo à tarefa.'))
   }
 }
+
+export async function getTaskCalendarStatus(task: UUID): Promise<TaskCalendarStatus> {
+  try {
+    return (await api.get<TaskCalendarStatus>(`${BASE}tasks/${task}/`)).data
+  } catch (error) {
+    throw new Error(getErrorMessage(error, 'Não foi possível consultar o Google Calendar.'))
+  }
+}
+
+/** Adds the task's due date to my calendar, or updates the event when it already exists. */
+export async function syncTaskToCalendar(task: UUID): Promise<TaskCalendarStatus> {
+  try {
+    return (await api.post<TaskCalendarStatus>(`${BASE}tasks/${task}/`)).data
+  } catch (error) {
+    throw new Error(getErrorMessage(error, 'Não foi possível adicionar a tarefa ao calendário.'))
+  }
+}
+
+export async function removeTaskFromCalendar(task: UUID): Promise<void> {
+  try {
+    await api.delete(`${BASE}tasks/${task}/`)
+  } catch (error) {
+    throw new Error(getErrorMessage(error, 'Não foi possível remover a tarefa do calendário.'))
+  }
+}

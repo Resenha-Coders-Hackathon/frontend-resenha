@@ -5,7 +5,10 @@ import {
   attachDriveFile,
   disconnectGoogle,
   getGoogleStatus,
+  getTaskCalendarStatus,
   listDriveFiles,
+  removeTaskFromCalendar,
+  syncTaskToCalendar,
   uploadToDrive,
 } from '../services'
 import type {
@@ -14,6 +17,7 @@ import type {
   DriveUploadRequest,
   DriveUploadResult,
   GoogleConnectionStatus,
+  TaskCalendarStatus,
 } from '../types'
 
 export const useGoogleStore = defineStore('google', () => {
@@ -21,6 +25,8 @@ export const useGoogleStore = defineStore('google', () => {
   const files = ref<DriveFile[]>([])
   const isLoading = ref(false)
   const error = ref('')
+  // by task id: is it in my Google Calendar?
+  const calendar = ref<Record<UUID, TaskCalendarStatus>>({})
 
   async function run<T>(action: () => Promise<T>): Promise<T | undefined> {
     error.value = ''
@@ -64,7 +70,29 @@ export const useGoogleStore = defineStore('google', () => {
     return run(() => attachDriveFile(task, fileId))
   }
 
+  async function loadTaskCalendar(task: UUID): Promise<void> {
+    const loaded = await run(() => getTaskCalendarStatus(task))
+    if (loaded) calendar.value[task] = loaded
+  }
+
+  /** Adds or updates the task's due-date event; returns false when it failed (see `error`). */
+  async function addTaskToCalendar(task: UUID): Promise<boolean> {
+    const synced = await run(() => syncTaskToCalendar(task))
+    if (synced) calendar.value[task] = synced
+    return !!synced
+  }
+
+  async function removeTaskFromCalendarEvent(task: UUID): Promise<boolean> {
+    const done = await run(async () => {
+      await removeTaskFromCalendar(task)
+      return true
+    })
+    if (done) calendar.value[task] = { synced: false, last_synced_at: null }
+    return !!done
+  }
+
   function reset(): void {
+    calendar.value = {}
     status.value = { connected: false, drive: false }
     files.value = []
     error.value = ''

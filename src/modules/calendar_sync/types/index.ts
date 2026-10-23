@@ -39,3 +39,7 @@ export interface DriveUploadRequest {
   /** Also attach the file to this task as a link. */
   task?: UUID
 }
+export interface TaskCalendarStatus {
+  synced: boolean
+  last_synced_at: ISODateTime | null
+}
