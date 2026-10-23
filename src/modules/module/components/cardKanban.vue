@@ -8,7 +8,7 @@ defineProps<{
 
 <template>
   <div
-    class="py-3 px-5 border border-(--border-default) rounded-lg w-full bg-(--surface) dark:bg-(--surface-inverse) grid gap-1"
+    class="py-3 px-5 border border-(--border-default) rounded-lg w-full bg-(--surface) dark:bg-(--surface-inverse) grid gap-1 dark:border-(--border-inverse)"
   >
     <div>
       <span>{{ task.id }}</span>

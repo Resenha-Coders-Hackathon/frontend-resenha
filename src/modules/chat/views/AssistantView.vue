@@ -205,7 +205,7 @@ async function send() {
                   Você · {{ entry.time }}
                 </p>
                 <p
-                  class="rounded-[12px] rounded-tr-[4px] bg-(--text-primary) px-[12px] py-[8px] text-[13.5px] leading-[20px] text-white dark:bg-(--surface) dark:text-(--text-primary)"
+                  class="rounded-[12px] rounded-tr-[4px] bg-(--text-primary) px-[12px] py-[8px] text-[13.5px] leading-[20px] text-white dark:bg-[#2e2c28] dark:text-(--text-inverse)"
                 >
                   {{ entry.content }}
                 </p>

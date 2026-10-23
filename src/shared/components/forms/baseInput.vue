@@ -30,7 +30,7 @@ const value = computed({
 
 <template>
   <div
-    class="relative flex items-center rounded-2xl px-5 py-3 mt-5 shadow-inner transition-all duration-300 focus-within:ring-2 border border-(--border-default)"
+    class="relative flex items-center rounded-2xl px-5 py-3 mt-5 shadow-inner transition-all duration-300 focus-within:ring-2 border border-(--border-default) dark:border-(--border-inverse)"
   >
     <span
       v-if="icon"

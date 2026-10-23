@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { Toaster, toast } from 'vue-sonner'
 import { useRouter } from 'vue-router'
+import { useTheme } from '@/app/composables/useTheme'
+
+// inicializa o tema salvo em todas as telas, não só onde existe o ThemeSwitcher
+const { isDark } = useTheme()
 import { useAuthStore } from '@/modules/auth'
 import { finishGoogleConnect } from '@/modules/calendar_sync'
 import { useNotificationSession } from '@/modules/notifications'
@@ -23,5 +27,5 @@ finishGoogleConnect()
 
 <template>
   <RouterView />
-  <Toaster />
+  <Toaster :theme="isDark ? 'dark' : 'light'" />
 </template>

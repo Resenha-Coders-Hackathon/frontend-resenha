@@ -77,7 +77,7 @@ const tasks: ITasks[] = [
 
 <template>
   <div class="bg-(--surface) dark:bg-(--surface-inverse) rounded-xl w-full">
-    <div class="border-b border-(--border-default) py-3 px-4">
+    <div class="border-b border-(--border-default) py-3 px-4 dark:border-(--border-inverse)">
       <div class="flex justify-between">
         <h3 class="flex gap-1 text-sm">
           <span class="material-symbols-outlined">history</span>
