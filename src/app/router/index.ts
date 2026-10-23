@@ -35,7 +35,8 @@ router.beforeEach(async (to) => {
   const auth = useAuthStore()
   if (auth.user) return
   try {
-    if (!(await auth.loadUser())) {
+    
+    if (!(await useAuthStore().loadUser())) {
       return { path: '/entrar', query: { redirect: to.fullPath } }
     }
   } catch {

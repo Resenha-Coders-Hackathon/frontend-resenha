@@ -19,30 +19,21 @@ screens use the inspected frames; unrelated pages remain outside that verificati
 
 ### Organization and invitation implementation
 
-- Desktop: [team frame](https://www.figma.com/design/ylOa2V5UJmvnx85NWv3rUf/Inceptum?node-id=4-2),
-  264 px sidebar, 65 px topbar, member table and invitation entry action.
-- Mobile: [team frame](https://www.figma.com/design/ylOa2V5UJmvnx85NWv3rUf/Inceptum?node-id=6-418),
-  single-column member list. The implementation uses flowing content rather than clipping
-  to the prototype's fixed viewport.
-- Verified light palette: background `#f3f2ef`, surface `#ffffff`, ink `#141412`,
-  secondary `#57534e`, border `#e5e2dc`; Geist typography. These live in module-scoped
-  workspace variables in `src/modules/organizations/organizations.css`, preserving the
-  existing auth theme. Dark colors are an implementation adaptation.
-- The active team navigation icon from Figma is local at `public/figma/organization-users.svg`,
-  rendered in the desktop navigation at its 16 × 16 design dimensions.
-- Organization creation and team onboarding follow F04/F05: a 600 px brand panel,
-  56 px panel padding, 400 px form, Geist typography, 28 px titles, 44 px controls,
-  46 px submit action and 18 px vertical gaps. Original SVGs are local in `public/figma/`.
-  Geist is local in `public/fonts/` with its OFL license.
-- The prototype gives the form wrapper only 10 px height and decorative columns 24 px,
-  causing overflow. The implementation uses natural heights and centers the entire form,
-  keeping every field/button and decorative card inside its panel. Mobile content scrolls.
-- Sector selection is a real intermediate step using the mobile chip pattern. Acceptance,
-  empty/error states and desktop dark mode are adaptations; creation/invitation are no
-  longer described as invented forms based on the team-management screen.
-- Pending invitations are displayed separately from members. Task statistics, presence,
-  sector roles and plan quotas are omitted from this integration because the member API
-  does not supply them. No prototype counts or sample people are shipped.
+The current `dev` is the presentation baseline, as requested by the owner. F04/F05
+remain a reference for the organization/sector/team steps and available fields;
+prototype branding, fixed panel measurements and the mobile dark/orange palette do
+not override the existing dev components.
+
+- Organization onboarding reuses `AuthAside`, `AuthSplitLayout`, `AuthField` and
+  `BaseButton`, with the same ResenhaCoders branding and global theme tokens as auth.
+- Organization lists, members and invitation acceptance reuse `SidebarComp` and
+  `FooterComp`; the duplicate Inceptum sidebar was removed.
+- Light/dark styling follows the selected application theme, including mobile.
+  The form uses the shared layout's relative width and natural scrolling content.
+- Creation still starts at the explicit **Criar organização** button. Creating an
+  account does not automatically create an organization or enter onboarding.
+- API services, authorization, route names and the three existing steps are unchanged.
+  Original exported assets remain available, but are not a separate design system.
 
 See [organization onboarding](ORGANIZATION_ONBOARDING.md) for routes, contracts and checks.
 
