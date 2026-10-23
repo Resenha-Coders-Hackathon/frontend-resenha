@@ -4,19 +4,15 @@ import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 const AUTH_PATHS = ['/login/', '/refresh/']
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, ''),
+  // Vite proxies this path in development. Production serves it through the web server.
+  baseURL: import.meta.env.DEV
+    ? '/api/v1'
+    : (import.meta.env.VITE_API_BASE_URL || '/api/v1').replace(/\/+$/, ''),
   withCredentials: true, // o backend autentica por cookies HttpOnly
   // o Django exige X-CSRFToken em POST/PUT/DELETE quando a auth é por cookie
   xsrfCookieName: 'csrftoken',
   xsrfHeaderName: 'X-CSRFToken',
   withXSRFToken: true,
-})
-
-api.interceptors.request.use((config) => {
-  if (!config.baseURL) {
-    throw new Error('Configure VITE_API_BASE_URL com a URL base do backend.')
-  }
-  return config
 })
 
 // Várias requisições podem expirar juntas: todas esperam o mesmo refresh.
@@ -48,6 +44,8 @@ api.interceptors.response.use(undefined, async (error: AxiosError) => {
   } catch {
     // import dinâmico: o router importa este módulo indiretamente (evita ciclo)
     const { default: router } = await import('@/app/router')
+    const { useAuthStore } = await import('@/modules/auth')
+    useAuthStore().user = null
     const { currentRoute } = router
     // só expulsa de página protegida; o guard cuida da navegação inicial
     if (currentRoute.value.meta.requiresAuth) {

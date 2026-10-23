@@ -9,6 +9,7 @@ export interface OrganizationInvite {
   organization_name: string
   email: string
   role: InviteRole
+  sector_ids: UUID[]
   status: InviteStatus
   expires_at: ISODateTime
   created_at: ISODateTime
@@ -16,6 +17,7 @@ export interface OrganizationInvite {
 export interface CreateInviteRequest {
   email: string
   role?: InviteRole
+  sector_ids?: UUID[]
 }
 export interface AcceptInviteRequest {
   token: string
@@ -23,3 +25,5 @@ export interface AcceptInviteRequest {
 export interface InviteAccepted extends OrganizationMember {
   organization_id: UUID
 }
+
+export type Invitation = OrganizationInvite

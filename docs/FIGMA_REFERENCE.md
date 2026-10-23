@@ -6,12 +6,36 @@
 - File key: `ylOa2V5UJmvnx85NWv3rUf`.
 - Entry node: `0:1`. Inspect its structure to find the requested screen; do not assume it is an implementation frame.
 - Access checked: 2026-10-23 through the Figma plugin.
-- Result: `create_session` rejected access, reporting that the connected account needs editor access from the file owner. No session, design context, screenshot, variables or assets were retrieved.
+- Result: access restored. Design context and screenshots were retrieved for desktop
+  `4:2` (1440 × 1024, “05 · Equipe e setores”) and mobile `6:418`
+  (390 × 844, “M05 · Equipe”). The earlier access refusal is resolved.
+- The onboarding source is on page `10:2` (“Frontend · App”), not the team-management
+  page: `10:161` (F04, organization), `10:231` (F05, invite team), both 1440 × 1024.
+  Mobile `32:51` supplies the dark/orange treatment and input/action icons.
 
 This document records the implementation contract and verified repository facts. It does
-**not** certify that the current frontend matches the design. Colors, fonts, spacing,
-screen inventory, breakpoints, variants and interactions from Figma remain unverified.
-The file title alone does not establish requirements for a Kanban feature.
+**not** certify that the entire frontend matches the design. The organization/member
+screens use the inspected frames; unrelated pages remain outside that verification.
+
+### Organization and invitation implementation
+
+The current `dev` is the presentation baseline, as requested by the owner. F04/F05
+remain a reference for the organization/sector/team steps and available fields;
+prototype branding, fixed panel measurements and the mobile dark/orange palette do
+not override the existing dev components.
+
+- Organization onboarding reuses `AuthAside`, `AuthSplitLayout`, `AuthField` and
+  `BaseButton`, with the same ResenhaCoders branding and global theme tokens as auth.
+- Organization lists, members and invitation acceptance reuse `SidebarComp` and
+  `FooterComp`; the duplicate Inceptum sidebar was removed.
+- Light/dark styling follows the selected application theme, including mobile.
+  The form uses the shared layout's relative width and natural scrolling content.
+- Creation still starts at the explicit **Criar organização** button. Creating an
+  account does not automatically create an organization or enter onboarding.
+- API services, authorization, route names and the three existing steps are unchanged.
+  Original exported assets remain available, but are not a separate design system.
+
+See [organization onboarding](ORGANIZATION_ONBOARDING.md) for routes, contracts and checks.
 
 ## Repository baseline
 
