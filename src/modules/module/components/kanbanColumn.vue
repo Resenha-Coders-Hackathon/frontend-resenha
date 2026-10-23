@@ -76,8 +76,12 @@ const tasks: ITasks[] = [
 </script>
 
 <template>
-  <div class="bg-(--surface) dark:bg-(--surface-inverse) rounded-xl w-full">
-    <div class="border-b border-(--border-default) py-3 px-4 dark:border-(--border-inverse)">
+  <div
+    class="flex max-h-[calc(100dvh-16rem)] min-w-72 flex-1 flex-col rounded-xl bg-(--surface) dark:bg-(--surface-inverse)"
+  >
+    <div
+      class="flex min-h-0 flex-1 flex-col border-b border-(--border-default) py-3 px-4 dark:border-(--border-inverse)"
+    >
       <div class="flex justify-between">
         <h3 class="flex gap-1 text-sm">
           <span class="material-symbols-outlined">history</span>
@@ -94,13 +98,13 @@ const tasks: ITasks[] = [
         </div>
       </div>
 
-      <ul class="grid gap-3">
+      <ul class="grid min-h-0 flex-1 gap-3 overflow-y-auto py-3">
         <li v-for="(task, index) in tasks" :key="index">
           <CardKanban :task="task" />
         </li>
       </ul>
 
-      <p class="text-sm">
+      <p class="shrink-0 pt-2 text-sm">
         {{ cards ? 'Existem itens atrasados' : 'Não há itens atrasados' }}
       </p>
     </div>

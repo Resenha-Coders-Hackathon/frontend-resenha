@@ -82,7 +82,7 @@ async function send() {
 </script>
 
 <template>
-  <div class="flex h-dvh w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)">
+  <div class="flex h-[calc(100dvh-3.5rem)] w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)">
     <ChatTopbar
       v-model:search="search"
       :crumbs="['Norte Studio', 'Assistente IA', historyTitle]"
