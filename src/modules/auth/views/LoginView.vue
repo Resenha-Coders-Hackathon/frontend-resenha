@@ -131,6 +131,6 @@ async function handleGoogleCredential(credential: string) {
         </a>
       </p>
     </AuthSplitLayout>
-    <AuthAside />
+    <AuthAside side="right" />
   </section>
 </template>

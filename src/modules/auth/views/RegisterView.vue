@@ -70,7 +70,7 @@ async function handleGoogleCredential(credential: string) {
 
 <template>
   <section class="grid lg:grid-cols-[minmax(0,1fr)_64vw]">
-    <AuthAside />
+    <AuthAside side="left" />
     <AuthSplitLayout compact>
       <h1 class="text-[34px]! leading-10! tracking-[-0.03em]!">Crie sua conta</h1>
       <p
