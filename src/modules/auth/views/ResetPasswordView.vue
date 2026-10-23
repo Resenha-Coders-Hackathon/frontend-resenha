@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
+import { useAuthNavigation } from '../composables'
 import { BaseButton } from '@/shared/components'
 import { AuthCardLayout, AuthField } from '../components'
 import { confirmPasswordReset } from '../services'
@@ -16,6 +17,7 @@ const STRENGTH_LABELS = [
 ]
 
 const router = useRouter()
+const navigation = useAuthNavigation()
 const authFlow = useAuthFlowStore()
 const password = ref('')
 const confirmation = ref('')
@@ -23,7 +25,7 @@ const isSubmitting = ref(false)
 const errorMessage = ref('')
 
 if (!authFlow.email || !authFlow.resetCode) {
-  router.replace({ name: 'ForgotPassword' })
+  router.replace(navigation.to('ForgotPassword'))
 }
 
 const strength = computed(() => {
@@ -55,7 +57,7 @@ async function handleSubmit() {
     })
     authFlow.clear()
     toast.success('Senha redefinida! Entre com a nova senha.')
-    await router.push({ name: 'Login' })
+    await router.push(navigation.to('Login'))
   } catch (error) {
     errorMessage.value =
       error instanceof Error ? error.message : 'Não foi possível redefinir a senha.'
