@@ -70,3 +70,5 @@ export interface WriteChatMessageRequest {
 export interface EditChatMessageRequest {
   content: string
 }
+
+export type * from './ui'

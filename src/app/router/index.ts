@@ -5,6 +5,8 @@ import { organizationRoutes } from '@/modules/organizations'
 import { invitationRoutes } from '@/modules/invitations'
 
 import { authRoutes } from '@/modules/auth/router'
+import { chatRoutes } from '@/modules/chat/router'
+import { configRoutes } from '@/modules/config/router'
 import { geolocationRoutes } from '@/modules/geolocation/router'
 import { mapboxRoutes } from '@/modules/mapbox/router'
 import { moduleRoutes } from '@/modules/module/router'
@@ -15,6 +17,8 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     ...authRoutes,
+    ...chatRoutes,
+    ...configRoutes,
     ...organizationRoutes,
     ...invitationRoutes,
     ...geolocationRoutes,
