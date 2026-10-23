@@ -1,3 +1,6 @@
 export * from './buttons'
+export * from './charts'
+export * from './content'
 export * from './forms'
 export * from './general'
+export * from './tables'
