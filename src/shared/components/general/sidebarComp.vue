@@ -6,11 +6,8 @@ import type { IMenuItems } from '@/shared/types'
 const route = useRoute()
 const isOpen = ref<boolean>(true)
 
-const toggleSidebar = () => {
-  isOpen.value = !isOpen.value
-}
-
 const menuItems: IMenuItems[] = [
+  { link: '/organizacoes', label: 'Organizações' },
   {
     link: '/',
     icon: 'home',

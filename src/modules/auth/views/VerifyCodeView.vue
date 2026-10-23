@@ -2,8 +2,9 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
+import { useAuthNavigation } from '../composables'
 import { BaseButton } from '@/shared/components'
-import { AuthSplitLayout, CodeInput } from '../components'
+import { AuthAside, AuthSplitLayout, CodeInput } from '../components'
 import {
   confirmRegistration,
   requestPasswordReset,
@@ -17,6 +18,7 @@ const RESEND_SECONDS = 45
 const props = defineProps<{ flow: 'register' | 'reset' }>()
 
 const router = useRouter()
+const navigation = useAuthNavigation()
 const authFlow = useAuthFlowStore()
 const code = ref('')
 const isSubmitting = ref(false)
@@ -29,7 +31,7 @@ const isComplete = computed(() => /^\d{6}$/.test(code.value))
 const countdown = computed(() => `00:${String(secondsLeft.value).padStart(2, '0')}`)
 
 if (!authFlow.email) {
-  router.replace({ name: props.flow === 'register' ? 'Register' : 'ForgotPassword' })
+  router.replace(navigation.to(props.flow === 'register' ? 'Register' : 'ForgotPassword'))
 }
 
 function startTimer() {
@@ -59,13 +61,13 @@ async function handleSubmit() {
       })
       authFlow.clear()
       toast.success('Conta criada! Agora você já pode entrar.')
-      await router.push({ name: 'Login' })
+      await router.push(navigation.to('Login'))
       return
     }
 
     await verifyPasswordReset({ email: authFlow.email, code: code.value })
     authFlow.resetCode = code.value
-    await router.push({ name: 'ResetPassword' })
+    await router.push(navigation.to('ResetPassword'))
   } catch (error) {
     errorMessage.value =
       error instanceof Error ? error.message : 'Não foi possível validar o código.'
@@ -99,7 +101,7 @@ onBeforeUnmount(() => clearInterval(timer))
 </script>
 
 <template>
-  <section>
+  <section class="grid lg:grid-cols-[minmax(0,1fr)_36vw]">
     <AuthSplitLayout>
       <div
         v-if="props.flow === 'register'"
@@ -180,12 +182,13 @@ onBeforeUnmount(() => clearInterval(timer))
       <p class="mt-6 text-[14px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
         E-mail incorreto?
         <RouterLink
-          :to="{ name: props.flow === 'register' ? 'Register' : 'ForgotPassword' }"
+          :to="navigation.to(props.flow === 'register' ? 'Register' : 'ForgotPassword')"
           class="auth-link"
         >
           Corrigir e-mail
         </RouterLink>
       </p>
     </AuthSplitLayout>
+    <AuthAside />
   </section>
 </template>

@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthNavigation } from '../composables'
 import { BaseButton } from '@/shared/components'
-import { AuthField, AuthSplitLayout } from '../components'
+import { AuthAside, AuthField, AuthSplitLayout } from '../components'
 import { requestPasswordReset } from '../services'
 import { useAuthFlowStore } from '../stores'
 
 const router = useRouter()
+const navigation = useAuthNavigation()
 const authFlow = useAuthFlowStore()
 const email = ref(authFlow.email)
 const isSubmitting = ref(false)
@@ -20,7 +22,7 @@ async function handleSubmit() {
     const normalizedEmail = email.value.trim()
     await requestPasswordReset({ email: normalizedEmail })
     authFlow.startPasswordReset(normalizedEmail)
-    await router.push({ name: 'ResetCode' })
+    await router.push(navigation.to('ResetCode'))
   } catch (error) {
     errorMessage.value =
       error instanceof Error ? error.message : 'Não foi possível enviar o código.'
@@ -31,7 +33,7 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <section>
+  <section class="grid lg:grid-cols-[minmax(0,1fr)_36vw]">
     <AuthSplitLayout>
       <h1 class="text-[38px]! leading-11.5! tracking-[-0.03em]!">Esqueceu sua senha?</h1>
       <p class="mt-2 text-[16px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
@@ -63,8 +65,9 @@ async function handleSubmit() {
 
       <p class="mt-8 text-[15px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
         Lembrou sua senha?
-        <RouterLink to="/entrar" class="auth-link">Voltar para o login</RouterLink>
+        <RouterLink :to="navigation.to('Login')" class="auth-link">Voltar para o login</RouterLink>
       </p>
     </AuthSplitLayout>
+    <AuthAside />
   </section>
 </template>

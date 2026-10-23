@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
+import { isAxiosError } from 'axios'
 import { fetchMe, login, loginWithGoogle, logout, type LoginCredentials } from '../services'
 import type { User } from '../types'
 
@@ -40,22 +41,31 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Os cookies são HttpOnly: só o backend sabe se há sessão.
   async function loadUser(): Promise<User | null> {
-    user.value = await fetchMe().catch(() => null)
+    try {
+      user.value = await fetchMe()
+    } catch (error) {
+      if (!isAxiosError(error) || error.response?.status !== 401) throw error
+      user.value = null
+    }
     return user.value
   }
 
   async function signIn(credentials: LoginCredentials): Promise<void> {
     await login(credentials)
-    await loadUser()
+    if (!(await loadUser())) throw new Error('Sua sessão expirou. Entre novamente.')
   }
 
   async function signInWithGoogle(credential: string): Promise<void> {
     await loginWithGoogle(credential)
-    await loadUser()
+    if (!(await loadUser())) throw new Error('Sua sessão expirou. Entre novamente.')
   }
 
   async function signOut(): Promise<void> {
-    await logout().catch(() => {}) // sessão já inválida: limpar o estado local basta
+    try {
+      await logout()
+    } catch (error) {
+      if (!isAxiosError(error) || error.response?.status !== 401) throw error
+    }
     user.value = null
   }
 

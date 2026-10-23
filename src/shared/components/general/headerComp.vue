@@ -23,8 +23,8 @@ const menuItems: IMenuItems[] = [
     label: 'Planos & Cotação',
   },
   {
-    link: '/',
-    label: 'Portal do Cliente',
+    link: '/organizacoes',
+    label: 'Organizações',
   },
 ]
 

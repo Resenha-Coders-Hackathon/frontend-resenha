@@ -6,12 +6,45 @@
 - File key: `ylOa2V5UJmvnx85NWv3rUf`.
 - Entry node: `0:1`. Inspect its structure to find the requested screen; do not assume it is an implementation frame.
 - Access checked: 2026-10-23 through the Figma plugin.
-- Result: `create_session` rejected access, reporting that the connected account needs editor access from the file owner. No session, design context, screenshot, variables or assets were retrieved.
+- Result: access restored. Design context and screenshots were retrieved for desktop
+  `4:2` (1440 × 1024, “05 · Equipe e setores”) and mobile `6:418`
+  (390 × 844, “M05 · Equipe”). The earlier access refusal is resolved.
+- The onboarding source is on page `10:2` (“Frontend · App”), not the team-management
+  page: `10:161` (F04, organization), `10:231` (F05, invite team), both 1440 × 1024.
+  Mobile `32:51` supplies the dark/orange treatment and input/action icons.
 
 This document records the implementation contract and verified repository facts. It does
-**not** certify that the current frontend matches the design. Colors, fonts, spacing,
-screen inventory, breakpoints, variants and interactions from Figma remain unverified.
-The file title alone does not establish requirements for a Kanban feature.
+**not** certify that the entire frontend matches the design. The organization/member
+screens use the inspected frames; unrelated pages remain outside that verification.
+
+### Organization and invitation implementation
+
+- Desktop: [team frame](https://www.figma.com/design/ylOa2V5UJmvnx85NWv3rUf/Inceptum?node-id=4-2),
+  264 px sidebar, 65 px topbar, member table and invitation entry action.
+- Mobile: [team frame](https://www.figma.com/design/ylOa2V5UJmvnx85NWv3rUf/Inceptum?node-id=6-418),
+  single-column member list. The implementation uses flowing content rather than clipping
+  to the prototype's fixed viewport.
+- Verified light palette: background `#f3f2ef`, surface `#ffffff`, ink `#141412`,
+  secondary `#57534e`, border `#e5e2dc`; Geist typography. These live in module-scoped
+  workspace variables in `src/modules/organizations/organizations.css`, preserving the
+  existing auth theme. Dark colors are an implementation adaptation.
+- The active team navigation icon from Figma is local at `public/figma/organization-users.svg`,
+  rendered in the desktop navigation at its 16 × 16 design dimensions.
+- Organization creation and team onboarding follow F04/F05: a 600 px brand panel,
+  56 px panel padding, 400 px form, Geist typography, 28 px titles, 44 px controls,
+  46 px submit action and 18 px vertical gaps. Original SVGs are local in `public/figma/`.
+  Geist is local in `public/fonts/` with its OFL license.
+- The prototype gives the form wrapper only 10 px height and decorative columns 24 px,
+  causing overflow. The implementation uses natural heights and centers the entire form,
+  keeping every field/button and decorative card inside its panel. Mobile content scrolls.
+- Sector selection is a real intermediate step using the mobile chip pattern. Acceptance,
+  empty/error states and desktop dark mode are adaptations; creation/invitation are no
+  longer described as invented forms based on the team-management screen.
+- Pending invitations are displayed separately from members. Task statistics, presence,
+  sector roles and plan quotas are omitted from this integration because the member API
+  does not supply them. No prototype counts or sample people are shipped.
+
+See [organization onboarding](ORGANIZATION_ONBOARDING.md) for routes, contracts and checks.
 
 ## Repository baseline
 
