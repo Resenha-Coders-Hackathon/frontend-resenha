@@ -12,6 +12,13 @@ export default defineConfig({
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
     },
+    // Keep API requests on the frontend origin so browsers can send/read auth and CSRF cookies.
+    proxy: {
+      '/api': {
+        target: process.env.API_PROXY_TARGET || 'http://127.0.0.1:8000',
+        changeOrigin: true,
+      },
+    },
   },
   preview: {
     headers: {
