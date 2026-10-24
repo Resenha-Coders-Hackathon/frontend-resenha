@@ -45,7 +45,7 @@ function choose(plan: Plan) {
 </script>
 
 <template>
-  <PaymentPage :crumbs="['Norte Studio', 'Conta', 'Planos']">
+  <PaymentPage :crumbs="['Conta', 'Planos']">
     <header class="flex flex-col items-center gap-[10px] pt-[16px] text-center">
       <p
         class="font-mono text-[11px] leading-normal tracking-[0.16em] text-(--bg-orange) uppercase"

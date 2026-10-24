@@ -10,9 +10,9 @@ withDefaults(defineProps<{ crumbs: string[]; title?: string; description?: strin
 
 <template>
   <div
-    class="flex min-h-[calc(100dvh-3.5rem)] w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
+    class="flex min-h-dvh w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
   >
-    <TopbarComp :crumbs="crumbs" has-notifications />
+    <TopbarComp :crumbs="crumbs" />
 
     <section
       class="mx-auto flex w-full max-w-[1120px] flex-1 flex-col gap-[20px] px-[16px] pt-[24px] pb-[40px] sm:px-[28px]"

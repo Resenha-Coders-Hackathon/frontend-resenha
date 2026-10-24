@@ -16,28 +16,36 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 defineProps<{
   chartData: ChartData<'bar'>
   title: string
+  /** Número em destaque abaixo do título, como "47". */
+  headline?: string
+  /** Texto pequeno ao lado do destaque, como "+12%". */
+  note?: string
 }>()
 
 const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
-  plugins: {
-    legend: { display: false },
-  },
+  plugins: { legend: { display: false } },
+  datasets: { bar: { borderRadius: 6, maxBarThickness: 88 } },
   scales: {
-    y: { beginAtZero: true, grid: { display: false } },
-    x: { grid: { display: false } },
+    // contagens são inteiras: sem eixo, o valor aparece ao passar o mouse
+    y: { display: false, beginAtZero: true, ticks: { precision: 0 }, grid: { display: false } },
+    x: { grid: { display: false }, border: { display: false } },
   },
 }
 </script>
 
 <template>
   <div
-    class="min-w-0 py-3 px-5 border border-(--border-default) rounded-lg w-full bg-(--surface) dark:bg-(--surface-inverse) grid gap-2 shadow-xl dark:border-(--border-inverse)"
+    class="grid min-w-0 w-full gap-2 rounded-[16px] border border-(--border-default) bg-(--surface) px-[18px] py-[16px] dark:border-(--border-inverse) dark:bg-(--surface-inverse)"
   >
-    <h3 class="font-semibold text-sm">{{ title }}</h3>
+    <h3 class="text-[15px] font-semibold">{{ title }}</h3>
+    <p v-if="headline" class="flex items-baseline gap-2">
+      <span class="text-[28px] leading-none font-semibold tracking-[-0.02em]">{{ headline }}</span>
+      <span v-if="note" class="text-[13px] text-(--text-muted)">{{ note }}</span>
+    </p>
 
-    <div class="relative h-[220px] min-w-0 sm:h-[250px]">
+    <div class="relative h-[200px] min-w-0">
       <Bar :data="chartData" :options="chartOptions" />
     </div>
   </div>

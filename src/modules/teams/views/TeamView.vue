@@ -39,9 +39,9 @@ function editSector(id: string) {
 
 <template>
   <div
-    class="flex min-h-[calc(100dvh-3.5rem)] w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
+    class="flex min-h-dvh w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
   >
-    <TopbarComp :crumbs="['Norte Studio', 'Equipe e setores']" has-notifications />
+    <TopbarComp :crumbs="['Equipe e setores']" />
 
     <section class="flex flex-1 flex-col gap-[16px] px-[16px] pt-[24px] pb-[32px] sm:px-[28px]">
       <SubheaderComp

@@ -100,7 +100,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="relative h-[calc(100dvh-3.5rem)] w-full overflow-hidden">
+  <div class="relative h-dvh w-full overflow-hidden">
     <div id="map-fixed" class="h-full w-full overflow-hidden"></div>
   </div>
 </template>

@@ -157,7 +157,7 @@ async function handleSubmit(): Promise<void> {
 
 <template>
   <PaymentPage
-    :crumbs="['Norte Studio', plan ? 'Planos' : 'Pagamentos', 'Pagamento']"
+    :crumbs="[plan ? 'Planos' : 'Pagamentos', 'Pagamento']"
     :title="plan ? `Assinar o plano ${plan.name}` : 'Novo pagamento'"
     :description="
       plan

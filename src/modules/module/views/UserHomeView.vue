@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { toast } from 'vue-sonner'
+import { useTheme } from '@/app/composables/useTheme'
 import { getErrorMessage } from '@/app/plugins/axios'
+import { categoryColors, inkWithAccent } from '@/shared/utils/chartColors'
 import { CardComp, ChartComp, SubheaderComp, TopbarComp } from '@/shared/components'
 import { useAuthStore } from '@/modules/auth'
 import { useNotificationsStore } from '@/modules/notifications'
@@ -37,9 +39,6 @@ watch(
   { immediate: true },
 )
 
-// mesmo formato dos gráficos da Home (/): laranja da marca e cantos arredondados
-const CHART_STYLE = { backgroundColor: '#ff6700', borderRadius: 6 }
-
 const greeting = computed(() => {
   const hour = new Date().getHours()
   const salute = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite'
@@ -60,34 +59,43 @@ const description = computed(
 
 const cards = computed(() => (data.value ? kpis(data.value, notifications.unreadCount) : []))
 
-const weeklyData = computed(() => ({
-  labels: (data.value?.weekly_done ?? []).map((w) => weekLabel(w.week_start)),
-  datasets: [
-    {
-      label: 'Tarefas concluídas',
-      ...CHART_STYLE,
-      data: (data.value?.weekly_done ?? []).map((w) => w.done),
-    },
-  ],
-}))
+const { isDark } = useTheme()
 
-const sectorData = computed(() => ({
-  labels: (data.value?.open_by_sector ?? []).map((s) => s.sector),
-  datasets: [
-    {
-      label: 'Tarefas abertas',
-      ...CHART_STYLE,
-      data: (data.value?.open_by_sector ?? []).map((s) => s.open),
-    },
-  ],
-}))
+const weeklyData = computed(() => {
+  const weeks = data.value?.weekly_done ?? []
+  return {
+    labels: weeks.map((w) => weekLabel(w.week_start)),
+    datasets: [
+      {
+        label: 'Tarefas concluídas',
+        data: weeks.map((w) => w.done),
+        backgroundColor: inkWithAccent(weeks.length, isDark.value),
+      },
+    ],
+  }
+})
+const weeklyTotal = computed(() => (data.value?.weekly_done ?? []).reduce((n, w) => n + w.done, 0))
+
+const sectorData = computed(() => {
+  const sectors = data.value?.open_by_sector ?? []
+  return {
+    labels: sectors.map((s) => s.sector),
+    datasets: [
+      {
+        label: 'Tarefas abertas',
+        data: sectors.map((s) => s.open),
+        backgroundColor: categoryColors(sectors.length),
+      },
+    ],
+  }
+})
 </script>
 
 <template>
   <div
     class="flex min-h-dvh w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
   >
-    <TopbarComp :crumbs="[organizations.current?.name ?? 'Início', 'Início']" has-notifications />
+    <TopbarComp :crumbs="['Início']" />
 
     <section class="flex flex-1 flex-col gap-[16px] px-[16px] pt-[24px] pb-[32px] sm:px-[28px]">
       <SubheaderComp :title="greeting" :description="description" class="mb-0!"> </SubheaderComp>
@@ -147,7 +155,12 @@ const sectorData = computed(() => ({
       </div>
 
       <div class="grid gap-[16px] lg:grid-cols-2">
-        <ChartComp title="Tarefas concluídas por semana" :chart-data="weeklyData" />
+        <ChartComp
+          title="Tarefas concluídas por semana"
+          :chart-data="weeklyData"
+          :headline="String(weeklyTotal)"
+          note="em 6 semanas"
+        />
         <ChartComp title="Abertas por setor" :chart-data="sectorData" />
       </div>
     </section>

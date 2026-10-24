@@ -1,16 +1,22 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useShell } from '../../composables/shell'
 import ThemeSwitcher from './themeSwitcher.vue'
 
 /* COMO USAR:
-  <TopbarComp :crumbs="['Norte Studio', 'Conta', 'Planos']" has-notifications />
+  <TopbarComp :crumbs="['Conta', 'Planos']" />
+  A organização atual é colocada na frente do caminho pelo layout; o sino mostra as não lidas.
 */
 
-withDefaults(
-  defineProps<{ crumbs: string[]; searchPlaceholder?: string; hasNotifications?: boolean }>(),
-  { searchPlaceholder: 'Buscar tarefas, pessoas, arquivos', hasNotifications: false },
-)
+const props = withDefaults(defineProps<{ crumbs: string[]; searchPlaceholder?: string }>(), {
+  searchPlaceholder: 'Buscar tarefas, pessoas, arquivos',
+})
 
 const search = defineModel<string>('search', { default: '' })
+const shell = useShell()
+const path = computed(() =>
+  shell.organization.value ? [shell.organization.value, ...props.crumbs] : props.crumbs,
+)
 </script>
 
 <template>
@@ -19,22 +25,18 @@ const search = defineModel<string>('search', { default: '' })
   >
     <nav aria-label="Navegação estrutural" class="min-w-0 flex-1">
       <ol class="flex items-center gap-[6px] text-[13px] leading-normal text-(--text-muted)">
-        <li
-          v-for="(crumb, index) in crumbs"
-          :key="crumb"
-          class="flex min-w-0 items-center gap-[6px]"
-        >
+        <li v-for="(crumb, index) in path" :key="crumb" class="flex min-w-0 items-center gap-[6px]">
           <span v-if="index > 0" class="material-symbols-outlined text-[15px]!" aria-hidden="true"
             >chevron_right</span
           >
           <span
             :class="[
               'truncate',
-              index === crumbs.length - 1
+              index === path.length - 1
                 ? 'font-semibold text-(--text-primary) dark:text-(--text-inverse)'
                 : '',
             ]"
-            :aria-current="index === crumbs.length - 1 ? 'page' : undefined"
+            :aria-current="index === path.length - 1 ? 'page' : undefined"
           >
             {{ crumb }}
           </span>
@@ -67,17 +69,19 @@ const search = defineModel<string>('search', { default: '' })
       <ThemeSwitcher aria-label="Alternar tema" class="grid cursor-pointer place-items-center" />
     </span>
 
-    <button
-      type="button"
+    <RouterLink
+      to="/notificacoes"
       class="relative grid size-[38px] shrink-0 cursor-pointer place-items-center rounded-[10px] border border-(--border-default) bg-(--surface) transition-colors hover:bg-(--bg-subtle) dark:border-(--border-inverse) dark:bg-transparent"
-      aria-label="Notificações"
+      :aria-label="
+        shell.unread.value ? `Notificações: ${shell.unread.value} não lidas` : 'Notificações'
+      "
     >
       <span class="material-symbols-outlined text-[18px]!" aria-hidden="true">notifications</span>
       <span
-        v-if="hasNotifications"
+        v-if="shell.unread.value"
         class="absolute top-[7px] right-[8px] size-[7px] rounded-full bg-(--bg-orange) ring-2 ring-(--surface) dark:ring-(--surface-inverse)"
         aria-hidden="true"
       ></span>
-    </button>
+    </RouterLink>
   </div>
 </template>

@@ -2,7 +2,7 @@
 
 <template>
   <section
-    class="mx-auto flex min-h-[calc(100dvh-3.5rem)] w-full max-w-6xl flex-col justify-center px-4 pt-10 sm:px-6 md:px-12 xl:px-20"
+    class="mx-auto flex min-h-dvh w-full max-w-6xl flex-col justify-center px-4 pt-10 sm:px-6 md:px-12 xl:px-20"
   >
     <div
       class="mx-auto flex w-full max-w-8xl flex-col items-center justify-center px-5 py-12 text-center"

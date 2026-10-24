@@ -51,11 +51,11 @@ const buttonClasses = computed(() => [
       props.variant === 'ghost',
 
     /* DESTRUCTIVE */
-    'bg-(--destructive) text-(--text-inverse) shadow-sm hover:-translate-y-0.5 hover:brightness-110 hover:shadow-md active:translate-y-0 active:scale-[0.98]':
+    'bg-(--destructive) text-(--text-inverse) hover:brightness-110 active:scale-[0.98]':
       props.variant === 'destructive',
 
     /* SUCCESS */
-    'bg-(--sucess) text-(--text-inverse) shadow-sm hover:-translate-y-0.5 hover:brightness-110 hover:shadow-md active:translate-y-0 active:scale-[0.98]':
+    'bg-(--sucess) text-(--text-inverse) hover:brightness-110 active:scale-[0.98]':
       props.variant === 'success',
 
     /* DISABLED */

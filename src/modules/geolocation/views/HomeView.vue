@@ -10,7 +10,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="grid min-h-[calc(100dvh-3.5rem)] items-center justify-center px-5 py-20 sm:px-8 md:py-24">
+  <section class="grid min-h-dvh items-center justify-center px-5 py-20 sm:px-8 md:py-24">
     <div class="mx-auto w-full max-w-190">
       <div class="mx-auto max-w-3xl text-center">
         <h1

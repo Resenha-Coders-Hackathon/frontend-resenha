@@ -72,7 +72,7 @@ onBeforeUnmount(() => {
 
 <template>
   <PaymentPage
-    :crumbs="['Norte Studio', 'Pagamentos', 'Confirmação']"
+    :crumbs="['Pagamentos', 'Confirmação']"
     :title="heading"
     :description="message"
   >

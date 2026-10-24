@@ -2,7 +2,7 @@
 import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { BaseButton } from '@/shared/components'
+import { BaseButton, TopbarComp } from '@/shared/components'
 import { useAuthStore } from '@/modules/auth'
 import { aiErrorDetails, useAiStore } from '@/modules/ai'
 import {
@@ -12,7 +12,6 @@ import {
   ChatPanelLayout,
   ChatSectionTitle,
   ChatToolButton,
-  ChatTopbar,
 } from '../components'
 import { formatSize, formatTime } from '../utils'
 
@@ -20,8 +19,6 @@ const auth = useAuthStore()
 const ai = useAiStore()
 const route = useRoute()
 const router = useRouter()
-const accessChecked = ref(false)
-const hasAccess = computed(() => accessChecked.value && auth.user?.is_subscriber === true)
 const search = ref('')
 const draft = ref('')
 const files = ref<File[]>([])
@@ -67,8 +64,6 @@ onMounted(async () => {
       await router.replace({ name: 'Login', query: { redirect: route.fullPath } })
     } else if (!user.is_subscriber) {
       await router.replace({ name: 'Plans' })
-    } else {
-      accessChecked.value = true
     }
   } catch {
     toast.error('Não foi possível verificar seu acesso à IA. Tente novamente.')
@@ -127,11 +122,10 @@ async function analyze() {
 </script>
 
 <template>
-  <div class="flex h-[calc(100dvh-3.5rem)] w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)">
-    <ChatTopbar
+  <div class="flex h-dvh w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)">
+    <TopbarComp
       v-model:search="search"
       :crumbs="['Assistente IA', historyTitle]"
-      has-notifications
     />
 
     <div class="flex min-h-0 flex-1 flex-col p-[12px] sm:p-[20px] lg:p-[28px]">

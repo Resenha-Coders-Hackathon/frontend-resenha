@@ -67,7 +67,7 @@ onBeforeUnmount(() => {
 
 <template>
   <PaymentPage
-    :crumbs="['Norte Studio', 'Pagamentos', 'Pix']"
+    :crumbs="['Pagamentos', 'Pix']"
     :title="payment ? 'Pague com Pix' : ''"
     description="Escaneie o QR Code ou use o código copia e cola no app do seu banco."
   >

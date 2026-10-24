@@ -2,7 +2,7 @@
 import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { BaseButton } from '@/shared/components'
+import { BaseButton, TopbarComp } from '@/shared/components'
 import { useAuthStore } from '@/modules/auth'
 import { ensureGoogleConnected } from '@/modules/calendar_sync'
 import { useOrganizationsStore } from '@/modules/organizations'
@@ -14,7 +14,6 @@ import {
   ChatPanelLayout,
   ChatSectionTitle,
   ChatToolButton,
-  ChatTopbar,
   ChatTyping,
 } from '../components'
 import { useChatSocket } from '../composables/useChatSocket'
@@ -169,15 +168,13 @@ watch(() => [chat.activeId, items.value.length], scrollToEnd, { immediate: true 
 </script>
 
 <template>
-  <div class="flex h-[calc(100dvh-3.5rem)] w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)">
-    <ChatTopbar
+  <div class="flex h-dvh w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)">
+    <TopbarComp
       v-model:search="search"
       :crumbs="[
-        organization?.name ?? 'Organização',
         'Mensagens',
         active.kind === 'direct' ? active.name : `#${active.name}`,
       ]"
-      has-notifications
     />
 
     <div class="flex min-h-0 flex-1 flex-col p-[12px] sm:p-[20px] lg:p-[28px]">
