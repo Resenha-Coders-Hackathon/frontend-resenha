@@ -19,7 +19,7 @@ withDefaults(defineProps<{ tinted?: boolean }>(), { tinted: false })
       <header
         :class="[
           'flex items-center gap-[12px] border-b border-(--border-default) px-[20px] py-[14px] dark:border-(--border-inverse)',
-          tinted ? 'bg-linear-to-r from-(--chat-ai-soft) to-transparent' : '',
+          tinted ? 'bg-(--chat-ai-soft)/60' : '',
         ]"
       >
         <slot name="header" />

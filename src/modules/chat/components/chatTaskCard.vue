@@ -17,9 +17,7 @@ defineEmits<{ open: [] }>()
       <span class="material-symbols-outlined text-[14px]!">error</span>
     </span>
     <span class="flex min-w-0 flex-1 flex-col leading-normal">
-      <span class="font-mono text-[10.5px] text-(--text-muted)"
-        >{{ task.code }} · {{ task.status }}</span
-      >
+      <span class="text-[10.5px] text-(--text-muted)">{{ task.code }} · {{ task.status }}</span>
       <span class="truncate text-[13px] font-semibold">{{ task.title }}</span>
     </span>
     <button

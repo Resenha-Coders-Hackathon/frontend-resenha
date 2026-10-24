@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue'
 import { getErrorMessage } from '@/app/plugins/axios'
 import OrganizationLayout from '../components/organizationLayout.vue'
 import { useOrganizationsStore } from '../stores'
-import { roleLabels } from '../utils'
+import { initials, roleLabels } from '../utils'
 
 const store = useOrganizationsStore()
 const loading = ref(true)
@@ -28,7 +28,7 @@ onMounted(load)
     <div class="workspace-heading">
       <div>
         <h1>Suas organizações</h1>
-        <p>Escolha seu espaço de trabalho ou crie uma organização.</p>
+        <p>Entre em uma organização ou crie a sua.</p>
       </div>
       <RouterLink :to="{ name: 'OrganizationOnboarding' }" class="workspace-link-button"
         >Criar organização</RouterLink
@@ -38,21 +38,23 @@ onMounted(load)
     <div v-else-if="error" role="alert" class="workspace-error">
       {{ error }} <button type="button" @click="load">Tentar novamente</button>
     </div>
-    <div v-else class="organization-grid">
-      <RouterLink
-        v-for="organization in store.organizations"
-        :key="organization.id"
-        class="workspace-card organization-card"
-        :to="{ name: 'OrganizationMembers', params: { organizationId: organization.id } }"
-      >
-        <span class="workspace-eyebrow">{{
-          organization.is_personal ? 'Espaço pessoal' : 'Organização'
-        }}</span>
-        <h2>{{ organization.name }}</h2>
-        <p v-if="organization.description">{{ organization.description }}</p>
-        <span class="workspace-badge">{{ roleLabels[organization.current_role] }}</span>
-      </RouterLink>
-      <p v-if="!store.organizations.length">Você ainda não participa de uma organização.</p>
-    </div>
+    <ul v-else class="organization-list">
+      <li v-for="organization in store.organizations" :key="organization.id">
+        <RouterLink
+          class="organization-row"
+          :to="{ name: 'OrganizationOverview', params: { organizationId: organization.id } }"
+        >
+          <span class="organization-avatar" aria-hidden="true">{{ initials(organization.name) }}</span>
+          <span class="organization-row-text">
+            <strong>{{ organization.name }}</strong>
+            <span v-if="organization.description">{{ organization.description }}</span>
+          </span>
+          <span class="workspace-badge">{{
+            organization.is_personal ? 'Pessoal' : roleLabels[organization.current_role]
+          }}</span>
+        </RouterLink>
+      </li>
+      <li v-if="!store.organizations.length">Você ainda não participa de uma organização.</li>
+    </ul>
   </OrganizationLayout>
 </template>

@@ -28,7 +28,7 @@ withDefaults(defineProps<Props>(), {
         'text-(--outline) hover:bg-(--surface-container-low) hover:text-(--on-surface) dark:hover:bg-(--surface-container-dark) dark:hover:text-white active:bg-(--surface-container-low) active:text-(--on-surface) dark:active:bg-(--surface-container-dark) dark:active:text-white':
           variant === 'default',
 
-        'bg-(--primary-container) text-white shadow-md hover:scale-105 hover:shadow-lg active:scale-105 active:shadow-lg dark:bg-(--primary-container-dark)':
+        'bg-(--primary-container) text-white dark:bg-(--primary-container-dark)':
           variant === 'primary',
 
         'text-(--primary) hover:bg-(--surface-container-low) active:bg-(--surface-container-low) dark:text-(--primary-dark) dark:hover:bg-(--surface-container-dark) dark:active:bg-(--surface-container-dark)':
