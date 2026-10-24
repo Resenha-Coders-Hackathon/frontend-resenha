@@ -7,10 +7,9 @@ import { getErrorMessage } from '@/app/plugins/axios'
 import { useAuthStore } from '@/modules/auth'
 import { profilePayload, notificationSettings, validateAvatar } from '../utils'
 import { fetchSettings, updateSettings, uploadAvatar } from '../services'
-import { BaseButton, SubheaderComp } from '@/shared/components'
+import { BaseButton, SubheaderComp, TopbarComp } from '@/shared/components'
 import {
   ConfigTabs,
-  ConfigTopbar,
   NotificationsTab,
   PreferencesTab,
   ProfileTab,
@@ -357,10 +356,7 @@ function handleCancel() {
   <div
     class="flex min-h-dvh w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
   >
-    <ConfigTopbar
-      v-model:search="search"
-      :crumbs="['Minha conta', 'Configurações', current.label]"
-    />
+    <TopbarComp v-model:search="search" :crumbs="['Configurações', current.label]" />
 
     <section class="flex flex-1 flex-col gap-[16px] px-[16px] pt-[24px] pb-[28px] sm:px-[28px]">
       <SubheaderComp
