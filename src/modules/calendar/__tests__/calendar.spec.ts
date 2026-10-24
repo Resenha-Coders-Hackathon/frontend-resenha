@@ -44,7 +44,16 @@ test('months roll over the year and titles are capitalised in Portuguese', () =>
 
 test('deliveries are grouped by day and today ignores the time zone', () => {
   const item = (id: string, due_date: string) =>
-    ({ id, title: id, due_date, state: 'todo', sector_name: 'S', assignee_name: null }) as const
+    ({
+      id,
+      title: id,
+      due_date,
+      state: 'todo',
+      sector_id: 's',
+      sector_name: 'S',
+      in_google: false,
+      assignee_name: null,
+    }) as const
   const grouped = groupByDate([
     item('a', '2026-10-15'),
     item('b', '2026-10-15'),

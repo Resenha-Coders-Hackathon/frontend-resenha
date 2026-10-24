@@ -5,6 +5,7 @@ import { toast } from 'vue-sonner'
 import { useTheme } from '@/app/composables/useTheme'
 import { getErrorMessage } from '@/app/plugins/axios'
 import { useAuthStore } from '@/modules/auth'
+import { useOrganizationsStore } from '@/modules/organizations'
 import { profilePayload, notificationSettings, validateAvatar } from '../utils'
 import { fetchSettings, updateSettings, uploadAvatar } from '../services'
 import { BaseButton, SubheaderComp, TopbarComp } from '@/shared/components'
@@ -28,6 +29,7 @@ import type {
 } from '../types'
 
 const auth = useAuthStore()
+const organizations = useOrganizationsStore()
 const isLoading = ref(true)
 const isSaving = ref(false)
 const isUploadingAvatar = ref(false)
@@ -67,6 +69,12 @@ const TABS: ConfigTab[] = [
     label: 'Preferências',
     title: 'Preferências',
     description: 'Aparência e formatos usados na sua conta',
+  },
+  {
+    id: 'organization',
+    label: 'Organização',
+    title: 'Organização',
+    description: 'Nome, endereço, logo e dados do seu espaço de trabalho',
   },
 ]
 
@@ -258,6 +266,7 @@ async function endSession(id: number): Promise<void> {
 async function handleSave(): Promise<void> {
   if (
     activeTab.value === 'security' ||
+    activeTab.value === 'organization' ||
     isLoading.value ||
     isSaving.value ||
     isUploadingAvatar.value ||
@@ -378,7 +387,13 @@ function handleCancel() {
             :full-width="false"
             class="mt-0!"
             :loading="isSaving"
-            :disabled="activeTab === 'security' || isLoading || isUploadingAvatar || !!loadError"
+            :disabled="
+              activeTab === 'security' ||
+              activeTab === 'organization' ||
+              isLoading ||
+              isUploadingAvatar ||
+              !!loadError
+            "
             @click="handleSave"
           />
         </div>
@@ -428,6 +443,27 @@ function handleCancel() {
           @end-session="endSession"
           @retry="loadSessions"
         />
+        <div v-else-if="activeTab === 'organization'" class="grid max-w-[480px] gap-[12px]">
+          <template v-if="organizations.current">
+            <p>
+              Você está em <strong>{{ organizations.current.name }}</strong
+              >. Edite nome, endereço, logo e descrição na página da organização.
+            </p>
+            <BaseButton
+              label="Editar organização"
+              icon="edit"
+              icon-position="left"
+              :full-width="false"
+              @click="
+                $router.push({
+                  name: 'OrganizationSettings',
+                  params: { organizationId: organizations.current.id },
+                })
+              "
+            />
+          </template>
+          <p v-else>Nenhuma organização selecionada.</p>
+        </div>
         <fieldset v-else :disabled="isSaving" class="min-w-0">
           <PreferencesTab v-model="preferences" />
         </fieldset>

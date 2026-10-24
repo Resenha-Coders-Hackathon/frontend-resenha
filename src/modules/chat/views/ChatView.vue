@@ -7,6 +7,7 @@ import { useAuthStore } from '@/modules/auth'
 import { ensureGoogleConnected } from '@/modules/calendar_sync'
 import { useOrganizationsStore } from '@/modules/organizations'
 import {
+  ChatAvatar,
   ChatChannelItem,
   ChatComposer,
   ChatDayDivider,
@@ -95,11 +96,52 @@ function select(channel: ChatChannel) {
   void chat.select(channel.id)
 }
 
+// @menção: sugere membros da organização enquanto você digita "@nome"
+const mentioned = ref(new Map<string, string>()) // id -> nome
+const mentionQuery = computed(() => /(?:^|\s)@([^\s@]*)$/.exec(draft.value)?.[1] ?? null)
+const mentionOptions = computed(() => {
+  const query = mentionQuery.value?.toLowerCase()
+  if (query === undefined) return []
+  return organizations.members
+    .filter((m) => m.user_id !== auth.user?.id && m.name.toLowerCase().includes(query))
+    .slice(0, 6)
+})
+
+function startMention() {
+  if (mentionQuery.value === null)
+    draft.value += `${draft.value && !/\s$/.test(draft.value) ? ' ' : ''}@`
+}
+
+function pickMention(member: { user_id: string; name: string }) {
+  draft.value = draft.value.replace(/@[^\s@]*$/, `@${member.name} `)
+  mentioned.value.set(member.user_id, member.name)
+}
+
+const MAX_FILES = 5 // limites do backend
+const MAX_BYTES = 10 * 1024 * 1024
+const files = ref<File[]>([])
+const fileInput = useTemplateRef<HTMLInputElement>('fileInput')
+
+function pickFiles(event: Event) {
+  const input = event.target as HTMLInputElement
+  const picked = [...(input.files ?? [])]
+  input.value = ''
+  if (files.value.length + picked.length > MAX_FILES)
+    return void toast.error(`Envie no máximo ${MAX_FILES} arquivos por mensagem.`)
+  if (picked.some((file) => file.size > MAX_BYTES))
+    return void toast.error('Cada arquivo pode ter no máximo 10 MB.')
+  files.value.push(...picked)
+}
+
 async function send() {
   const content = draft.value
-  if (!content.trim()) return
+  const attached = files.value
+  if (!content.trim() && !attached.length) return
+  const mentions = [...mentioned.value].filter(([, name]) => content.includes(`@${name}`))
   draft.value = ''
-  await chat.send(content)
+  files.value = []
+  mentioned.value = new Map()
+  await chat.send(content, { files: attached, mentions: mentions.map(([id]) => id) })
 }
 
 // O Meet não pode ser embutido em iframe (o Google bloqueia), então abre numa janelinha no canto.
@@ -259,6 +301,23 @@ watch(() => [chat.activeId, items.value.length], scrollToEnd, { immediate: true 
         </div>
 
         <template #footer>
+          <ul
+            v-if="mentionOptions.length"
+            class="mb-[6px] grid gap-[2px] rounded-[10px] border border-(--border-default) bg-(--surface) p-[4px] dark:border-(--border-inverse) dark:bg-(--surface-inverse)"
+            role="listbox"
+            aria-label="Mencionar membro"
+          >
+            <li v-for="member in mentionOptions" :key="member.user_id" role="option">
+              <button
+                type="button"
+                class="flex w-full cursor-pointer items-center gap-[8px] rounded-[7px] px-[8px] py-[6px] text-left text-[13px] hover:bg-(--bg-subtle) dark:hover:bg-white/10"
+                @click="pickMention(member)"
+              >
+                <ChatAvatar :name="member.name" :size="24" />
+                {{ member.name }}
+              </button>
+            </li>
+          </ul>
           <ChatComposer
             v-model="draft"
             :placeholder="`Mensagem para ${active.kind === 'direct' ? active.name : `#${active.name}`} · use @ para mencionar e # para citar uma tarefa`"
@@ -267,8 +326,42 @@ watch(() => [chat.activeId, items.value.length], scrollToEnd, { immediate: true 
             @submit="send"
           >
             <template #tools>
-              <ChatToolButton icon="attach_file" label="Anexar arquivo" />
-              <ChatToolButton icon="alternate_email" label="Mencionar alguém" />
+              <input
+                ref="fileInput"
+                type="file"
+                multiple
+                class="sr-only"
+                tabindex="-1"
+                aria-label="Arquivos da mensagem"
+                @change="pickFiles"
+              />
+              <ChatToolButton
+                icon="attach_file"
+                label="Anexar arquivo"
+                @click="fileInput?.click()"
+              />
+              <span
+                v-for="(file, index) in files"
+                :key="index"
+                class="flex max-w-[160px] items-center gap-[4px] rounded-[6px] bg-(--bg-subtle) py-[2px] pr-[2px] pl-[8px] text-[12px] dark:bg-white/10"
+              >
+                <span class="truncate">{{ file.name }}</span>
+                <button
+                  type="button"
+                  class="grid size-[20px] cursor-pointer place-items-center"
+                  :aria-label="`Remover ${file.name}`"
+                  @click="files.splice(index, 1)"
+                >
+                  <span class="material-symbols-outlined text-[14px]!" aria-hidden="true"
+                    >close</span
+                  >
+                </button>
+              </span>
+              <ChatToolButton
+                icon="alternate_email"
+                label="Mencionar alguém"
+                @click="startMention"
+              />
               <button
                 type="button"
                 class="ml-[4px] flex h-[30px] cursor-pointer items-center gap-[6px] rounded-[8px] border border-(--border-default) px-[10px] text-[12.5px] font-medium transition-colors hover:bg-(--bg-subtle) dark:border-(--border-inverse) dark:hover:bg-white/10"

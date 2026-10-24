@@ -9,7 +9,10 @@ export interface CalendarItem {
   title: string
   due_date: ISODate
   state: CalendarState
+  sector_id: UUID
   sector_name: string
+  /** Já está no meu Google Agenda. */
+  in_google: boolean
   assignee_name: string | null
 }
 

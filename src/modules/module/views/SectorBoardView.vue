@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { getErrorMessage } from '@/app/plugins/axios'
 import { BaseButton, SubheaderComp, TopbarComp } from '@/shared/components'
@@ -16,6 +16,7 @@ import { TOOLBAR_BUTTON } from '../utils/ui'
 
 const props = defineProps<{ sectorId: string }>()
 const router = useRouter()
+const route = useRoute()
 const auth = useAuthStore()
 const kanban = useKanbanStore()
 const access = useSectorAccessStore()
@@ -76,6 +77,9 @@ async function load(id: string) {
   try {
     sector.value = await getSector(id)
     await Promise.all([kanban.load(id), access.load(id)])
+    // link vindo do calendário: /setores/:id?task=<id>
+    const task = route.query.task
+    if (typeof task === 'string' && kanban.tasks.some((t) => t.id === task)) openDetails(task)
   } catch (error) {
     missing.value = true
     toast.error(getErrorMessage(error, 'Não foi possível abrir este setor.'))

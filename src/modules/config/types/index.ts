@@ -1,4 +1,4 @@
-export type ConfigTabId = 'profile' | 'notifications' | 'security' | 'preferences'
+export type ConfigTabId = 'profile' | 'notifications' | 'security' | 'preferences' | 'organization'
 
 export interface ConfigTab {
   id: ConfigTabId

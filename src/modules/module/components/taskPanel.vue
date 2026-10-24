@@ -4,6 +4,7 @@ import { toast } from 'vue-sonner'
 import { getErrorMessage } from '@/app/plugins/axios'
 import { BaseButton } from '@/shared/components'
 import { useAuthStore } from '@/modules/auth'
+import { uploadFile } from '@/modules/uploads'
 import { fetchAllPages } from '@/shared/utils'
 import { avatar } from '@/shared/utils/people'
 import { relativeTime } from '@/shared/utils/time'
@@ -190,6 +191,21 @@ const addLink = () =>
     linkUrl.value = linkTitle.value = ''
     linkHint.value = null
   }, 'Não foi possível anexar o link. Confira se o endereço começa com https://.')
+
+const fileInput = ref<HTMLInputElement | null>(null)
+
+// Envia o arquivo (Cloudinary) e o registra como anexo da tarefa.
+function uploadAttachment(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ''
+  if (!file) return
+  void run(async () => {
+    if (!props.task) return
+    const { url } = await uploadFile(file)
+    await linksStore.add('task', props.task.id, { url, title: file.name.slice(0, 255) })
+  }, 'Não foi possível enviar o arquivo.')
+}
 
 function onAttached(link: DriveTaskLink) {
   if (!props.task) return
@@ -571,6 +587,25 @@ const field =
                 Nenhum anexo ainda.
               </li>
             </ul>
+            <div v-if="canEdit">
+              <input
+                ref="fileInput"
+                type="file"
+                class="sr-only"
+                tabindex="-1"
+                aria-label="Arquivo para anexar"
+                @change="uploadAttachment"
+              />
+              <BaseButton
+                label="Enviar arquivo do computador"
+                icon="attach_file"
+                icon-position="left"
+                variant="ghost"
+                size="sm"
+                :full-width="false"
+                @click="fileInput?.click()"
+              />
+            </div>
             <form v-if="canEdit" class="flex flex-wrap gap-2" @submit.prevent="addLink">
               <input
                 ref="linkUrlInput"
