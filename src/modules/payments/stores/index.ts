@@ -1,70 +1,108 @@
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
-import { createPayment, listPayments } from '../services'
-import type { CardPaymentData, CreatePaymentData, Payment, PaymentMethod } from '../types'
+import { useAuthStore } from '@/modules/auth'
+import { createPayment, createCardPayment, listPayments, tokenizeCard } from '../services'
+import type { CardDetails } from '../services'
+import type {
+  CreatePaymentData,
+  CreatePaymentResponse,
+  CreateCardPaymentResponse,
+  Payment,
+  PaymentMethod,
+} from '../types'
 
 export const usePaymentsStore = defineStore('payments', () => {
+  const auth = useAuthStore()
   const current = ref<Payment | null>(null)
-  // forma de pagamento por id (o backend atual só conhece Pix)
+  const payments = ref<Payment[]>([])
+  const price = computed(() => auth.user?.subscription_price ?? null)
+  const isSubscriber = computed(() => auth.user?.is_subscriber === true)
   const methods = ref<Record<string, PaymentMethod>>({})
+  let generation = 0
 
-  async function create(data: CreatePaymentData): Promise<Payment> {
-    const response = await createPayment(data)
-    const now = new Date().toISOString()
+  watch(
+    () => auth.user?.id,
+    () => {
+      generation += 1
+      current.value = null
+      payments.value = []
+      methods.value = {}
+    },
+    { flush: 'sync' },
+  )
 
-    current.value = {
-      id: response.payment_id,
-      title: data.title,
-      amount: data.amount,
-      status: response.status,
-      payer_name: data.name,
-      payer_cpf: data.cpf,
-      qr_code: response.qr_code,
-      qr_code_base64: response.qr_code_base64,
-      ticket_url: response.ticket_url,
-      created_at: now,
-      updated_at: now,
-    }
-    return current.value
+  async function refreshAccess(): Promise<void> {
+    if (!(await auth.loadUser())) throw new Error('Entre na sua conta para continuar.')
   }
 
-  // Cartão ainda não é integrado: simula a aprovação localmente, sem enviar os dados do cartão.
-  async function createCard(data: CardPaymentData): Promise<Payment> {
-    await new Promise((resolve) => setTimeout(resolve, 1200))
-    const now = new Date().toISOString()
-    const id = `card-${crypto.randomUUID()}`
+  async function create(data: CreatePaymentData): Promise<CreatePaymentResponse> {
+    if (!auth.user) throw new Error('Entre na sua conta para continuar.')
+    return createPayment({ title: data.title, cpf: data.cpf, name: data.name })
+  }
 
-    current.value = {
-      id,
+  async function createCard(
+    data: CardDetails & { title: string; installments: number },
+  ): Promise<CreateCardPaymentResponse> {
+    const user = auth.user
+    if (!user) throw new Error('Entre na sua conta para continuar.')
+    const card = await tokenizeCard(data)
+    if (auth.user?.id !== user.id) throw new Error('Sua sessão mudou. Tente novamente.')
+    const result = await createCardPayment({
       title: data.title,
-      amount: data.amount,
-      status: 'approved',
-      payer_name: data.holder,
-      payer_cpf: data.cpf,
-      qr_code: '',
-      qr_code_base64: '',
-      ticket_url: '',
-      created_at: now,
-      updated_at: now,
-    }
-    methods.value[id] = 'card'
-    return current.value
+      cpf: data.cpf,
+      email: user.email,
+      installments: data.installments,
+      ...card,
+    })
+    if (auth.user?.id === user.id) methods.value[result.payment_id] = 'card'
+    return result
   }
 
   function methodOf(id: string): PaymentMethod {
-    return methods.value[id] ?? 'pix'
+    const payment = find(id)
+    return methods.value[id] ?? (payment?.payer_name || payment?.qr_code ? 'pix' : 'card')
   }
 
   function find(id: string): Payment | null {
-    return current.value?.id === id ? current.value : null
+    return current.value?.id === id
+      ? current.value
+      : (payments.value.find((item) => item.id === id) ?? null)
+  }
+
+  async function loadAll(): Promise<Payment[]> {
+    const version = generation
+    const result: Payment[] = []
+    let page = 1
+    while (true) {
+      const response = await listPayments(page++)
+      if (version !== generation) return []
+      result.push(...response.results)
+      if (!response.next) break
+    }
+    payments.value = result
+    return result
   }
 
   async function load(id: string): Promise<Payment | null> {
-    const payments = await listPayments()
-    const payment = payments.results.find((item) => item.id === id) ?? null
-    if (payment) current.value = payment
-    return payment
+    const version = generation
+    const all = await loadAll()
+    if (version !== generation) return null
+    current.value = all.find((item) => item.id === id) ?? null
+    await refreshAccess()
+    return version === generation ? current.value : null
   }
 
-  return { current, create, createCard, methodOf, find, load }
+  return {
+    current,
+    payments,
+    price,
+    isSubscriber,
+    refreshAccess,
+    create,
+    createCard,
+    methodOf,
+    find,
+    load,
+    loadAll,
+  }
 })

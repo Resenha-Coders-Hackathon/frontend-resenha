@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { BaseButton } from '@/shared/components'
@@ -13,7 +13,7 @@ import {
   PaymentSummary,
 } from '../components'
 import { usePaymentsStore } from '../stores'
-import type { BillingCycle, PaymentMethod } from '../types'
+import type { PaymentMethod } from '../types'
 import {
   cardBrand,
   CARD_BRAND_LABELS,
@@ -22,37 +22,28 @@ import {
   isValidExpiry,
   maskCardNumber,
   maskCpf,
-  maskCurrency,
   maskExpiry,
   onlyDigits,
-  parseCurrency,
 } from '../utils'
-import { CYCLE_LABELS, findPlan, ORG_MEMBERS, planPrice, planTotal } from '../utils/plans'
+import { findPlan } from '../utils/plans'
 
 const route = useRoute()
 const router = useRouter()
 const store = usePaymentsStore()
 
-// vindo da página de planos: ?plano=pro&ciclo=yearly
-const plan = computed(() => {
-  const found = findPlan(route.query.plano)
-  return found && found.monthlyPrice > 0 ? found : undefined
-})
-const cycle = computed<BillingCycle>(() => (route.query.ciclo === 'yearly' ? 'yearly' : 'monthly'))
-
+const plan = computed(() => findPlan(route.query.plano))
 const method = ref<PaymentMethod>('card')
-// vindo do faturamento: ?descricao=Fatura #0482&valor=480.00
-const queryText = (value: unknown) => (typeof value === 'string' ? value : '')
-const title = ref(
-  plan.value
-    ? `Plano ${plan.value.name} — ${CYCLE_LABELS[cycle.value]}`
-    : queryText(route.query.descricao),
-)
-const amount = ref(
-  maskCurrency(
-    plan.value ? planTotal(plan.value.id, cycle.value).toFixed(2) : queryText(route.query.valor),
-  ),
-)
+const title = ref('Acesso Pro — Assistente IA')
+const amountValue = computed(() => store.price ?? '')
+
+onMounted(async () => {
+  try {
+    await store.refreshAccess()
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : 'Não foi possível consultar o valor.')
+  }
+})
+
 const name = ref('')
 const cpf = ref('')
 const cardNumber = ref('')
@@ -61,10 +52,6 @@ const cvv = ref('')
 const installments = ref(1)
 const isSubmitting = ref(false)
 
-const amountModel = computed({
-  get: () => amount.value,
-  set: (value: string) => (amount.value = maskCurrency(value)),
-})
 const cpfModel = computed({
   get: () => cpf.value,
   set: (value: string) => (cpf.value = maskCpf(value)),
@@ -82,42 +69,15 @@ const cvvModel = computed({
   set: (value: string) => (cvv.value = onlyDigits(value).slice(0, brand.value === 'amex' ? 4 : 3)),
 })
 
-const amountValue = computed(() => parseCurrency(amount.value))
-const isTrial = computed(() => plan.value?.id === 'pro')
-// primeira cobrança depois dos 14 dias de teste
-const firstCharge = computed(() =>
-  new Date(Date.now() + 14 * 86_400_000).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-  }),
+const submitLabel = computed(() =>
+  method.value === 'pix' ? 'Gerar QR Code Pix' : `Pagar ${formatCurrency(amountValue.value || 0)}`,
 )
-const submitLabel = computed(() => {
-  if (method.value === 'pix') return 'Gerar QR Code Pix'
-  return isTrial.value
-    ? 'Começar 14 dias grátis'
-    : `Pagar ${formatCurrency(amountValue.value || 0)}`
-})
 const brand = computed(() => cardBrand(cardNumber.value))
-
-const installmentOptions = computed(() => {
-  const total = Number(amountValue.value) || 0
-  return Array.from({ length: 12 }, (_, index) => {
-    const count = index + 1
-    return { value: count, label: `${count}x de ${formatCurrency(total / count)} sem juros` }
-  })
-})
-
-const planDetails = computed(() =>
-  plan.value
-    ? [
-        { label: 'Plano', value: `${plan.value.name} · ${CYCLE_LABELS[cycle.value]}` },
-        {
-          label: 'Membros',
-          value: `${ORG_MEMBERS} × ${formatCurrency(planPrice(plan.value, cycle.value))}${cycle.value === 'yearly' ? ' × 12' : ''}`,
-        },
-      ]
-    : [],
-)
+// Uma cobrança única, com o preço do backend; não oferece parcelas ou teste fictícios.
+const installmentOptions = computed(() => [
+  { value: 1, label: `1x de ${formatCurrency(amountValue.value || 0)}` },
+])
+const planDetails = [{ label: 'Plano', value: 'Pro · acesso à IA' }]
 
 function restrictNumericInput(event: KeyboardEvent, maxDigits: number): void {
   if (event.ctrlKey || event.metaKey || event.altKey || event.key.length !== 1) return
@@ -139,7 +99,7 @@ function restrictNumericInput(event: KeyboardEvent, maxDigits: number): void {
 
 function validate(): string | null {
   if (!title.value.trim()) return 'Informe a descrição do pagamento.'
-  if (!(Number(amountValue.value) > 0)) return 'Informe um valor maior que zero.'
+  if (!(Number(amountValue.value) > 0)) return 'Aguarde a consulta do valor do pagamento.'
   if (name.value.trim().split(/\s+/).length < 2)
     return method.value === 'card'
       ? 'Informe o nome como está no cartão.'
@@ -155,6 +115,7 @@ function validate(): string | null {
 }
 
 async function handleSubmit(): Promise<void> {
+  if (isSubmitting.value) return
   const error = validate()
   if (error) {
     toast.error(error)
@@ -162,31 +123,33 @@ async function handleSubmit(): Promise<void> {
   }
 
   isSubmitting.value = true
+  const selectedMethod = method.value
   try {
     const payment =
-      method.value === 'card'
+      selectedMethod === 'card'
         ? await store.createCard({
             title: title.value.trim(),
-            amount: amountValue.value,
             holder: name.value.trim(),
             cpf: onlyDigits(cpf.value),
-            last4: onlyDigits(cardNumber.value).slice(-4),
-            brand: brand.value,
+            number: cardNumber.value,
+            expiry: expiry.value,
+            cvv: cvv.value,
             installments: installments.value,
           })
         : await store.create({
             title: title.value.trim(),
-            amount: amountValue.value,
             name: name.value.trim(),
             cpf: onlyDigits(cpf.value),
           })
     router.push({
-      name: method.value === 'card' ? 'PaymentResult' : 'PaymentPix',
-      params: { id: payment.id },
+      name: selectedMethod === 'card' ? 'PaymentResult' : 'PaymentPix',
+      params: { id: payment.payment_id },
     })
   } catch (error) {
     toast.error(error instanceof Error ? error.message : 'Não foi possível concluir o pagamento.')
   } finally {
+    cardNumber.value = ''
+    cvv.value = ''
     isSubmitting.value = false
   }
 }
@@ -198,7 +161,7 @@ async function handleSubmit(): Promise<void> {
     :title="plan ? `Assinar o plano ${plan.name}` : 'Novo pagamento'"
     :description="
       plan
-        ? 'Escolha como pagar. Você pode trocar de plano ou cancelar quando quiser.'
+        ? 'Escolha como pagar. O acesso será liberado após a confirmação.'
         : 'Preencha os dados e escolha pagar com cartão de crédito ou Pix.'
     "
   >
@@ -216,7 +179,7 @@ async function handleSubmit(): Promise<void> {
         <PaymentCard
           v-if="!plan"
           title="Dados do pagamento"
-          description="O que está sendo pago e qual o valor."
+          description="O valor é definido pelo servidor."
         >
           <div class="flex flex-col gap-[14px] sm:flex-row">
             <PaymentField
@@ -224,17 +187,7 @@ async function handleSubmit(): Promise<void> {
               v-model="title"
               label="Descrição"
               icon="description"
-              placeholder="Ex.: Frete São Paulo → Joinville"
-            />
-            <PaymentField
-              id="payment-amount"
-              v-model="amountModel"
-              label="Valor (R$)"
-              icon="payments"
-              placeholder="0,00"
-              inputmode="numeric"
-              class="sm:max-w-[200px]"
-              @keydown="restrictNumericInput($event, 10)"
+              placeholder="Acesso Pro — Assistente IA"
             />
           </div>
         </PaymentCard>
@@ -375,17 +328,6 @@ async function handleSubmit(): Promise<void> {
             :details="planDetails"
           />
 
-          <p
-            v-if="isTrial && method === 'card'"
-            class="flex items-start gap-[8px] rounded-[10px] bg-(--plan-pro-soft) px-[12px] py-[10px] text-[12.5px] leading-[18px] text-(--plan-pro)"
-          >
-            <span class="material-symbols-outlined text-[16px]!" aria-hidden="true"
-              >auto_awesome</span
-            >
-            14 dias grátis. A primeira cobrança de {{ formatCurrency(amountValue || 0) }} acontece
-            em {{ firstCharge }}, e você pode cancelar antes.
-          </p>
-
           <BaseButton
             type="submit"
             form="payment-form"
@@ -403,9 +345,7 @@ async function handleSubmit(): Promise<void> {
               >verified_user</span
             >
             {{
-              method === 'card'
-                ? 'Demonstração: nenhum cartão é cobrado'
-                : 'Pagamento seguro via Pix'
+              method === 'card' ? 'Pagamento seguro via Mercado Pago' : 'Pagamento seguro via Pix'
             }}
           </p>
         </PaymentCard>

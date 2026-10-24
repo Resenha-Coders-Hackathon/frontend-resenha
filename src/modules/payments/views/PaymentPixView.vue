@@ -19,6 +19,7 @@ const props = defineProps<{ id: string }>()
 const router = useRouter()
 const store = usePaymentsStore()
 const isChecking = ref(false)
+let disposed = false
 let pollingTimer: ReturnType<typeof setInterval> | undefined
 
 const payment = computed(() => store.find(props.id))
@@ -35,9 +36,10 @@ async function refreshPayment(showError = false): Promise<void> {
   isChecking.value = true
   try {
     const updatedPayment = await store.load(props.id)
+    if (disposed) return
     if (updatedPayment && isPaymentFinal(updatedPayment.status)) {
       clearInterval(pollingTimer)
-      router.push({ name: 'PaymentResult', params: { id: props.id } })
+      router.replace({ name: 'PaymentResult', params: { id: props.id } })
     }
   } catch (error) {
     if (showError) {
@@ -51,11 +53,16 @@ async function refreshPayment(showError = false): Promise<void> {
 }
 
 onMounted(async () => {
-  if (!payment.value) await refreshPayment(true)
-  pollingTimer = setInterval(() => refreshPayment(), 5000)
+  await refreshPayment(true)
+  if (!disposed && (!payment.value || !isPaymentFinal(payment.value.status))) {
+    pollingTimer = setInterval(() => refreshPayment(), 5000)
+  }
 })
 
-onBeforeUnmount(() => clearInterval(pollingTimer))
+onBeforeUnmount(() => {
+  disposed = true
+  clearInterval(pollingTimer)
+})
 </script>
 
 <template>

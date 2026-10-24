@@ -1,22 +1,46 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { BillingToggle, PaymentPage, PlanCard } from '../components'
-import type { BillingCycle, Plan } from '../types'
+import { PaymentPage, PlanCard } from '../components'
+import type { Plan } from '../types'
 import { PLANS } from '../utils/plans'
+import { usePaymentsStore } from '../stores'
 
 const router = useRouter()
-const cycle = ref<BillingCycle>('monthly')
-// plano atual da organização de exemplo
-const currentPlan = 'free'
-
+const store = usePaymentsStore()
+const cycle = 'monthly'
+const currentPlan = computed(() => (store.isSubscriber ? 'pro' : 'free'))
+const plans = computed(() =>
+  PLANS.filter((plan) => plan.id !== 'enterprise').map((plan) => ({
+    ...plan,
+    monthlyPrice: plan.id === 'pro' ? Number(store.price ?? 0) : 0,
+    priceNote: plan.id === 'pro' ? 'pagamento único' : plan.priceNote,
+    cta: plan.id === currentPlan.value ? 'Plano atual' : 'Liberar acesso à IA',
+    features:
+      plan.id === 'pro'
+        ? [
+            { label: 'Chat com IA para gerenciar tarefas', icon: 'ai' as const },
+            { label: 'Análise de PDF e imagens', icon: 'ai' as const },
+            { label: 'Relatórios em PDF', icon: 'check' as const },
+          ]
+        : plan.features,
+  })),
+)
+onMounted(async () => {
+  try {
+    await store.refreshAccess()
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : 'Não foi possível consultar seu plano.')
+  }
+})
 function choose(plan: Plan) {
-  if (plan.id === 'enterprise') {
-    toast.success('Recebemos seu interesse! Nosso time comercial vai entrar em contato.')
+  if (plan.id === 'free' || store.isSubscriber) return
+  if (!store.price) {
+    toast.error('Aguarde a consulta do valor do plano.')
     return
   }
-  router.push({ name: 'Payment', query: { plano: plan.id, ciclo: cycle.value } })
+  router.push({ name: 'Payment', query: { plano: 'pro' } })
 }
 </script>
 
@@ -36,12 +60,11 @@ function choose(plan: Plan) {
       >
         Comece com o time inteiro sem pagar nada e ative o assistente quando a demanda crescer.
       </p>
-      <BillingToggle v-model="cycle" class="mt-[6px]" />
     </header>
 
     <div class="mt-[12px] grid items-start gap-[18px] lg:grid-cols-3">
       <PlanCard
-        v-for="plan in PLANS"
+        v-for="plan in plans"
         :key="plan.id"
         :plan="plan"
         :cycle="cycle"
@@ -51,7 +74,7 @@ function choose(plan: Plan) {
     </div>
 
     <p class="text-center text-[12px] leading-normal text-(--text-muted)">
-      Valores de exemplo para o protótipo. Cobrança por membro ativo; convidados são gratuitos.
+      Acesso individual à IA após confirmação do pagamento. Sem renovação automática.
     </p>
   </PaymentPage>
 </template>

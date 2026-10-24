@@ -1,4 +1,4 @@
-/* Tipos só de tela: planos e pagamento com cartão (não integrado ao backend). */
+/* Tipos de apresentação dos pagamentos. */
 
 export type PaymentMethod = 'card' | 'pix'
 
@@ -25,13 +25,3 @@ export interface Plan {
 }
 
 export type CardBrand = 'visa' | 'mastercard' | 'amex' | 'elo' | 'unknown'
-
-export interface CardPaymentData {
-  title: string
-  amount: string
-  holder: string
-  cpf: string
-  last4: string
-  brand: CardBrand
-  installments: number
-}

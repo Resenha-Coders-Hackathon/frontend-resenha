@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { BaseButton } from '@/shared/components'
@@ -24,35 +24,49 @@ const method = computed(() => store.methodOf(props.id))
 
 const heading = computed(() =>
   !payment.value
-    ? 'Pagamento indisponível'
+    ? 'Consultando pagamento'
     : approved.value
       ? 'Pagamento confirmado'
-      : 'Pagamento não concluído',
+      : isPaymentFinal(payment.value.status)
+        ? 'Pagamento não concluído'
+        : 'Aguardando confirmação',
 )
 const message = computed(() => {
-  if (!payment.value) return 'Os dados deste pagamento não estão mais disponíveis. Comece um novo.'
-  if (!approved.value)
-    return 'O pagamento não foi aprovado. Nenhum valor foi cobrado; tente de novo.'
-  return method.value === 'card'
-    ? 'Cartão aprovado. Esta é uma demonstração: nenhum valor foi cobrado de verdade.'
-    : 'Recebemos a confirmação do seu Pix. Está tudo certo.'
+  if (!payment.value) return 'Consultando os dados no servidor.'
+  if (approved.value) return 'Pagamento aprovado. Seu acesso à IA está liberado.'
+  if (!isPaymentFinal(payment.value.status))
+    return 'Aguarde a confirmação do pagamento pelo Mercado Pago.'
+  return 'Este pagamento não liberou o acesso à IA. Consulte o status abaixo.'
 })
 
-// ainda não pago: volta para a tela do QR Code
-onMounted(async () => {
-  if (!payment.value && method.value === 'pix') {
-    try {
-      await store.load(props.id)
-    } catch (error) {
+let timer: ReturnType<typeof setTimeout> | undefined
+let disposed = false
+let checking = false
+async function refresh() {
+  if (checking || disposed) return
+  checking = true
+  clearTimeout(timer)
+  try {
+    await store.load(props.id)
+    if (disposed) return
+    if (payment.value && !isPaymentFinal(payment.value.status)) {
+      if (method.value === 'pix') {
+        await router.replace({ name: 'PaymentPix', params: { id: props.id } })
+      } else timer = setTimeout(refresh, 5000)
+    }
+  } catch (error) {
+    if (!disposed)
       toast.error(
         error instanceof Error ? error.message : 'Não foi possível consultar o pagamento.',
       )
-    }
+  } finally {
+    checking = false
   }
-
-  if (payment.value && !isPaymentFinal(payment.value.status)) {
-    router.replace({ name: 'PaymentPix', params: { id: props.id } })
-  }
+}
+onMounted(refresh)
+onBeforeUnmount(() => {
+  disposed = true
+  clearTimeout(timer)
 })
 </script>
 
@@ -103,11 +117,23 @@ onMounted(async () => {
         </div>
 
         <BaseButton
-          :label="approved ? 'Ver planos' : 'Tentar novamente'"
+          :label="
+            approved
+              ? 'Abrir assistente'
+              : isPaymentFinal(payment.status)
+                ? 'Tentar novamente'
+                : 'Consultar novamente'
+          "
           :icon="approved ? 'workspace_premium' : 'refresh'"
           icon-position="left"
           class="mt-0! h-[44px]! rounded-[10px]! py-0! text-[14px]! [&_.material-symbols-outlined]:text-[17px]!"
-          @click="router.push({ name: approved ? 'Plans' : 'Payment' })"
+          @click="
+            approved
+              ? router.push({ name: 'Assistant' })
+              : isPaymentFinal(payment.status)
+                ? router.push({ name: 'Payment' })
+                : refresh()
+          "
         />
         <BaseButton
           variant="ghost"

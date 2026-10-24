@@ -1,37 +1,57 @@
 <script setup lang="ts">
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { BaseButton, CardComp, SubheaderComp, TopbarComp } from '@/shared/components'
 import { formatCurrency } from '../utils'
-import {
-  INVOICES,
-  INVOICE_STATUS,
-  PAYMENT_METHODS,
-  SUBSCRIPTION,
-  type Invoice,
-} from '../utils/billing'
+import { INVOICE_STATUS, type Invoice } from '../utils/billing'
+import { usePaymentsStore } from '../stores'
 import { BADGE, BADGE_BASE, TOOLBAR_BUTTON } from '../utils/ui'
 
-// Página só de interface: os dados são de exemplo e as ações não chamam o backend.
-
 const router = useRouter()
-const COLUMNS = ['Fatura', 'Data', 'Valor', 'Status', 'Ação']
-
-function handleInvoice(invoice: Invoice) {
-  if (invoice.status === 'paid') {
-    toast.success(`Baixando a fatura ${invoice.number} (demonstração).`)
-    return
+const store = usePaymentsStore()
+const COLUMNS = ['Pagamento', 'Data', 'Valor', 'Status', 'Ação']
+const INVOICES = computed<Invoice[]>(() =>
+  store.payments.map((payment) => ({
+    id: payment.id,
+    number: payment.id.slice(0, 8),
+    date: new Date(payment.created_at).toLocaleDateString('pt-BR'),
+    amount: Number(payment.amount),
+    status:
+      payment.status === 'approved'
+        ? 'paid'
+        : ['pending', 'in_process'].includes(payment.status)
+          ? 'pending'
+          : 'failed',
+  })),
+)
+const PAYMENT_METHODS = computed(() =>
+  store.payments.slice(0, 1).map((payment) => ({
+    id: payment.id,
+    icon: store.methodOf(payment.id) === 'pix' ? 'qr_code_2' : 'credit_card',
+    title: store.methodOf(payment.id) === 'pix' ? 'Pix' : 'Cartão',
+    description: 'Último pagamento registrado',
+    primary: false,
+  })),
+)
+onMounted(async () => {
+  try {
+    await store.refreshAccess()
+    await store.loadAll()
+  } catch (error) {
+    toast.error(
+      error instanceof Error ? error.message : 'Não foi possível consultar o faturamento.',
+    )
   }
-  router.push({
-    name: 'Payment',
-    query: { descricao: `Fatura ${invoice.number}`, valor: invoice.amount.toFixed(2) },
-  })
+})
+function handleInvoice(invoice: Invoice) {
+  router.push({ name: 'PaymentResult', params: { id: invoice.id } })
 }
 
 function exportInvoices() {
   const lines = [
     'fatura;data;valor;status',
-    ...INVOICES.map((invoice) =>
+    ...INVOICES.value.map((invoice) =>
       [
         invoice.number,
         invoice.date,
@@ -68,12 +88,12 @@ function exportInvoices() {
             @click="router.push({ name: 'Plans' })"
           />
           <BaseButton
-            label="Adicionar assentos"
+            label="Abrir assistente"
             icon="add"
             icon-position="left"
             :full-width="false"
             :class="TOOLBAR_BUTTON"
-            @click="toast.success('Pedido de novos assentos enviado (demonstração).')"
+            @click="router.push({ name: 'Assistant' })"
           />
         </div>
       </SubheaderComp>
@@ -81,22 +101,18 @@ function exportInvoices() {
       <div class="grid gap-[12px] sm:grid-cols-2 xl:grid-cols-4">
         <CardComp
           title="Plano atual"
-          :data="SUBSCRIPTION.plan"
-          :description="`${SUBSCRIPTION.cycle} · ${formatCurrency(SUBSCRIPTION.pricePerSeat).replace(',00', '')}/membro`"
+          :data="store.isSubscriber ? 'Pro' : 'Free'"
+          description="Acesso individual"
         />
         <CardComp
-          title="Próxima cobrança"
-          :data="formatCurrency(SUBSCRIPTION.nextCharge)"
-          :description="`em ${SUBSCRIPTION.nextChargeDate}`"
+          title="Valor do acesso"
+          :data="store.price ? formatCurrency(store.price) : '—'"
+          description="Sem renovação automática"
         />
+        <CardComp title="Pagamentos" :data="String(store.payments.length)" />
         <CardComp
-          title="Assentos em uso"
-          :data="`${SUBSCRIPTION.seatsUsed} de ${SUBSCRIPTION.seats}`"
-        />
-        <CardComp
-          title="Créditos de IA"
-          :data="`${SUBSCRIPTION.credits.used}/${SUBSCRIPTION.credits.total}`"
-          :description="`renova em ${SUBSCRIPTION.credits.renewsAt}`"
+          title="Acesso à IA"
+          :data="store.isSubscriber ? 'Liberado' : 'Aguardando pagamento'"
         />
       </div>
 
@@ -174,7 +190,7 @@ function exportInvoices() {
             <button
               type="button"
               class="cursor-pointer text-[13px] font-medium text-(--bg-orange) hover:underline"
-              @click="toast.success('Troca de método disponível quando o cartão for integrado.')"
+              @click="router.push({ name: 'Payment' })"
             >
               Alterar
             </button>
