@@ -3,10 +3,12 @@ import { test } from 'node:test'
 import { registerHooks } from 'node:module'
 
 const posted: unknown[] = []
+const urls: string[] = []
 Object.assign(globalThis, {
   uploadTestApi: {
     api: {
-      post: async (_url: string, body: unknown) => (
+      post: async (url: string, body: unknown) => (
+        urls.push(url),
         posted.push(body),
         { data: { url: 'u', public_id: 'p' } }
       ),
@@ -28,7 +30,7 @@ const hooks = registerHooks({
     return nextResolve(specifier, context)
   },
 })
-const { uploadFile, MAX_UPLOAD_BYTES } = await import('../services/index.ts')
+const { attachToOrganization, uploadFile, MAX_UPLOAD_BYTES } = await import('../services/index.ts')
 hooks.deregister()
 
 test('sends the file as multipart and returns the url', async () => {
@@ -43,4 +45,12 @@ test('rejects files over 10 MB without calling the API', async () => {
   const big = { size: MAX_UPLOAD_BYTES + 1 } as File
   await assert.rejects(() => uploadFile(big), /10 MB/)
   assert.equal(posted.length, 0)
+})
+
+test('attaches an uploaded file to the organization', async () => {
+  posted.length = 0
+  urls.length = 0
+  await attachToOrganization('org-1', { title: 'ata.pdf', url: 'https://x/ata.pdf' })
+  assert.deepEqual(urls, ['/organizations/org-1/links/'])
+  assert.deepEqual(posted, [{ title: 'ata.pdf', url: 'https://x/ata.pdf' }])
 })

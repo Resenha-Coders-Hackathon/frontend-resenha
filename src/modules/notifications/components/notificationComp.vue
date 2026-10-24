@@ -4,13 +4,13 @@ import { toast } from 'vue-sonner'
 import { BaseButton, TopbarComp } from '@/shared/components'
 import { useNotificationsStore } from '../stores'
 import { useOpenNotification } from '../composables/useOpenNotification'
+import { avatar } from '@/shared/utils/people'
+import { relativeTime } from '@/shared/utils/time'
 import {
-  actorAvatar,
   kindIcons,
   notificationActor,
   notificationKind,
   notificationTitle,
-  relativeTime,
   type NotificationKind,
 } from '../utils'
 
@@ -98,7 +98,7 @@ async function sendTest(): Promise<void> {
       <div
         role="tablist"
         aria-label="Filtrar notificações"
-        class="flex gap-[22px] overflow-x-auto border-b border-(--border-default) dark:border-(--border-inverse)"
+        class="flex gap-[22px] overflow-x-auto overflow-y-hidden border-b border-(--border-default) dark:border-(--border-inverse)"
       >
         <button
           v-for="item in TABS"
@@ -153,9 +153,9 @@ async function sendTest(): Promise<void> {
               <span
                 v-if="notificationActor(item.title)"
                 class="grid size-[32px] shrink-0 place-items-center rounded-full text-[11px] leading-none font-semibold text-white"
-                :style="{ backgroundColor: actorAvatar(notificationActor(item.title)!).color }"
+                :style="{ backgroundColor: avatar(notificationActor(item.title)!).color }"
                 aria-hidden="true"
-                >{{ actorAvatar(notificationActor(item.title)!).initials }}</span
+                >{{ avatar(notificationActor(item.title)!).initials }}</span
               >
               <span
                 v-else

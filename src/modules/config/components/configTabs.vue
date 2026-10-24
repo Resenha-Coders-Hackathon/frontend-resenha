@@ -22,7 +22,7 @@ function handleKeydown(event: KeyboardEvent) {
   <div
     role="tablist"
     aria-label="Seções das configurações"
-    class="flex items-end gap-[22px] overflow-x-auto border-b border-(--border-default) dark:border-(--border-inverse)"
+    class="flex items-end gap-[22px] overflow-x-auto overflow-y-hidden border-b border-(--border-default) dark:border-(--border-inverse)"
     @keydown="handleKeydown"
   >
     <button

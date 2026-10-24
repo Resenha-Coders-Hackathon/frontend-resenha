@@ -34,28 +34,7 @@ export const kindIcons: Record<NotificationKind, string> = {
   other: 'notifications',
 }
 
-export function relativeTime(date: string, now = Date.now()): string {
-  const minutes = Math.round((now - new Date(date).getTime()) / 60_000)
-  if (minutes < 1) return 'agora'
-  if (minutes < 60) return `há ${minutes} min`
-  const hours = Math.round(minutes / 60)
-  if (hours < 24) return `há ${hours} h`
-  const days = Math.round(hours / 24)
-  return days === 1 ? 'ontem' : `há ${days} dias`
-}
-
-const AVATAR_COLORS = ['#f0541e', '#1e9e5a', '#2563eb', '#7c4dff', '#d97706', '#0e9488']
-
 // Quem fez a ação, quando o título o cita ("Ana mentioned you"); sem nome devolve null.
 export function notificationActor(title: string): string | null {
   return title.match(/^(.+) mentioned you$/)?.[1] ?? null
-}
-
-export function actorAvatar(name: string): { initials: string; color: string } {
-  const parts = name.trim().split(/\s+/)
-  const initials = (
-    (parts[0]?.[0] ?? '') + (parts.length > 1 ? (parts.at(-1)?.[0] ?? '') : '')
-  ).toUpperCase()
-  const hash = [...name].reduce((sum, char) => sum + char.charCodeAt(0), 0)
-  return { initials, color: AVATAR_COLORS[hash % AVATAR_COLORS.length]! }
 }

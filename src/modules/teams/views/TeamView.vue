@@ -73,7 +73,7 @@ function editSector(id: string) {
       <div
         role="tablist"
         aria-label="Seções da equipe"
-        class="flex gap-[22px] overflow-x-auto border-b border-(--border-default) dark:border-(--border-inverse)"
+        class="flex gap-[22px] overflow-x-auto overflow-y-hidden border-b border-(--border-default) dark:border-(--border-inverse)"
       >
         <button
           v-for="item in tabs"
