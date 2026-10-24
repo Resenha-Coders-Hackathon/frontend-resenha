@@ -29,7 +29,7 @@ const value = computed({
 
 <template>
   <div
-    class="relative flex items-center rounded-2xl px-5 py-3 mt-5 transition-all duration-300 focus-within:ring-2 border border-(--border-default) dark:border-(--border-inverse)"
+    class="relative flex items-center rounded-2xl px-5 py-3 mt-5 shadow-inner transition-all duration-300 focus-within:ring-2 border border-(--border-default) dark:border-(--border-inverse)"
   >
     <span class="material-symbols-outlined mr-2 text-[20px] transition-colors duration-300">
       lock

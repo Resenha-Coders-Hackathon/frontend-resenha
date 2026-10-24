@@ -10,9 +10,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section
-    class="grid min-h-[calc(100dvh-6rem)] items-center justify-center px-5 py-20 sm:px-8 md:py-24"
-  >
+  <section class="grid min-h-[calc(100dvh-3.5rem)] items-center justify-center px-5 py-20 sm:px-8 md:py-24">
     <div class="mx-auto w-full max-w-190">
       <div class="mx-auto max-w-3xl text-center">
         <h1
@@ -31,13 +29,17 @@ onMounted(async () => {
       </div>
 
       <div class="mt-12 grid gap-4 sm:grid-cols-2">
-        <p class="font-semibold text-(--on-surface-variant) dark:text-(--on-surface-variant-dark)">
+        <p
+          class="uppercase font-semibold text-(--on-surface-variant) dark:text-(--on-surface-variant-dark)"
+        >
           Latitude:
           <span class="text-2xl font-bold tracking-tight sm:text-3xl text-black dark:text-white">{{
             geolocation.latitude ?? '--'
           }}</span>
         </p>
-        <p class="font-semibold text-(--on-surface-variant) dark:text-(--on-surface-variant-dark)">
+        <p
+          class="uppercase font-semibold text-(--on-surface-variant) dark:text-(--on-surface-variant-dark)"
+        >
           Longitude:
           <span class="text-2xl font-bold tracking-tight sm:text-3xl text-black dark:text-white">{{
             geolocation.longitude ?? '--'

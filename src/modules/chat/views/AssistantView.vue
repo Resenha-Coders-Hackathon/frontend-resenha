@@ -2,7 +2,6 @@
 import { computed, nextTick, ref, useTemplateRef } from 'vue'
 import { toast } from 'vue-sonner'
 import { BaseButton } from '@/shared/components'
-import { useOrganizationsStore } from '@/modules/organizations'
 import {
   AssistantTaskCard,
   ChatAttachmentCard,
@@ -24,7 +23,6 @@ import {
 
 // Página só de interface: "Gerar tarefas" não chama a IA nem o backend.
 
-const organizations = useOrganizationsStore()
 const search = ref('')
 const activeHistory = ref(ASSISTANT_HISTORY[0]!.id)
 const entries = ref<AssistantEntry[]>(structuredClone(ASSISTANT_CONVERSATION))
@@ -84,12 +82,10 @@ async function send() {
 </script>
 
 <template>
-  <div
-    class="flex h-[calc(100dvh-6rem)] w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
-  >
+  <div class="flex h-[calc(100dvh-3.5rem)] w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)">
     <ChatTopbar
       v-model:search="search"
-      :crumbs="[organizations.current?.name ?? 'Organização', 'Assistente IA', historyTitle]"
+      :crumbs="['Norte Studio', 'Assistente IA', historyTitle]"
       has-notifications
     />
 
@@ -112,7 +108,9 @@ async function send() {
           >
             <p class="flex items-center justify-between text-[12px] leading-normal">
               <span>Créditos de IA no mês</span>
-              <span class="text-[11.5px]">{{ AI_CREDITS.used }} / {{ AI_CREDITS.total }}</span>
+              <span class="font-mono text-[11.5px]"
+                >{{ AI_CREDITS.used }} / {{ AI_CREDITS.total }}</span
+              >
             </p>
             <div
               class="h-[4px] overflow-hidden rounded-full bg-(--bg-muted) dark:bg-black/40"
@@ -130,7 +128,10 @@ async function send() {
               class="flex items-center justify-between text-[12px] leading-normal text-(--text-secondary) dark:text-(--text-inverse-muted)"
             >
               <span>Renova em {{ AI_CREDITS.renewsAt }}</span>
-              <a href="#" class="text-[11.5px] text-(--chat-ai) hover:underline" @click.prevent
+              <a
+                href="#"
+                class="font-mono text-[11.5px] text-(--chat-ai) hover:underline"
+                @click.prevent
                 >Plano Pro</a
               >
             </p>
@@ -164,7 +165,7 @@ async function send() {
             >
               Assistente Fluxa
               <span
-                class="rounded-[5px] bg-(--chat-ai-soft) px-[5px] text-[10px] leading-[16px] font-medium text-(--chat-ai)"
+                class="rounded-[5px] bg-(--chat-ai-soft) px-[5px] font-mono text-[10px] leading-[16px] font-medium text-(--chat-ai)"
                 >PRO</span
               >
             </h1>
@@ -324,7 +325,7 @@ async function send() {
               <ChatToolButton icon="folder" label="Escolher do Drive" />
               <ChatToolButton icon="mic" label="Ditar" />
               <span
-                class="ml-[4px] rounded-[6px] bg-(--bg-subtle) px-[7px] py-[2px] text-[11px] text-(--text-secondary) dark:bg-black/30 dark:text-(--text-inverse-muted)"
+                class="ml-[4px] rounded-[6px] bg-(--bg-subtle) px-[7px] py-[2px] font-mono text-[11px] text-(--text-secondary) dark:bg-black/30 dark:text-(--text-inverse-muted)"
                 >Setor: Marketing</span
               >
             </template>

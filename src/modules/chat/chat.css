@@ -1,11 +1,11 @@
 /* Cores do módulo de chat: roxo do assistente de IA (vem do design) e laranja das menções. */
 :root {
-  --chat-ai: #e2560b;
-  --chat-ai-soft: #fff1e6;
+  --chat-ai: #6b4eff;
+  --chat-ai-soft: #efebff;
   --chat-mention: #e2560b;
 }
 
 .dark {
-  --chat-ai-soft: rgb(226 86 11 / 0.18);
+  --chat-ai-soft: rgb(107 78 255 / 0.2);
   --chat-mention: #ff8a4c;
 }

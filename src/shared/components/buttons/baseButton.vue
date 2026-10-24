@@ -39,11 +39,11 @@ const buttonClasses = computed(() => [
   // VARIANTS
   {
     /* PRIMARY */
-    'bg-(--surface-inverse) text-(--text-inverse) dark:bg-(--text-inverse) dark:text-(--text-primary) active:scale-[0.98]':
+    'bg-(--surface-inverse) text-(--text-inverse) dark:bg-(--text-inverse) dark:text-(--text-primary) hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]':
       props.variant === 'primary',
 
     /* SECONDARY */
-    'dark:bg-(--surface-inverse) dark:text-(--text-inverse) bg-(--surface) text-(--text-primary) border border-(--border-default) dark:border-(--border-inverse) active:scale-[0.98]':
+    'dark:bg-(--surface-inverse) dark:text-(--text-inverse) bg-(--surface) text-(--text-primary) border border-(--border-default) dark:border-(--border-inverse) hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]':
       props.variant === 'secondary',
 
     /* GHOST */
@@ -51,15 +51,16 @@ const buttonClasses = computed(() => [
       props.variant === 'ghost',
 
     /* DESTRUCTIVE */
-    'bg-(--destructive) text-(--text-inverse) hover:brightness-110 active:scale-[0.98]':
+    'bg-(--destructive) text-(--text-inverse) shadow-sm hover:-translate-y-0.5 hover:brightness-110 hover:shadow-md active:translate-y-0 active:scale-[0.98]':
       props.variant === 'destructive',
 
     /* SUCCESS */
-    'bg-(--sucess) text-(--text-inverse) hover:brightness-110 active:scale-[0.98]':
+    'bg-(--sucess) text-(--text-inverse) shadow-sm hover:-translate-y-0.5 hover:brightness-110 hover:shadow-md active:translate-y-0 active:scale-[0.98]':
       props.variant === 'success',
 
     /* DISABLED */
-    'cursor-not-allowed opacity-50 ': props.disabled || props.loading,
+    'cursor-not-allowed opacity-50 shadow-none hover:translate-y-0 hover:shadow-none':
+      props.disabled || props.loading,
 
     /* LOADING */
     'cursor-wait': props.loading,

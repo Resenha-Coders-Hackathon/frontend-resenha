@@ -58,7 +58,7 @@ export function cardBrand(number: string): CardBrand {
   const digits = onlyDigits(number)
   if (/^(4011|4312|4389|4514|4576|5041|5066|5067|509|6277|6362|6363|650|6516|6550)/.test(digits))
     return 'elo'
-  if (digits.startsWith('4')) return 'visa'
+  if (/^4/.test(digits)) return 'visa'
   if (/^(5[1-5]|2[2-7])/.test(digits)) return 'mastercard'
   if (/^3[47]/.test(digits)) return 'amex'
   return 'unknown'

@@ -32,12 +32,6 @@ export const organizationRoutes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/organizacoes/:organizationId([0-9a-f-]{36})',
-    name: 'OrganizationOverview',
-    component: () => import('../views/OrganizationOverviewView.vue'),
-    meta: { requiresAuth: true },
-  },
-  {
     path: '/organizacoes/:organizationId/membros',
     name: 'OrganizationMembers',
     component: () => import('../views/OrganizationMembersView.vue'),
