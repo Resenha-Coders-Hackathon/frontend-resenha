@@ -43,7 +43,13 @@ async function post(
     await api.post(path, payload)
   } catch (error) {
     const status = isAxiosError(error) ? error.response?.status : undefined
-    if (status === 401 || status === 403) throw new Error(unauthorizedMessage)
+    if (status === 401 || status === 403) {
+      const detail = getErrorMessage(error, '').toLowerCase()
+      if (path === API_PATHS.googleLogin && detail.includes('not verified')) {
+        throw new Error('O e-mail da sua conta Google não está verificado.')
+      }
+      throw new Error(unauthorizedMessage)
+    }
     if (status === 409) throw new Error('Este e-mail já está cadastrado.')
     throw new Error(translateApiMessage(getErrorMessage(error, DEFAULT_ERROR)))
   }
@@ -56,6 +62,11 @@ function translateApiMessage(message: string): string {
   }
   if (normalized.includes('verification code') && normalized.includes('invalid')) {
     return 'Código inválido ou expirado. Confira e tente novamente.'
+  }
+  if (normalized.includes('google sign-in')) {
+    return normalized.includes('not configured')
+      ? 'O login com Google não está configurado neste ambiente.'
+      : 'O login com Google está indisponível no momento. Tente novamente em instantes.'
   }
   if (normalized.includes('at least 9 characters')) {
     return 'A senha precisa ter pelo menos 9 caracteres.'

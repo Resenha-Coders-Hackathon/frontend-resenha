@@ -27,8 +27,9 @@ The `/users/me/` session probe lets the guard handle redirects, avoiding recursi
 Network errors propagate and cancel private navigation without treating an outage
 as a confirmed logout. A normal 403 from a business API does not clear authentication.
 
-Login initializes CSRF through `/csrf/`, and axios reads the rotated cookie for
-subsequent writes and refresh. JWTs remain in HttpOnly cookies. Frontend guards
+Login initializes CSRF through `/csrf/` on a best-effort basis (the login POST itself
+needs no CSRF and its response sets the cookie, so a failed call never blocks sign-in),
+and axios reads the rotated cookie for subsequent writes and refresh. JWTs remain in HttpOnly cookies. Frontend guards
 control navigation; backend authentication and authorization continue to enforce
 access to data and actions.
 
