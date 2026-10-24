@@ -58,8 +58,8 @@ const hooks = registerHooks({
         }
       if (specifier === '../services')
         return { url: new URL('../services/index.ts', context.parentURL).href, shortCircuit: true }
-      if (specifier === './payment')
-        return { url: new URL('./payment.ts', context.parentURL).href, shortCircuit: true }
+      if (['./payment', './charge', './charges'].includes(specifier))
+        return { url: new URL(`${specifier}.ts`, context.parentURL).href, shortCircuit: true }
       if (specifier === './mercadoPago')
         return {
           url: `data:text/javascript,${encodeURIComponent('export const tokenizeCard = async () => ({token: "one-time-token", payment_method_id: "visa", issuer_id: 7});')}`,

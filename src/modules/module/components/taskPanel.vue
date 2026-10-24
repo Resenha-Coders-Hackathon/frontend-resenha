@@ -4,6 +4,7 @@ import { toast } from 'vue-sonner'
 import { getErrorMessage } from '@/app/plugins/axios'
 import { BaseButton } from '@/shared/components'
 import { useAuthStore } from '@/modules/auth'
+import { TaskCharges } from '@/modules/payments'
 import { uploadFile } from '@/modules/uploads'
 import { fetchAllPages } from '@/shared/utils'
 import { avatar } from '@/shared/utils/people'
@@ -31,7 +32,6 @@ import type {
 } from '../types'
 import { PRIORITIES } from './priority'
 import PriorityBars from './priorityBars.vue'
-import TaskCharges from './taskCharges.vue'
 import TaskGoogle from './taskGoogle.vue'
 
 /* Painel lateral: sem `task` cria uma tarefa; com `task` mostra e edita os detalhes. */

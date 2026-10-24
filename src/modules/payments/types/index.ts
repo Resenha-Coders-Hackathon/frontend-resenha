@@ -37,6 +37,7 @@ export interface PaginatedPayments {
 }
 
 export type * from './ui'
+export type * from './charges'
 
 export interface CreateCardPaymentData {
   title: string

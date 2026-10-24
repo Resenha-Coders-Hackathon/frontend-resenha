@@ -1,1 +1,2 @@
-export { default as PixCode } from './components/pixCode.vue'
+export { PixCode, TaskCharges } from './components'
+export type * from './types'

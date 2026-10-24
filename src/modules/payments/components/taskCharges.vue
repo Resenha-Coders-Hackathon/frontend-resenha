@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { toast } from 'vue-sonner'
-import { getErrorMessage } from '@/app/plugins/axios'
 import { BaseButton } from '@/shared/components'
-import { createCharge, listCharges } from '../services'
+import { useChargesStore } from '../stores'
 import type { Charge } from '../types'
+import { formatCurrency } from '../utils'
 import ChargePayDialog from './chargePayDialog.vue'
 
 /* Cobranças da tarefa: lista com "Pagar" (Pix) e, para quem edita, o formulário para criar. */
 const props = defineProps<{ taskId: string; canEdit: boolean }>()
 
-const charges = ref<Charge[]>([])
+const store = useChargesStore()
+const charges = computed(() => store.forTask(props.taskId))
 const creating = ref(false)
 const saving = ref(false)
 const paying = ref<Charge | null>(null)
@@ -18,8 +19,6 @@ const title = ref('')
 const amount = ref('')
 const deadline = ref('')
 
-const money = (value: string) =>
-  Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 const due = (date: string) =>
   new Date(`${date}T00:00:00Z`).toLocaleDateString('pt-BR', {
     day: 'numeric',
@@ -29,9 +28,9 @@ const due = (date: string) =>
 
 async function load() {
   try {
-    charges.value = await listCharges(props.taskId)
+    await store.load(props.taskId)
   } catch (error) {
-    toast.error(getErrorMessage(error, 'Não foi possível carregar as cobranças.'))
+    toast.error(error instanceof Error ? error.message : 'Não foi possível carregar as cobranças.')
   }
 }
 onMounted(load)
@@ -41,16 +40,15 @@ async function add() {
   if (saving.value) return
   saving.value = true
   try {
-    await createCharge(props.taskId, {
+    await store.create(props.taskId, {
       title: title.value.trim(),
       goal_amount: Number(amount.value).toFixed(2),
       deadline: deadline.value || null,
     })
     title.value = amount.value = deadline.value = ''
     creating.value = false
-    await load()
   } catch (error) {
-    toast.error(getErrorMessage(error, 'Não foi possível criar a cobrança.'))
+    toast.error(error instanceof Error ? error.message : 'Não foi possível criar a cobrança.')
   } finally {
     saving.value = false
   }
@@ -59,7 +57,7 @@ async function add() {
 async function closed(paid: boolean) {
   paying.value = null
   if (paid) toast.success('Pagamento aprovado.')
-  await load()
+  else await load()
 }
 
 const field =
@@ -127,10 +125,10 @@ const field =
         <span class="min-w-0 flex-1">
           <span class="block truncate text-[13.5px] font-medium">{{ charge.title }}</span>
           <span class="block text-[12px] text-(--text-muted)"
-            >{{ money(charge.goal_amount) }}
+            >{{ formatCurrency(charge.goal_amount) }}
             <template v-if="charge.deadline">· vence {{ due(charge.deadline) }}</template>
             <template v-if="!charge.paid && Number(charge.raised) > 0">
-              · {{ money(charge.raised) }} pago</template
+              · {{ formatCurrency(charge.raised) }} pago</template
             ></span
           >
         </span>
@@ -155,6 +153,6 @@ const field =
       </li>
     </ul>
 
-    <ChargePayDialog v-if="paying" :charge="paying" @close="closed" />
+    <ChargePayDialog v-if="paying" :charge="paying" :task-id="taskId" @close="closed" />
   </div>
 </template>

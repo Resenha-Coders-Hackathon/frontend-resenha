@@ -1,16 +1,17 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { getErrorMessage } from '@/app/plugins/axios'
 import { BaseButton } from '@/shared/components'
-import { PixCode } from '@/modules/payments'
-import { getChargeResult, payCharge } from '../services'
+import { useChargesStore } from '../stores'
 import type { Charge, PayChargeResponse } from '../types'
+import { formatCurrency } from '../utils'
+import PixCode from './pixCode.vue'
 
 /* Pagar uma cobrança: dados do pagador -> QR Code Pix -> resultado (aprovado ou recusado). */
-const props = defineProps<{ charge: Charge }>()
+const props = defineProps<{ charge: Charge; taskId: string }>()
 const emit = defineEmits<{ close: [paid: boolean] }>()
 
 const POLL_MS = 3000
+const store = useChargesStore()
 const dialog = ref<HTMLDialogElement | null>(null)
 const stage = ref<'form' | 'qr' | 'approved' | 'rejected'>('form')
 const pix = ref<PayChargeResponse | null>(null)
@@ -25,8 +26,6 @@ const name = ref('')
 const cpf = ref('')
 const message = ref('')
 const anonymous = ref(false)
-const money = (value: string | number) =>
-  Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 const valid = computed(
   () => Number(amount.value) >= 1 && name.value.trim() && cpf.value.length >= 11,
 )
@@ -36,7 +35,7 @@ async function submit() {
   busy.value = true
   error.value = ''
   try {
-    pix.value = await payCharge(props.charge.id, {
+    pix.value = await store.pay(props.charge, {
       amount: Number(amount.value).toFixed(2),
       cpf: cpf.value,
       name: name.value.trim(),
@@ -46,7 +45,7 @@ async function submit() {
     stage.value = 'qr'
     timer = setInterval(check, POLL_MS)
   } catch (cause) {
-    error.value = getErrorMessage(cause, 'Não foi possível gerar o Pix.')
+    error.value = cause instanceof Error ? cause.message : 'Não foi possível gerar o Pix.'
   } finally {
     busy.value = false
   }
@@ -57,7 +56,7 @@ async function check() {
   if (polling || !pix.value) return
   polling = true
   try {
-    const result = await getChargeResult(pix.value.contribution_id)
+    const result = await store.result(pix.value.contribution_id, props.taskId)
     if (result === 'pending') return
     clearInterval(timer)
     stage.value = result
@@ -94,7 +93,7 @@ const input =
         </h2>
         <p v-if="stage === 'form' || stage === 'qr'" class="text-sm text-(--text-muted)">
           {{ stage === 'qr' ? 'Pague com Pix' : 'Pagar com Pix' }} ·
-          {{ money(stage === 'qr' ? amount : remaining) }}
+          {{ formatCurrency(stage === 'qr' ? amount : remaining) }}
         </p>
       </div>
       <button
@@ -164,7 +163,7 @@ const input =
       <p class="text-[14px]">
         {{
           stage === 'approved'
-            ? `Recebemos ${money(amount)}. Obrigado!`
+            ? `Recebemos ${formatCurrency(amount)}. Obrigado!`
             : 'O pagamento não foi concluído. Você pode tentar novamente.'
         }}
       </p>

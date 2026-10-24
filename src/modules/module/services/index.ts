@@ -5,10 +5,6 @@ import type {
   ChecklistItem,
   Comment,
   AddSectorTeamRequest,
-  Charge,
-  ChargeResult,
-  ContributionStatus,
-  CreateChargeRequest,
   CreateChecklistItemRequest,
   CreateResourceLinkRequest,
   CreateSectorRequest,
@@ -16,8 +12,6 @@ import type {
   CreateTaskRequest,
   Dashboard,
   MoveTaskRequest,
-  PayChargeRequest,
-  PayChargeResponse,
   ResourceLink,
   Sector,
   SectorMember,
@@ -254,28 +248,6 @@ export async function createLink(
 
 export async function deleteLink(linkId: string): Promise<void> {
   await api.delete(`/links/${enc(linkId)}/`)
-}
-
-// ── Cobranças da tarefa (vaquinha paga por Pix) ───────────────────────────
-export async function listCharges(taskId: string): Promise<Charge[]> {
-  return (await api.get<Page<Charge>>(`/tasks/${enc(taskId)}/campaigns/`)).data.results
-}
-
-export async function createCharge(taskId: string, payload: CreateChargeRequest): Promise<Charge> {
-  return (await api.post<Charge>(`/tasks/${enc(taskId)}/campaigns/`, payload)).data
-}
-
-export async function payCharge(
-  chargeId: string,
-  payload: PayChargeRequest,
-): Promise<PayChargeResponse> {
-  return (await api.post<PayChargeResponse>(`/campaigns/${enc(chargeId)}/contributions/`, payload))
-    .data
-}
-
-/** O backend confirma com o Mercado Pago (webhook ou consulta) e devolve o resultado. */
-export async function getChargeResult(contributionId: string): Promise<ChargeResult> {
-  return (await api.get<ContributionStatus>(`/contributions/${enc(contributionId)}/`)).data.result
 }
 
 // ── Dashboard ──────────────────────────────────────────────────────────────
