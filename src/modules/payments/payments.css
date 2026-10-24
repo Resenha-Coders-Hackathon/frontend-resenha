@@ -1,9 +1,9 @@
 /* Roxo do plano Pro / IA (mesmo tom do assistente no chat). */
 :root {
-  --plan-pro: #6b4eff;
-  --plan-pro-soft: #efebff;
+  --plan-pro: #e2560b;
+  --plan-pro-soft: #fff1e6;
 }
 
 .dark {
-  --plan-pro-soft: rgb(107 78 255 / 0.2);
+  --plan-pro-soft: rgb(226 86 11 / 0.18);
 }

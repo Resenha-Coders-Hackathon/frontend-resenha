@@ -43,7 +43,7 @@ function subscribe() {
           </RouterLink>
 
           <p class="mt-5.5 max-w-75 text-(--text-muted)">
-            Uma frase curta que resume a proposta de valor da marca.
+            Tarefas, equipes e conversas da sua organização em um só lugar.
           </p>
 
           <form class="mt-5 flex items-center gap-2.25" @submit.prevent="subscribe">

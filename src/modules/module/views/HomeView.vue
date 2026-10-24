@@ -3,54 +3,17 @@ import { computed } from 'vue'
 import { BaseButton, CardComp, PendingTasksTable, UserTable, ChartComp } from '@/shared/components'
 import type { ICards } from '@/shared/types'
 import { useAuthStore } from '@/modules/auth/stores'
+import { useNotificationsStore, useOpenNotification, notificationTitle } from '@/modules/notifications'
+import { useOrganizationsStore } from '@/modules/organizations'
 
-const authStore = useAuthStore()
+const auth = useAuthStore()
+const notifications = useNotificationsStore()
+const organizations = useOrganizationsStore()
+const openNotification = useOpenNotification()
 
-const cards: ICards[] = [
-  {
-    title: 'Minhas tarefas abertas',
-    data: '6',
-    description: '2 vencem esta semana',
-  },
-  {
-    title: 'Concluídas na semana',
-    data: '9',
-    description: '+3 em relação à anterior',
-  },
-  {
-    title: 'Atrasadas',
-    data: '1',
-    description: 'Kit de identidade social',
-  },
-  {
-    title: 'Créditos de IA',
-    data: '312/500',
-    description: 'Renova em 01/11',
-  },
-]
-
-const chartData = computed(() => {
-  const last7DaysObjects = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date()
-    d.setDate(d.getDate() - i)
-    return d
-  }).reverse()
-
-  const dynamicLabels = last7DaysObjects.map((date) =>
-    date.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '').toUpperCase(),
-  )
-
-  return {
-    labels: dynamicLabels,
-    datasets: [
-      {
-        label: 'Tarefas concluídas',
-        backgroundColor: '#ff6700',
-        borderRadius: 6,
-        data: [5, 8, 4, 2, 10, 1, 8],
-      },
-    ],
-  }
+onMounted(() => {
+  void notifications.load(true)
+  if (!organizations.organizations.length) void organizations.load().catch(() => undefined)
 })
 </script>
 

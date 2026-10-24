@@ -51,7 +51,7 @@ const search = defineModel<string>('search', { default: '' })
         class="min-w-0 flex-1 bg-transparent text-[13px] leading-normal outline-none placeholder:text-(--text-muted)"
       />
       <kbd
-        class="rounded-[5px] border border-(--border-default) px-[5px] font-mono text-[10px] leading-[16px] text-(--text-muted) dark:border-(--border-inverse)"
+        class="rounded-[5px] border border-(--border-default) px-[5px] text-[10px] leading-[16px] text-(--text-muted) dark:border-(--border-inverse)"
         >⌘K</kbd
       >
     </label>

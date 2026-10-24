@@ -27,7 +27,7 @@ const FEATURE_ICONS: Record<PlanFeature['icon'], { icon: string; class: string }
     :class="[
       'relative flex flex-col gap-[18px] rounded-[16px] border bg-(--surface) p-[22px] dark:bg-(--surface-inverse)',
       plan.highlighted
-        ? 'border-(--plan-pro) shadow-[0_18px_40px_-18px_rgb(107_78_255/0.45)] lg:-mt-[12px] lg:pb-[30px]'
+        ? 'border-(--plan-pro) lg:-mt-[12px] lg:pb-[30px]'
         : 'border-(--border-default) dark:border-(--border-inverse)',
     ]"
   >

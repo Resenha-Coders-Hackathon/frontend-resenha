@@ -42,10 +42,7 @@ const preview = computed(() => {
     <span class="flex min-w-0 flex-1 flex-col leading-normal">
       <span class="flex items-baseline gap-[8px]">
         <span class="flex-1 truncate text-[13.5px] font-semibold">{{ channel.name }}</span>
-        <span
-          v-if="channel.last_message"
-          class="shrink-0 font-mono text-[10.5px] text-(--text-muted)"
-        >
+        <span v-if="channel.last_message" class="shrink-0 text-[10.5px] text-(--text-muted)">
           {{ formatListTime(channel.last_message.created_at) }}
         </span>
       </span>
