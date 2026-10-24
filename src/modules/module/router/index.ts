@@ -5,11 +5,8 @@ export const moduleRoutes: RouteRecordRaw[] = [
     path: '/',
     component: () => import('@/app/layouts/DefaultLayout.vue'),
     children: [
-      {
-        path: '',
-        name: 'Home',
-        component: () => import('../views/HomeView.vue'),
-      },
+      // a raiz abre o dashboard real; o nome 'Home' continua valendo para quem navega por nome
+      { path: '', name: 'Home', redirect: { name: 'UserHome' } },
       {
         path: '/home-usuario',
         name: 'UserHome',
