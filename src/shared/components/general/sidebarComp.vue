@@ -6,6 +6,7 @@ import { useAuthStore } from '@/modules/auth'
 import { useSectorsStore } from '@/modules/module'
 import { useOrganizationsStore } from '@/modules/organizations'
 import { useChatStore } from '@/modules/chat'
+import { useInvitationsStore } from '@/modules/invitations'
 import { useNotificationsStore } from '@/modules/notifications'
 import { useTheme } from '@/app/composables/useTheme'
 
@@ -27,6 +28,7 @@ const sectors = useSectorsStore()
 const notifications = useNotificationsStore()
 const { isDark } = useTheme()
 const chat = useChatStore()
+const invitations = useInvitationsStore()
 const isOpen = ref<boolean>(true)
 
 const current = computed(() => organizations.current)
@@ -160,6 +162,11 @@ async function signOut() {
             <span class="material-symbols-outlined text-(--text-muted)" aria-hidden="true"
               >unfold_more</span
             >
+            <span
+              v-if="invitations.mine.length"
+              class="absolute top-1.5 right-1.5 size-2.5 rounded-full bg-(--bg-orange)"
+              :aria-label="`${invitations.mine.length} convites pendentes`"
+            />
           </button>
 
           <ul
@@ -193,6 +200,16 @@ async function signOut() {
               </button>
             </li>
             <li class="mt-1 border-t border-(--border-default) pt-1 dark:border-(--border-inverse)">
+              <RouterLink
+                v-if="invitations.mine.length"
+                to="/home-usuario"
+                class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium transition-colors hover:bg-(--background-inverse)/10 dark:hover:bg-white/5"
+                @click="switcherOpen = false"
+              >
+                <span class="material-symbols-outlined text-[18px]!" aria-hidden="true">mail</span>
+                {{ invitations.mine.length }}
+                {{ invitations.mine.length === 1 ? 'convite pendente' : 'convites pendentes' }}
+              </RouterLink>
               <RouterLink
                 to="/organizacoes/nova"
                 class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-(--background-inverse)/10 dark:hover:bg-white/5"

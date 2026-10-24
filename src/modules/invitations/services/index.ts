@@ -29,3 +29,13 @@ export async function acceptInvitation(token: string): Promise<{ organization_id
 export async function listMyInvitations(page = 1): Promise<Page<Invitation>> {
   return (await api.get<Page<Invitation>>('/invitations/mine/', { params: { page } })).data
 }
+
+export async function acceptMyInvitation(id: string): Promise<{ organization_id: string }> {
+  return (
+    await api.post<{ organization_id: string }>(`/invitations/${encodeURIComponent(id)}/accept/`)
+  ).data
+}
+
+export async function declineMyInvitation(id: string): Promise<void> {
+  await api.post(`/invitations/${encodeURIComponent(id)}/decline/`)
+}

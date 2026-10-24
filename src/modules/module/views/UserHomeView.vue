@@ -6,6 +6,7 @@ import { getErrorMessage } from '@/app/plugins/axios'
 import { categoryColors, inkWithAccent } from '@/shared/utils/chartColors'
 import { CardComp, ChartComp, SubheaderComp, TopbarComp } from '@/shared/components'
 import { useAuthStore } from '@/modules/auth'
+import { InvitationsInbox } from '@/modules/invitations'
 import { useNotificationsStore } from '@/modules/notifications'
 import { useOrganizationsStore } from '@/modules/organizations'
 import { getDashboard } from '../services'
@@ -98,6 +99,8 @@ const sectorData = computed(() => {
     <TopbarComp :crumbs="['Início']" />
 
     <section class="flex flex-1 flex-col gap-[16px] px-[16px] pt-[24px] pb-[32px] sm:px-[28px]">
+      <InvitationsInbox />
+
       <SubheaderComp :title="greeting" :description="description" class="mb-0!"> </SubheaderComp>
 
       <div class="grid grid-cols-2 gap-[12px] xl:grid-cols-4">

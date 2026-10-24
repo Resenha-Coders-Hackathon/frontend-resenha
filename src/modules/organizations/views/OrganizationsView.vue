@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { getErrorMessage } from '@/app/plugins/axios'
+import { InvitationsInbox } from '@/modules/invitations'
 import OrganizationLayout from '../components/organizationLayout.vue'
 import { useOrganizationsStore } from '../stores'
 import { roleLabels } from '../utils'
@@ -25,6 +26,7 @@ onMounted(load)
 
 <template>
   <OrganizationLayout title="Organizações">
+    <InvitationsInbox class="mb-4" />
     <div class="workspace-heading">
       <div>
         <h1>Suas organizações</h1>
