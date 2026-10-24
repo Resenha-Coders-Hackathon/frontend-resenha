@@ -49,7 +49,6 @@ const organizationItems = computed<MenuItem[]>(() => [
 ])
 
 const accountItems: MenuItem[] = [
-  { link: '/notificacoes', icon: 'notifications', label: 'Notificações' },
   {
     link: '/faturamento',
     icon: 'receipt_long',
@@ -127,7 +126,7 @@ async function signOut() {
     <nav class="py-4 flex flex-col justify-between min-h-full gap-6">
       <div class="grid gap-2">
         <RouterLink to="/" class="text-2xl font-bold mb-3">
-          Resenha<span class="shrink-0 whitespace-nowrap text-(--text-muted)">Coders</span>
+          <img src="/wordmark.svg" alt="" class="mx-auto" />
         </RouterLink>
 
         <!-- Seletor de organização -->

@@ -39,7 +39,7 @@ function subscribe() {
             to="/"
             class="inline-block w-fit rounded-sm text-[18px] leading-8 font-bold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--text-inverse)"
           >
-            Resenha<span class="text-(--text-muted)">Coders</span>
+            <img src="/wordmark-inverse.svg" alt="" class="mx-auto" />
           </RouterLink>
 
           <p class="mt-5.5 max-w-75 text-(--text-muted)">

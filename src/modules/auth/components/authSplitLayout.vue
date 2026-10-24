@@ -14,6 +14,6 @@ const props = withDefaults(defineProps<{ compact?: boolean }>(), { compact: fals
       </div>
     </div>
 
-    <footer class="text-[12px] text-(--text-muted)">© 2026 ResenhaCoders</footer>
+    <footer class="text-[12px] text-(--text-muted)">© 2026 Inceptum</footer>
   </div>
 </template>
