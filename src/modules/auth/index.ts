@@ -2,4 +2,11 @@ export type * from './types'
 export { useAuthStore } from './stores'
 export { useUsersStore } from './stores/users'
 export { safeRedirect } from './utils'
-export { AuthAside, AuthField, AuthSplitLayout, AuthCardLayout, CodeInput } from './components'
+export {
+  AuthAside,
+  AuthField,
+  AuthSplitLayout,
+  AuthCardLayout,
+  CodeInput,
+  AuthTransitionOverlay,
+} from './components'

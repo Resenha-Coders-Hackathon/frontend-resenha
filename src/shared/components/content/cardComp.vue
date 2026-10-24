@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import AnimatedNumber from './animatedNumber.vue'
+
 defineProps<{
   title: string
   data: string | number
@@ -13,8 +15,9 @@ defineProps<{
     class="group relative grid w-full gap-1 overflow-hidden rounded-[14px] border border-(--border-default) bg-(--surface) px-5 py-4 transition-all duration-300 before:absolute before:top-0 before:left-5 before:h-[2px] before:w-6 before:rounded-full before:bg-(--bg-orange)/55 before:transition-all before:duration-300 hover:border-(--bg-orange)/50 hover:bg-(--bg-orange)/[0.025] hover:shadow-[0_8px_24px_rgba(255,103,0,0.1)] hover:before:w-12 hover:before:bg-(--bg-orange) dark:border-(--border-inverse) dark:bg-(--surface-inverse)"
   >
     <p class="text-sm text-(--text-muted)">{{ title }}</p>
-    <p class="text-2xl font-semibold">{{ data }}</p>
+    <p class="text-2xl font-semibold"><AnimatedNumber :value="data" /></p>
     <p
+      v-if="description"
       :class="[
         'text-xs',
         tone === 'good'
@@ -24,7 +27,7 @@ defineProps<{
             : 'text-(--text-muted)',
       ]"
     >
-      {{ description }}
+      <AnimatedNumber :value="description" />
     </p>
   </div>
 </template>

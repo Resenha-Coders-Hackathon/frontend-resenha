@@ -23,7 +23,7 @@ async function accept(id: string, name: string) {
     await organizations.load()
     organizations.select(organizationId)
     toast.success(`Você entrou em ${name}.`)
-    await router.push('/home-usuario')
+    await router.push('/')
   } catch (error) {
     toast.error(
       getErrorMessage(

@@ -3,12 +3,13 @@ import type { RouteRecordRaw } from 'vue-router'
 export const moduleRoutes: RouteRecordRaw[] = [
   {
     path: '/',
+    meta: { transitionGroup: 'default' },
     component: () => import('@/app/layouts/DefaultLayout.vue'),
     children: [
       // a raiz abre o dashboard real; o nome 'Home' continua valendo para quem navega por nome
       { path: '', name: 'Home', redirect: { name: 'UserHome' } },
       {
-        path: '/home-usuario',
+        path: '/',
         name: 'UserHome',
         component: () => import('../views/UserHomeView.vue'),
       },

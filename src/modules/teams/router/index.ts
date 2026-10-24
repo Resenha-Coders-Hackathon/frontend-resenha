@@ -3,7 +3,7 @@ import type { RouteRecordRaw } from 'vue-router'
 export const teamsRoutes: RouteRecordRaw[] = [
   {
     path: '/equipe',
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, transitionGroup: 'default' },
     component: () => import('@/app/layouts/DefaultLayout.vue'),
     children: [
       { path: '', name: 'Team', component: () => import('../views/TeamView.vue') },

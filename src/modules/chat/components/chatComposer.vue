@@ -35,7 +35,7 @@ function handleKeydown(event: KeyboardEvent) {
       @keydown="handleKeydown"
     ></textarea>
 
-    <div class="flex items-center gap-[6px]">
+    <div class="flex flex-wrap items-center gap-[6px]">
       <slot name="tools" />
       <button
         type="submit"

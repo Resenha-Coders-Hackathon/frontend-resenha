@@ -65,7 +65,7 @@ async function accept() {
     const { organization_id } = await acceptInvitation(token.value)
     await organizations.load()
     organizations.select(organization_id)
-    await router.replace('/home-usuario')
+    await router.replace('/')
   } catch (error) {
     problem.value = inviteProblem(error)
   } finally {
@@ -183,7 +183,7 @@ watch(token, load, { immediate: true })
           />
           <RouterLink
             v-else-if="auth.user"
-            to="/home-usuario"
+            to="/"
             class="workspace-link-button secondary"
             >Ir para o início</RouterLink
           >

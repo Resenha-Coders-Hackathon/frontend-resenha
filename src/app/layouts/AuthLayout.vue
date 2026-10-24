@@ -2,6 +2,10 @@
 
 <template>
   <main class="min-h-dvh bg-(--auth-background) dark:bg-(--background-inverse)">
-    <RouterView />
+    <RouterView v-slot="{ Component, route }">
+      <Transition name="page" mode="out-in" appear>
+        <component :is="Component" :key="route.path" />
+      </Transition>
+    </RouterView>
   </main>
 </template>

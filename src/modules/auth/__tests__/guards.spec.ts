@@ -151,7 +151,7 @@ test('cached profiles cannot bypass server validation or revocation', async () =
     checks++
     return checks === 1 ? auth.user : null
   }
-  await router.push('/home-usuario')
+  await router.push('/')
   assert.equal(router.currentRoute.value.name, 'UserHome')
   await router.push('/chat')
   assert.equal(router.currentRoute.value.name, 'Login')
@@ -163,7 +163,7 @@ test('network failures cancel private navigation without clearing the cached acc
   const router = routerForTest()
   auth.user = { id: 'valid-user' }
   auth.loadUser = async () => auth.user
-  await router.push('/home-usuario')
+  await router.push('/')
   auth.loadUser = async () => {
     throw new Error('offline')
   }
