@@ -117,6 +117,15 @@ test('integrated reports, teams and uploads routes remain registered and protect
   }
 })
 
+test('removed board and personal task routes stay removed after integration', () => {
+  const router = routerForTest()
+  assert.equal(router.hasRoute('Mural'), false)
+  assert.equal(router.hasRoute('MyTasks'), false)
+  for (const path of ['/kanban', '/minhas-tarefas']) {
+    assert.equal(router.resolve(path).name, 'NotFound')
+  }
+})
+
 test('new routes are private without requiring a metadata flag', async () => {
   const router = routerForTest()
   let loaded = false
@@ -142,8 +151,8 @@ test('cached profiles cannot bypass server validation or revocation', async () =
     checks++
     return checks === 1 ? auth.user : null
   }
-  await router.push('/kanban')
-  assert.equal(router.currentRoute.value.name, 'Mural')
+  await router.push('/home-usuario')
+  assert.equal(router.currentRoute.value.name, 'UserHome')
   await router.push('/chat')
   assert.equal(router.currentRoute.value.name, 'Login')
   assert.equal(router.currentRoute.value.query.redirect, '/chat')
@@ -154,12 +163,12 @@ test('network failures cancel private navigation without clearing the cached acc
   const router = routerForTest()
   auth.user = { id: 'valid-user' }
   auth.loadUser = async () => auth.user
-  await router.push('/kanban')
+  await router.push('/home-usuario')
   auth.loadUser = async () => {
     throw new Error('offline')
   }
   await router.push('/configuracoes')
-  assert.equal(router.currentRoute.value.name, 'Mural')
+  assert.equal(router.currentRoute.value.name, 'UserHome')
   assert.equal(auth.user.id, 'valid-user')
   assert.equal(messages.length, 1)
 })
