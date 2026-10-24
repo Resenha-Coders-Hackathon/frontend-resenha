@@ -1,92 +1,100 @@
 import { fileURLToPath, URL } from 'node:url'
 
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import { VitePWA } from 'vite-plugin-pwa'
 import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
-export default defineConfig({
-  server: {
-    headers: {
-      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  const apiBaseUrl = env.VITE_API_BASE_URL
+  const apiProxyTarget =
+    env.API_PROXY_TARGET ||
+    (apiBaseUrl?.startsWith('http') ? new URL(apiBaseUrl).origin : 'http://127.0.0.1:8000')
+
+  return {
+    server: {
+      headers: {
+        'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+      },
+      // Keep API requests on the frontend origin so browsers can send/read auth and CSRF cookies.
+      proxy: {
+        '/api': {
+          target: apiProxyTarget,
+          changeOrigin: true,
+        },
+        '/ws': {
+          target: apiProxyTarget,
+          changeOrigin: true,
+          ws: true,
+        },
+      },
     },
-    // Keep API requests on the frontend origin so browsers can send/read auth and CSRF cookies.
-    proxy: {
-      '/api': {
-        target: process.env.API_PROXY_TARGET || 'http://127.0.0.1:8000',
-        changeOrigin: true,
-      },
-      '/ws': {
-        target: process.env.API_PROXY_TARGET || 'http://127.0.0.1:8000',
-        changeOrigin: true,
-        ws: true,
+    preview: {
+      headers: {
+        'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
       },
     },
-  },
-  preview: {
-    headers: {
-      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+    plugins: [
+      vue(),
+      vueDevTools(),
+      tailwindcss(),
+      VitePWA({
+        registerType: 'autoUpdate',
+        workbox: {
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+          cleanupOutdatedCaches: true,
+          sourcemap: false,
+          maximumFileSizeToCacheInBytes: 5000000,
+        },
+        strategies: 'injectManifest',
+        srcDir: 'service-worker',
+        filename: 'sw.ts',
+        injectManifest: {
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+          maximumFileSizeToCacheInBytes: 5000000,
+        },
+        manifest: {
+          id: 'inceptum',
+          name: 'Inceptum',
+          short_name: 'Inceptum',
+          description: 'Inceptum',
+          theme_color: '#ffffff',
+          background_color: '#ffffff',
+          display: 'standalone',
+          scope: '/',
+          start_url: '/',
+          icons: [
+            {
+              src: '/icons/hackathon-192.png',
+              sizes: '192x192',
+              type: 'image/png',
+            },
+            {
+              src: '/icons/hackathon-512.png',
+              sizes: '512x512',
+              type: 'image/png',
+            },
+            {
+              src: '/icons/hackathon-512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'maskable',
+            },
+          ],
+        },
+        devOptions: {
+          enabled: true,
+          type: 'module',
+        },
+      }),
+    ],
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+      },
     },
-  },
-  plugins: [
-    vue(),
-    vueDevTools(),
-    tailwindcss(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        cleanupOutdatedCaches: true,
-        sourcemap: false,
-        maximumFileSizeToCacheInBytes: 5000000,
-      },
-      strategies: 'injectManifest',
-      srcDir: 'service-worker',
-      filename: 'sw.ts',
-      injectManifest: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        maximumFileSizeToCacheInBytes: 5000000,
-      },
-      manifest: {
-        id: 'inceptum',
-        name: 'Inceptum',
-        short_name: 'Inceptum',
-        description: 'Inceptum',
-        theme_color: '#ffffff',
-        background_color: '#ffffff',
-        display: 'standalone',
-        scope: '/',
-        start_url: '/',
-        icons: [
-          {
-            src: '/icons/hackathon-192.png',
-            sizes: '192x192',
-            type: 'image/png',
-          },
-          {
-            src: '/icons/hackathon-512.png',
-            sizes: '512x512',
-            type: 'image/png',
-          },
-          {
-            src: '/icons/hackathon-512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'maskable',
-          },
-        ],
-      },
-      devOptions: {
-        enabled: true,
-        type: 'module',
-      },
-    }),
-  ],
-  resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
-    },
-  },
+  }
 })

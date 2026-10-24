@@ -40,6 +40,12 @@
   font-weight: 500;
 }
 
+.auth-primary-submit {
+  background-color: var(--accent-orange);
+  border: 1px solid var(--accent-orange);
+  color: var(--surface);
+}
+
 /* Em formulários com gap entre campos, o gap já faz parte do respiro. */
 form.flex .auth-submit {
   margin-top: 4px;

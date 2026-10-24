@@ -63,15 +63,6 @@ async function handleGoogleCredential(credential: string) {
 <template>
   <section class="grid lg:grid-cols-[minmax(0,1fr)_36vw]">
     <AuthSplitLayout>
-      <p
-        class="mb-3 flex items-center gap-2 text-[11px] leading-4 font-semibold tracking-[0.14em] text-(--text-muted) uppercase"
-      >
-        <span
-          class="size-2 rounded-full bg-(--accent-orange) shadow-[0_0_12px_var(--accent-orange)]"
-          aria-hidden="true"
-        ></span>
-        Seu espaço de trabalho
-      </p>
       <h1 class="text-[38px]! leading-11.5! tracking-[-0.03em]!">
         Bem-vindo <span class="text-(--accent-orange)">de volta</span>
       </h1>
@@ -136,7 +127,7 @@ async function handleGoogleCredential(credential: string) {
           label="Entrar"
           :loading="isSubmitting"
           :disabled="isGoogleSubmitting"
-          class="auth-submit"
+          class="auth-submit auth-primary-submit"
         />
       </form>
 
