@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { useAuthNavigation } from '../composables'
 import { BaseButton } from '@/shared/components'
@@ -9,11 +9,13 @@ import { useAuthSwap } from '../composables'
 import { useAuthFlowStore, useAuthStore } from '../stores'
 
 const router = useRouter()
+const route = useRoute()
 const navigation = useAuthNavigation()
 const auth = useAuthStore()
 const authFlow = useAuthFlowStore()
 const { swapTo } = useAuthSwap()
-const email = ref('')
+// vindo de um convite, o e-mail convidado já vem preenchido
+const email = ref(typeof route.query.email === 'string' ? route.query.email : '')
 const password = ref('')
 const isSubmitting = ref(false)
 const errorMessage = ref('')
