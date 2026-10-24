@@ -6,7 +6,7 @@ import { useAuthNavigation } from '../composables'
 import { BaseButton } from '@/shared/components'
 import { AuthCardLayout, AuthField } from '../components'
 import { confirmPasswordReset } from '../services'
-import { useAuthFlowStore } from '../stores'
+import { useAuthFlowStore, useAuthStore } from '../stores'
 
 const STRENGTH_LABELS = [
   'Senha muito fraca',
@@ -56,6 +56,8 @@ async function handleSubmit() {
       new_password: password.value,
     })
     authFlow.clear()
+    useAuthStore().user = null
+    useAuthStore().sessions = []
     toast.success('Senha redefinida! Entre com a nova senha.')
     await router.push(navigation.to('Login'))
   } catch (error) {

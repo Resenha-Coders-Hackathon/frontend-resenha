@@ -14,6 +14,8 @@ payments, notifications and AI types remain in their respective `types` barrels.
 `PaginatedResponse<T>` describes DRF paginated endpoints; endpoints returning plain
 arrays should use `T[]`.
 
-Database-only models without public serializers (custom fields, saved views, dependencies,
-user settings and calendar credentials) are deliberately not presented as API responses.
+Database-only models without public serializers (custom fields, saved views, dependencies
+and calendar credentials) are deliberately not presented as API responses.
+User preferences now use `GET/PATCH /users/me/settings/`; see
+[`PROFILE_INTEGRATION.md`](PROFILE_INTEGRATION.md) for the coordinated backend contract.
 Never expose password hashes, verification tokens or provider credentials in client types.

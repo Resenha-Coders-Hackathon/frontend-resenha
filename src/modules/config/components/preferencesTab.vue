@@ -9,6 +9,7 @@ const settings = defineModel<PreferenceSettings>({ required: true })
 const THEMES = [
   { value: 'light', label: 'Claro', icon: 'light_mode' },
   { value: 'dark', label: 'Escuro', icon: 'dark_mode' },
+  { value: 'system', label: 'Sistema', icon: 'contrast' },
 ] as const
 
 const DATE_FORMATS: SelectOption[] = [
@@ -57,14 +58,14 @@ const WEEK_STARTS: SelectOption[] = [
       <div class="flex flex-col gap-[16px] sm:flex-row">
         <ConfigField
           id="preferences-date-format"
-          v-model="settings.dateFormat"
+          v-model="settings.date_format"
           as="select"
           label="Formato de data"
           :options="DATE_FORMATS"
         />
         <ConfigField
           id="preferences-week-start"
-          v-model="settings.weekStart"
+          v-model="settings.week_start"
           as="select"
           label="Semana começa em"
           :options="WEEK_STARTS"
@@ -75,12 +76,12 @@ const WEEK_STARTS: SelectOption[] = [
     <ConfigCard title="Kanban" class="gap-[6px]!">
       <div>
         <ConfigToggle
-          v-model="settings.compactCards"
+          v-model="settings.compact_cards"
           label="Cartões compactos"
           description="Mostra mais tarefas por coluna"
         />
         <ConfigToggle
-          v-model="settings.showCompleted"
+          v-model="settings.show_completed"
           label="Mostrar tarefas concluídas"
           description="Mantém a coluna de concluídas visível no board"
         />

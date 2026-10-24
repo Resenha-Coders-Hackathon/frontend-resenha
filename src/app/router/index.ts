@@ -37,8 +37,10 @@ router.beforeEach(async (to) => {
   const auth = useAuthStore()
   if (auth.user) return
   try {
-    
     if (!(await useAuthStore().loadUser())) {
+      if (to.matched.some((record) => record.path === '/configuracoes')) {
+        return { name: 'NotFound', params: { pathMatch: ['404'] }, replace: true }
+      }
       return { path: '/entrar', query: { redirect: to.fullPath } }
     }
   } catch {

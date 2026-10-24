@@ -5,6 +5,8 @@ export interface User {
   id: UUID
   name: string
   email: string
+  bio: string
+  avatar_url: string
   created_at: ISODateTime
 }
 
@@ -15,11 +17,17 @@ export interface UserSession {
   ip: string | null
   created_at: ISODateTime
   current: boolean
+  location: string
+  last_activity: ISODateTime
 }
 
 export interface UpdateUserRequest {
-  name: string
+  name?: string
+  bio?: string
+  avatar_url?: string
 }
+
+export type UpdatedUserProfile = Pick<User, 'name' | 'bio' | 'avatar_url'>
 
 export interface LoginCredentials {
   email: string

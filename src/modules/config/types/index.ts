@@ -13,23 +13,45 @@ export interface SelectOption {
 }
 
 export interface ProfileForm {
-  firstName: string
-  lastName: string
+  name: string
   email: string
-  role: string
   timezone: string
   language: string
   bio: string
+  avatar_url: string
+}
+
+export interface UserSettings {
+  theme: 'light' | 'dark' | 'system'
+  locale: string
+  timezone: string
+  push_enabled: boolean
+  email_product: boolean
+  email_weekly_digest: boolean
+  email_security: boolean
+  email_assigned: boolean
+  email_mentions: boolean
+  email_deadlines: boolean
+  app_comments: boolean
+  app_status: boolean
+  app_ai: boolean
+  date_format: DateFormat
+  week_start: WeekStart
+  compact_cards: boolean
+  show_completed: boolean
 }
 
 export interface NotificationSettings {
-  emailAssigned: boolean
-  emailMentions: boolean
-  emailDeadlines: boolean
-  emailDigest: boolean
-  appComments: boolean
-  appStatus: boolean
-  appAi: boolean
+  email_product: boolean
+  email_weekly_digest: boolean
+  email_security: boolean
+  email_assigned: boolean
+  email_mentions: boolean
+  email_deadlines: boolean
+  app_comments: boolean
+  app_status: boolean
+  app_ai: boolean
+  push_enabled: boolean
 }
 
 export interface PasswordForm {
@@ -39,16 +61,19 @@ export interface PasswordForm {
 }
 
 export interface ActiveSession {
-  id: string
+  id: number
   device: string
   detail: string
   current: boolean
 }
 
 export interface PreferenceSettings {
-  theme: 'light' | 'dark'
-  dateFormat: string
-  weekStart: string
-  compactCards: boolean
-  showCompleted: boolean
+  theme: UserSettings['theme']
+  date_format: UserSettings['date_format']
+  week_start: UserSettings['week_start']
+  compact_cards: boolean
+  show_completed: boolean
 }
+
+export type DateFormat = 'dd/mm/yyyy' | 'yyyy-mm-dd' | 'long'
+export type WeekStart = 'sunday' | 'monday'
