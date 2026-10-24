@@ -32,7 +32,7 @@ function drop(event: DragEvent, position = props.tasks.length) {
   <section
     :aria-label="status.name"
     :class="[
-      'flex max-h-full w-72 shrink-0 flex-col rounded-[14px] bg-(--bg-subtle) transition-colors sm:w-80 dark:bg-white/5',
+      'flex min-w-64 max-w-[30rem] flex-1 basis-0 flex-col rounded-[14px] bg-(--bg-subtle) transition-colors dark:bg-white/5',
       over ? 'outline-2 -outline-offset-2 outline-(--bg-orange)' : '',
     ]"
     @dragover.prevent="over = canEdit"

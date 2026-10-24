@@ -7,6 +7,8 @@ import { useAuthStore } from '@/modules/auth'
 import { fetchAllPages } from '@/shared/utils'
 import { avatar } from '@/shared/utils/people'
 import { relativeTime } from '@/shared/utils/time'
+import { useLinksStore } from '../stores/links'
+import { LINK_ORIGINS, dueLabel, linkOrigin, type LinkOrigin } from '../utils/board'
 import type { TaskPriority } from '@/shared/types'
 import {
   createChecklistItem,
@@ -50,6 +52,7 @@ const emit = defineEmits<{
 }>()
 
 const auth = useAuthStore()
+const linksStore = useLinksStore()
 const title = ref('')
 const description = ref('')
 const priority = ref<TaskPriority>('medium')
@@ -61,6 +64,10 @@ const checklist = ref<ChecklistItem[]>([])
 const comments = ref<Comment[]>([])
 const newItem = ref('')
 const newComment = ref('')
+const linkUrl = ref('')
+const linkTitle = ref('')
+const linkHint = ref<LinkOrigin | null>(null)
+const linkUrlInput = ref<HTMLInputElement | null>(null)
 
 const editing = computed(() => !!props.task)
 const readOnly = computed(() => editing.value && !props.canEdit)
@@ -78,7 +85,8 @@ watch(
     status.value = t?.status_id ?? (props.initialStatus || props.statuses[0]?.id || '')
     checklist.value = []
     comments.value = []
-    newItem.value = newComment.value = ''
+    newItem.value = newComment.value = linkUrl.value = linkTitle.value = ''
+    linkHint.value = null
     await nextTick()
     if (!t) titleInput.value?.focus()
     if (t) await loadDetails(t.id)
@@ -91,6 +99,7 @@ async function loadDetails(id: string) {
     const [items, notes] = await Promise.all([
       fetchAllPages((page) => listChecklist(id, page)),
       fetchAllPages((page) => listComments(id, page)),
+      linksStore.load('task', id),
     ])
     if (props.task?.id !== id) return
     checklist.value = items
@@ -161,6 +170,43 @@ const removeComment = (comment: Comment) =>
     comments.value = comments.value.filter((c) => c.id !== comment.id)
   }, 'Não foi possível apagar o comentário.')
 
+const links = computed(() => (props.task ? linksStore.forTarget('task', props.task.id) : []))
+
+function pickOrigin(origin: LinkOrigin) {
+  linkHint.value = origin
+  linkUrlInput.value?.focus()
+}
+
+const addLink = () =>
+  run(async () => {
+    const url = linkUrl.value.trim()
+    if (!props.task || !url) return
+    await linksStore.add('task', props.task.id, {
+      url,
+      ...(linkTitle.value.trim() && { title: linkTitle.value.trim() }),
+    })
+    linkUrl.value = linkTitle.value = ''
+    linkHint.value = null
+  }, 'Não foi possível anexar o link. Confira se o endereço começa com https://.')
+
+const removeLink = (id: string) =>
+  run(async () => {
+    if (props.task) await linksStore.remove('task', props.task.id, id)
+  }, 'Não foi possível remover o anexo.')
+
+const currentStatus = computed(() => props.statuses.find((s) => s.id === status.value))
+const created = computed(() =>
+  props.task
+    ? new Date(props.task.created_at)
+        .toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+        .replace('.', '')
+    : '',
+)
+const deadline = computed(() =>
+  props.task
+    ? dueLabel({ due_date: dueDate.value || null, completed_at: props.task.completed_at })
+    : '',
+)
 const done = computed(() => checklist.value.filter((i) => i.is_done).length)
 const canDeleteComment = (c: Comment) => props.canManage || c.author_id === auth.user?.id
 
@@ -248,6 +294,11 @@ const field =
                   >timelapse</span
                 >Status</label
               >
+              <span
+                class="size-2.5 rounded-full"
+                :style="{ backgroundColor: currentStatus?.color || '#8a857d' }"
+                aria-hidden="true"
+              />
               <select id="task-status" v-model="status" :disabled="readOnly" :class="field">
                 <option v-for="s in statuses" :key="s.id" :value="s.id">{{ s.name }}</option>
               </select>
@@ -288,6 +339,19 @@ const field =
               </div>
             </div>
 
+            <div v-if="task" :class="row">
+              <span :class="label"
+                ><span class="material-symbols-outlined text-[16px]" aria-hidden="true">event</span
+                >Criada em</span
+              >
+              <span class="text-[13px]"
+                >{{ created
+                }}<template v-if="task.created_by_name">
+                  · por {{ task.created_by_name }}</template
+                ></span
+              >
+            </div>
+
             <div :class="row">
               <label :class="label" for="task-due"
                 ><span class="material-symbols-outlined text-[16px]" aria-hidden="true">flag</span
@@ -300,6 +364,16 @@ const field =
                 :disabled="readOnly"
                 :class="field"
               />
+              <span
+                v-if="deadline"
+                :class="[
+                  'rounded-md px-2 py-0.5 text-[12px] font-medium',
+                  task?.is_overdue
+                    ? 'bg-[#fde8e8] text-[#c42b2b] dark:bg-[#dc2626]/20 dark:text-[#ff8a8a]'
+                    : 'bg-(--bg-muted) text-(--text-secondary) dark:bg-white/10',
+                ]"
+                >{{ deadline }}</span
+              >
             </div>
 
             <div :class="row">
@@ -327,6 +401,15 @@ const field =
                   {{ p.label }}
                 </button>
               </div>
+            </div>
+
+            <div :class="row">
+              <span :class="label"
+                ><span class="material-symbols-outlined text-[16px]" aria-hidden="true"
+                  >apartment</span
+                >Setor</span
+              >
+              <span class="text-[13px] font-medium">{{ sectorName }}</span>
             </div>
           </div>
 
@@ -392,6 +475,114 @@ const field =
                 :full-width="false"
                 type="submit"
                 :disabled="!newItem.trim()"
+              />
+            </form>
+          </section>
+
+          <section v-if="editing" class="grid gap-2.5" aria-labelledby="task-links">
+            <h3 id="task-links" class="text-[14px] font-semibold">
+              Anexos e integrações
+              <span v-if="links.length" class="font-normal text-(--text-muted)"
+                >· {{ links.length }}</span
+              >
+            </h3>
+            <div v-if="canEdit" class="grid grid-cols-3 gap-2">
+              <button
+                v-for="origin in ['drive', 'docs', 'meet'] as const"
+                :key="origin"
+                type="button"
+                :class="[
+                  'flex flex-col items-start gap-2 rounded-xl border p-3 text-left text-[13px] font-medium transition-colors',
+                  linkHint === origin
+                    ? 'border-(--text-primary) dark:border-(--text-inverse)'
+                    : 'border-(--border-default) hover:bg-(--bg-subtle) dark:border-(--border-inverse) dark:hover:bg-white/10',
+                ]"
+                @click="pickOrigin(origin)"
+              >
+                <span
+                  class="material-symbols-outlined grid size-8 place-items-center rounded-lg text-[18px]!"
+                  :style="{
+                    backgroundColor: `${LINK_ORIGINS[origin].color}1f`,
+                    color: LINK_ORIGINS[origin].color,
+                  }"
+                  aria-hidden="true"
+                  >{{ LINK_ORIGINS[origin].icon }}</span
+                >
+                {{ LINK_ORIGINS[origin].label }}
+              </button>
+            </div>
+            <ul class="grid gap-2">
+              <li
+                v-for="link in links"
+                :key="link.id"
+                class="group flex items-center gap-3 rounded-xl border border-(--border-default) p-3 dark:border-(--border-inverse)"
+              >
+                <span
+                  class="material-symbols-outlined grid size-8 shrink-0 place-items-center rounded-lg text-[18px]!"
+                  :style="{
+                    backgroundColor: `${LINK_ORIGINS[linkOrigin(link.url)].color}1f`,
+                    color: LINK_ORIGINS[linkOrigin(link.url)].color,
+                  }"
+                  aria-hidden="true"
+                  >{{ LINK_ORIGINS[linkOrigin(link.url)].icon }}</span
+                >
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate text-[13.5px] font-medium">{{
+                    link.title || link.url
+                  }}</span>
+                  <span class="block truncate text-[12px] text-(--text-muted)">{{
+                    LINK_ORIGINS[linkOrigin(link.url)].label
+                  }}</span>
+                </span>
+                <a
+                  :href="link.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="material-symbols-outlined text-[18px]! text-(--text-muted) hover:text-(--text-primary)"
+                  :aria-label="`Abrir ${link.title || link.url}`"
+                  >open_in_new</a
+                >
+                <button
+                  v-if="canEdit"
+                  type="button"
+                  class="material-symbols-outlined text-[18px]! text-(--text-muted) opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+                  aria-label="Remover anexo"
+                  @click="removeLink(link.id)"
+                >
+                  close
+                </button>
+              </li>
+              <li v-if="!links.length" class="text-[13px] text-(--text-muted)">
+                Nenhum anexo ainda.
+              </li>
+            </ul>
+            <form v-if="canEdit" class="flex flex-wrap gap-2" @submit.prevent="addLink">
+              <input
+                ref="linkUrlInput"
+                v-model="linkUrl"
+                type="url"
+                :placeholder="
+                  linkHint
+                    ? `Cole o link do ${LINK_ORIGINS[linkHint].label}`
+                    : 'Cole um link (https://…)'
+                "
+                aria-label="Endereço do anexo"
+                :class="[field, 'h-9 min-w-48 flex-[2]']"
+              />
+              <input
+                v-model="linkTitle"
+                maxlength="255"
+                placeholder="Nome (opcional)"
+                aria-label="Nome do anexo"
+                :class="[field, 'h-9 min-w-32 flex-1']"
+              />
+              <BaseButton
+                label="Anexar"
+                variant="ghost"
+                size="sm"
+                :full-width="false"
+                type="submit"
+                :disabled="!linkUrl.trim()"
               />
             </form>
           </section>

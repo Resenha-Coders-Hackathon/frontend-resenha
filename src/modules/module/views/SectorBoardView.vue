@@ -11,7 +11,7 @@ import { getSector } from '../services'
 import { useKanbanStore } from '../stores'
 import { useSectorAccessStore } from '../stores/access'
 import type { CreateTaskRequest, Sector, SectorRole } from '../types'
-import { filterTasks, type BoardFilter } from '../utils/board'
+import { NO_FILTERS, activeFilters, filterTasks, type BoardFilters } from '../utils/board'
 import { TOOLBAR_BUTTON } from '../utils/ui'
 
 const props = defineProps<{ sectorId: string }>()
@@ -25,7 +25,7 @@ const missing = ref(false)
 const loading = ref(false)
 const saving = ref(false)
 const search = ref('')
-const filter = ref<BoardFilter>('all')
+const filters = ref<BoardFilters>({ ...NO_FILTERS })
 const panelOpen = ref(false)
 const openTaskId = ref<string | null>(null)
 const newStatus = ref('')
@@ -34,7 +34,7 @@ const canEdit = computed(() => sector.value?.my_role !== 'viewer' && !!sector.va
 const canManage = computed(() => sector.value?.my_role === 'manager')
 const openTask = computed(() => kanban.tasks.find((t) => t.id === openTaskId.value) ?? null)
 const visible = computed(() =>
-  filterTasks(kanban.tasks, filter.value, search.value, auth.user?.id ?? null),
+  filterTasks(kanban.tasks, filters.value, search.value, auth.user?.id ?? null),
 )
 const byStatus = (statusId: string) => visible.value.filter((t) => t.status_id === statusId)
 
@@ -48,18 +48,29 @@ const description = computed(() => {
   return `${people} ${people === 1 ? 'pessoa' : 'pessoas'} · ${tasks} ${tasks === 1 ? 'tarefa' : 'tarefas'} · ${percent.value}% concluído`
 })
 
-const FILTERS: { value: BoardFilter; label: string; icon: string }[] = [
-  { value: 'all', label: 'Todas', icon: 'apps' },
-  { value: 'mine', label: 'Minhas', icon: 'person' },
-  { value: 'overdue', label: 'Atrasadas', icon: 'schedule' },
-  { value: 'high', label: 'Prioridade alta', icon: 'flag' },
-]
+const filtering = computed(() => activeFilters(filters.value) > 0 || !!search.value.trim())
+const clearFilters = () => {
+  filters.value = { ...NO_FILTERS }
+  search.value = ''
+}
+
+// atalhos de um clique para os filtros mais usados
+const QUICK = [
+  { label: 'Minhas', icon: 'person', key: 'assignee', value: 'me' },
+  { label: 'Atrasadas', icon: 'schedule', key: 'due', value: 'overdue' },
+  { label: 'Prioridade alta', icon: 'flag', key: 'priority', value: 'high+' },
+] as const
+const toggleQuick = (q: (typeof QUICK)[number]) =>
+  (filters.value = { ...filters.value, [q.key]: filters.value[q.key] === q.value ? '' : q.value })
+
+const selectClass =
+  'h-9 rounded-full border border-(--border-default) bg-transparent px-3 text-[13px] dark:border-(--border-inverse)'
 
 async function load(id: string) {
   loading.value = true
   missing.value = false
   sector.value = null
-  filter.value = 'all'
+  filters.value = { ...NO_FILTERS }
   search.value = ''
   panelOpen.value = false
   try {
@@ -194,23 +205,60 @@ async function move(taskId: string, statusId: string, position: number) {
 
         <div class="flex flex-wrap items-center gap-2" role="group" aria-label="Filtrar tarefas">
           <button
-            v-for="f in FILTERS"
-            :key="f.value"
+            v-for="q in QUICK"
+            :key="q.label"
             type="button"
-            :aria-pressed="filter === f.value"
+            :aria-pressed="filters[q.key] === q.value"
             :class="[
-              'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-medium transition-colors',
-              filter === f.value
+              'flex h-9 items-center gap-1.5 rounded-full border px-3 text-[13px] font-medium transition-colors',
+              filters[q.key] === q.value
                 ? 'border-(--text-primary) bg-(--text-primary) text-white dark:border-(--text-inverse) dark:bg-(--text-inverse) dark:text-(--text-primary)'
                 : 'border-(--border-default) text-(--text-secondary) hover:bg-(--bg-subtle) dark:border-(--border-inverse)',
             ]"
-            @click="filter = f.value"
+            @click="toggleQuick(q)"
           >
             <span class="material-symbols-outlined text-[16px]!" aria-hidden="true">{{
-              f.icon
+              q.icon
             }}</span>
-            {{ f.label }}
+            {{ q.label }}
           </button>
+
+          <select v-model="filters.assignee" aria-label="Responsável" :class="selectClass">
+            <option value="">Responsável: todos</option>
+            <option value="me">Minhas</option>
+            <option value="none">Sem responsável</option>
+            <option v-for="m in access.members" :key="m.user_id" :value="m.user_id">
+              {{ m.name }}
+            </option>
+          </select>
+          <select v-model="filters.priority" aria-label="Prioridade" :class="selectClass">
+            <option value="">Prioridade: todas</option>
+            <option value="high+">Alta ou urgente</option>
+            <option value="urgent">Urgente</option>
+            <option value="high">Alta</option>
+            <option value="medium">Média</option>
+            <option value="low">Baixa</option>
+          </select>
+          <select v-model="filters.due" aria-label="Entrega" :class="selectClass">
+            <option value="">Entrega: qualquer</option>
+            <option value="overdue">Atrasadas</option>
+            <option value="today">Vence hoje</option>
+            <option value="week">Próximos 7 dias</option>
+            <option value="none">Sem data</option>
+          </select>
+
+          <button
+            v-if="filtering"
+            type="button"
+            class="h-9 rounded-full px-3 text-[13px] text-(--text-secondary) underline"
+            @click="clearFilters"
+          >
+            Limpar filtros
+          </button>
+          <span v-if="filtering" class="text-[13px] text-(--text-muted)" role="status">
+            {{ visible.length }} de {{ kanban.tasks.length }}
+            {{ kanban.tasks.length === 1 ? 'tarefa' : 'tarefas' }}
+          </span>
         </div>
 
         <p v-if="loading" role="status" class="text-sm text-(--text-muted)">Carregando o quadro…</p>
@@ -223,14 +271,13 @@ async function move(taskId: string, statusId: string, position: number) {
             >Criar colunas</RouterLink
           >
         </p>
-        <div v-else class="flex min-h-0 flex-1 items-start gap-4 overflow-x-auto pb-2">
+        <div v-else class="flex min-h-0 flex-1 items-stretch gap-4 overflow-x-auto pb-2">
           <BoardColumn
             v-for="status in kanban.statuses"
             :key="status.id"
             :status="status"
             :tasks="byStatus(status.id)"
             :can-edit="canEdit"
-            class="max-h-full"
             @add="openCreate(status.id)"
             @open="openDetails"
             @drop="(taskId, position) => move(taskId, status.id, position)"
