@@ -95,7 +95,7 @@ test('uploads use repeated files fields and blob responses without setting multi
     body.getAll('files').map((value) => (typeof value === 'string' ? value : value.name)),
     ['a.png', 'b.pdf'],
   )
-  assert.deepEqual(calls[0]?.config, { responseType: 'blob' })
+  assert.deepEqual(calls[0]?.config, { responseType: 'blob', timeout: 200_000 })
 })
 
 test('JSON validation errors returned as blobs are decoded, including nested file errors', async () => {

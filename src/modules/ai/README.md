@@ -57,3 +57,9 @@ Task creation goes through a **draft card**: the assistant's `task_draft` receip
 saved until "Criar tarefa", which calls `POST /ai/tasks/` directly (no model) with the
 draft's `request_id`, so a retry or double click never duplicates the task. Changing the
 sector reloads assignable people through `GET /ai/tasks/options/`.
+
+Task cards (`AssistantTaskCard`) edit the task **directly through the Kanban API** (no model):
+complete/reopen, edit title/description, priority, due date, assignee, column, checklist
+and comments (a just-posted comment has "Desfazer"). Only deletion still goes through the
+assistant so the server can require its single-use confirmation. The assistant is branded
+"Inceptum AI" (`AiBrandName`).
