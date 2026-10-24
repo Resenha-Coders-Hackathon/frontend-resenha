@@ -1,11 +1,19 @@
 <script setup lang="ts">
+import { watch } from 'vue'
 import { SidebarComp, FooterComp, ThemeSwitcher } from '@/shared/components'
 import { useOrganizationsStore } from '../stores'
 import '../organizations.css'
 import { NotificationLink } from '@/modules/notifications'
 
-defineProps<{ title: string; organizationId?: string }>()
+const props = defineProps<{ title: string; organizationId?: string }>()
 const organizations = useOrganizationsStore()
+
+// abrir/trocar a organização aqui a torna a selecionada (chat, times...)
+watch(
+  () => props.organizationId,
+  (id) => id && organizations.select(id),
+  { immediate: true },
+)
 </script>
 
 <template>

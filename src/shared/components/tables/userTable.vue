@@ -7,7 +7,7 @@ defineProps<{
 
 <template>
   <div
-    class="py-3 px-5 border border-(--border-default) rounded-lg w-full bg-(--surface) dark:bg-(--surface-inverse) grid gap-1 shadow-xl"
+    class="py-3 px-5 border border-(--border-default) rounded-lg w-full bg-(--surface) dark:bg-(--surface-inverse) grid gap-1 shadow-xl dark:border-(--border-inverse)"
   >
     <h3 class="font-semibold text-sm">{{ title }}</h3>
 

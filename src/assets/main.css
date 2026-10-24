@@ -8,10 +8,11 @@
 
   --auth-background: #ffffff;
   --background: #f3f2ef;
-  --background-inverse: #000000;
+  /* tons escuros quentes, na mesma família do claro (#f3f2ef) */
+  --background-inverse: #0e0e0d;
 
   --surface: #ffffff;
-  --surface-inverse: #262626;
+  --surface-inverse: #191917;
 
   --bg-subtle: #f4f4f4;
   --bg-muted: #e6e6e6;
@@ -20,8 +21,8 @@
   --text-primary: #000000;
   --text-secondary: #525252;
   --text-muted: #a3a3a3;
-  --text-inverse: #ffffff;
-  --text-inverse-muted: #a3a3a3;
+  --text-inverse: #edece8;
+  --text-inverse-muted: #a19d95;
 
   --sucess: #2590f6;
   --low: #64748b;
@@ -86,6 +87,14 @@ html {
   --kanban-shadow: 0 4px 12px rgb(0 0 0 / 15%);
   background-color: var(--background-inverse);
   color: var(--text-inverse);
+}
+
+.dark ::selection {
+  background-color: rgb(255 103 0 / 0.35);
+}
+
+.dark * {
+  scrollbar-color: #3a3935 transparent;
 }
 
 h1 {

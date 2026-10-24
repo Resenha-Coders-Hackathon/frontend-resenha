@@ -94,6 +94,14 @@ export const useKanbanStore = defineStore('kanban', () => {
     return created
   }
 
+  async function editStatus(statusId: string, payload: UpdateStatusRequest): Promise<Status> {
+    const updated = await updateStatus(requireSector(), statusId, payload)
+    statuses.value = statuses.value
+      .map((s) => (s.id === statusId ? updated : s))
+      .sort((a, b) => a.position - b.position)
+    return updated
+  }
+
   async function removeStatus(statusId: string): Promise<void> {
     await deleteStatus(requireSector(), statusId)
     statuses.value = statuses.value.filter((s) => s.id !== statusId)

@@ -16,8 +16,7 @@ const label = computed(() =>
 )
 const isLoading = ref(true)
 const setupMessage = ref('')
-let unmountGoogleButton: (() => void) | undefined
-let isDisposed = false
+const abortController = new AbortController()
 
 function handleCredential(credential: string) {
   emit('credential', credential)
@@ -33,14 +32,13 @@ onMounted(async () => {
 
   try {
     if (buttonContainer.value) {
-      const cleanup = await mountGoogleButton(
+      await mountGoogleButton(
         buttonContainer.value,
         clientId,
         props.buttonText,
         handleCredential,
+        abortController.signal,
       )
-      if (isDisposed) cleanup()
-      else unmountGoogleButton = cleanup
     }
   } catch (error) {
     setupMessage.value =
@@ -51,8 +49,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-  isDisposed = true
-  unmountGoogleButton?.()
+  abortController.abort()
 })
 </script>
 
@@ -106,7 +103,8 @@ onBeforeUnmount(() => {
 /* O iframe do Google tem no máximo 400px x 44px: ampliamos para cobrir o botão todo.
    Fica invisível, mas continua clicável e acessível por teclado. */
 .google-button__overlay {
-  opacity: 0;
+  /* Chrome skips pointer input on fully transparent cross-origin iframes. */
+  opacity: 0.001;
   transform: scale(1.6);
 }
 </style>

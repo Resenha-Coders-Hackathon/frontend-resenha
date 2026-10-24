@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { fetchAllPages } from '@/shared/utils'
 import {
@@ -19,9 +19,39 @@ import type {
   UpdateOrganizationRequest,
 } from '../types'
 
+const CURRENT_KEY = 'resenha.currentOrganization'
+
+function storedId(): string | null {
+  try {
+    return localStorage.getItem(CURRENT_KEY)
+  } catch {
+    return null // storage bloqueado: usa só a memória
+  }
+}
+
 export const useOrganizationsStore = defineStore('organizations', () => {
   const organizations = ref<Organization[]>([])
   const members = ref<OrganizationMember[]>([])
+  const currentId = ref<string | null>(storedId())
+
+  // Organização selecionada: chat, times e demais telas por organização usam esta.
+  // Se a escolhida não existe mais (ou nunca houve), cai na primeira que não é o espaço pessoal.
+  const current = computed(
+    () =>
+      organizations.value.find((o) => o.id === currentId.value) ??
+      organizations.value.find((o) => !o.is_personal) ??
+      organizations.value[0] ??
+      null,
+  )
+
+  function select(id: string): void {
+    currentId.value = id
+    try {
+      localStorage.setItem(CURRENT_KEY, id)
+    } catch {
+      /* sem storage a escolha vale só até recarregar */
+    }
+  }
 
   async function load(): Promise<void> {
     organizations.value = []
@@ -43,6 +73,7 @@ export const useOrganizationsStore = defineStore('organizations', () => {
   async function remove(id: string): Promise<void> {
     await deleteOrganization(id)
     organizations.value = organizations.value.filter((o) => o.id !== id)
+    if (currentId.value === id) currentId.value = null
   }
 
   async function loadMembers(id: string): Promise<void> {
@@ -70,6 +101,9 @@ export const useOrganizationsStore = defineStore('organizations', () => {
   return {
     organizations,
     members,
+    current,
+    currentId,
+    select,
     load,
     create,
     update,

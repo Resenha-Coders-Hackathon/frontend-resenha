@@ -2,6 +2,22 @@ import type { RouteRecordRaw } from 'vue-router'
 
 export const paymentsRoutes: RouteRecordRaw[] = [
   {
+    path: '/faturamento',
+    component: () => import('@/app/layouts/DefaultLayout.vue'),
+    children: [{ path: '', name: 'Billing', component: () => import('../views/BillingView.vue') }],
+  },
+  {
+    path: '/planos',
+    component: () => import('@/app/layouts/DefaultLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'Plans',
+        component: () => import('../views/PlansView.vue'),
+      },
+    ],
+  },
+  {
     path: '/pagamentos',
     component: () => import('@/app/layouts/DefaultLayout.vue'),
     children: [

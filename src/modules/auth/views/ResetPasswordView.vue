@@ -95,7 +95,7 @@ async function handleSubmit() {
                 :class="[
                   'h-1 rounded-full transition-colors',
                   bar <= strength
-                    ? 'bg-(--surface-inverse) dark:bg-(--surface)'
+                    ? 'bg-(--surface-inverse) dark:bg-(--text-inverse)'
                     : 'bg-(--bg-muted) dark:bg-(--border-inverse)',
                 ]"
               ></span>

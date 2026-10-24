@@ -39,7 +39,7 @@ const buttonClasses = computed(() => [
   // VARIANTS
   {
     /* PRIMARY */
-    'bg-(--surface-inverse) text-(--text-inverse) dark:bg-(--surface) dark:text-(--text-primary) hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]':
+    'bg-(--surface-inverse) text-(--text-inverse) dark:bg-(--text-inverse) dark:text-(--text-primary) hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]':
       props.variant === 'primary',
 
     /* SECONDARY */

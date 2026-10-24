@@ -72,7 +72,7 @@ const authItems: IMenuItems[] = [
               :class="[
                 'flex items-center gap-1',
                 item.label === 'Entrar'
-                  ? 'group rounded-full bg-(--surface-inverse) text-(--text-inverse) dark:bg-(--surface) dark:text-(--text-primary) px-3 py-1.5 transition-all duration-300'
+                  ? 'group rounded-full bg-(--surface-inverse) text-(--text-inverse) dark:bg-(--text-inverse) dark:text-(--text-primary) px-3 py-1.5 transition-all duration-300'
                   : 'hover:text-(--text-muted) active:text-(--text-muted)',
               ]"
             >
@@ -153,7 +153,7 @@ const authItems: IMenuItems[] = [
                 :class="[
                   'flex justify-between items-center gap-2 rounded-full px-4 py-3 text-sm font-semibold',
                   item.label === 'Entrar'
-                    ? 'group rounded-full bg-(--surface-inverse) text-(--text-inverse) dark:bg-(--surface) dark:text-(--text-primary) px-3 py-1.5 transition-all duration-300'
+                    ? 'group rounded-full bg-(--surface-inverse) text-(--text-inverse) dark:bg-(--text-inverse) dark:text-(--text-primary) px-3 py-1.5 transition-all duration-300'
                     : 'hover:text-(--text-muted) active:text-(--text-muted)',
                 ]"
                 @click="closeMenu"

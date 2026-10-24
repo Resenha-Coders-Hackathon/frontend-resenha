@@ -8,10 +8,12 @@ const auth = useAuthStore()
 
 <template>
   <div class="pb-[calc(87px+env(safe-area-inset-bottom))] md:pb-0">
-    <main class="flex">
+    <main class="flex items-start">
       <SidebarComp />
       <div class="min-w-0 flex-1">
-        <header v-if="auth.user" class="flex justify-end p-3"><NotificationLink /></header>
+        <header v-if="auth.user" class="flex h-14 items-center justify-end px-3">
+          <NotificationLink />
+        </header>
         <RouterView />
       </div>
     </main>
