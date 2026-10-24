@@ -41,8 +41,18 @@ const plan = computed(() => {
 const cycle = computed<BillingCycle>(() => (route.query.ciclo === 'yearly' ? 'yearly' : 'monthly'))
 
 const method = ref<PaymentMethod>('card')
-const title = ref(plan.value ? `Plano ${plan.value.name} — ${CYCLE_LABELS[cycle.value]}` : '')
-const amount = ref(plan.value ? maskCurrency(planTotal(plan.value.id, cycle.value).toFixed(2)) : '')
+// vindo do faturamento: ?descricao=Fatura #0482&valor=480.00
+const queryText = (value: unknown) => (typeof value === 'string' ? value : '')
+const title = ref(
+  plan.value
+    ? `Plano ${plan.value.name} — ${CYCLE_LABELS[cycle.value]}`
+    : queryText(route.query.descricao),
+)
+const amount = ref(
+  maskCurrency(
+    plan.value ? planTotal(plan.value.id, cycle.value).toFixed(2) : queryText(route.query.valor),
+  ),
+)
 const name = ref('')
 const cpf = ref('')
 const cardNumber = ref('')

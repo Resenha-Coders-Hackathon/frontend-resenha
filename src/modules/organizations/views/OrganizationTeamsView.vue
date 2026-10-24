@@ -10,7 +10,7 @@ import {
   deleteTeam,
   listTeamMembers,
   addTeamMember,
-  updateTeamMember,
+  updateTeamMemberRole,
   removeTeamMember,
   type Team,
   type TeamMember,
@@ -137,14 +137,17 @@ async function removeTeam() {
 async function addPerson() {
   if (!selected.value || !userId.value) return
   const teamId = selected.value.id
-  await mutate(() => addTeamMember(id.value, teamId, userId.value, role.value), refresh)
+  await mutate(
+    () => addTeamMember(id.value, teamId, { user_id: userId.value, role: role.value }),
+    refresh,
+  )
 }
 
 async function changeRole(member: TeamMember, event: Event) {
   const value = (event.target as HTMLSelectElement).value
   if (!selected.value || (value !== 'lead' && value !== 'member')) return
   const teamId = selected.value.id
-  await mutate(() => updateTeamMember(id.value, teamId, member.id, value), refresh)
+  await mutate(() => updateTeamMemberRole(id.value, teamId, member.id, { role: value }), refresh)
   ;(event.target as HTMLSelectElement).value =
     members.value.find((row) => row.id === member.id)?.role ?? member.role
 }

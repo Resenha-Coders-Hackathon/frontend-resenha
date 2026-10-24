@@ -105,6 +105,18 @@ test('every registered private route redirects anonymous visitors before loading
   assert.deepEqual(resolvedPublicNames.sort(), publicNames.sort())
 })
 
+test('integrated reports, teams and uploads routes remain registered and protected', async () => {
+  const router = routerForTest()
+  for (const path of ['/relatorios', '/equipe', '/arquivos']) {
+    const target = router.resolve(path)
+    assert.ok(target.matched.length)
+    assert.notEqual(target.name, 'NotFound', path)
+    await router.push(path)
+    assert.equal(router.currentRoute.value.name, 'Login', path)
+    assert.equal(router.currentRoute.value.query.redirect, path)
+  }
+})
+
 test('new routes are private without requiring a metadata flag', async () => {
   const router = routerForTest()
   let loaded = false

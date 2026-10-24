@@ -15,3 +15,6 @@ export {
   updateSectorTeam,
   removeSectorTeam,
 } from './services'
+export { useSectorAccessStore } from './stores/access'
+export { useLinksStore } from './stores/links'
+export type { LinkTarget } from './services'

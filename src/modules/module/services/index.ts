@@ -4,11 +4,15 @@ import type {
   AddSectorMemberRequest,
   ChecklistItem,
   Comment,
+  AddSectorTeamRequest,
   CreateChecklistItemRequest,
+  CreateResourceLinkRequest,
   CreateSectorRequest,
   CreateStatusRequest,
   CreateTaskRequest,
+  Dashboard,
   MoveTaskRequest,
+  ResourceLink,
   Sector,
   SectorMember,
   SectorRole,
@@ -81,28 +85,12 @@ export async function updateSectorMember(
   return (await api.patch<SectorMember>(`/sectors/${enc(id)}/members/${memberId}/`, { role })).data
 }
 
-export async function listSectorTeams(id: string, page = 1): Promise<Page<SectorTeam>> {
-  return (await api.get<Page<SectorTeam>>(`/sectors/${enc(id)}/teams/`, { params: { page } })).data
-}
-
-export async function addSectorTeam(
-  id: string,
-  teamId: string,
-  role: SectorRole,
-): Promise<SectorTeam> {
-  return (await api.post<SectorTeam>(`/sectors/${enc(id)}/teams/`, { team_id: teamId, role })).data
-}
-
 export async function updateSectorTeam(
   id: string,
   linkId: number,
   role: SectorRole,
 ): Promise<SectorTeam> {
   return (await api.patch<SectorTeam>(`/sectors/${enc(id)}/teams/${linkId}/`, { role })).data
-}
-
-export async function removeSectorTeam(id: string, linkId: number): Promise<void> {
-  await api.delete(`/sectors/${enc(id)}/teams/${linkId}/`)
 }
 
 // ── Colunas (status) ───────────────────────────────────────────────────────
@@ -195,4 +183,74 @@ export async function createComment(taskId: string, content: string): Promise<Co
 
 export async function deleteComment(taskId: string, commentId: string): Promise<void> {
   await api.delete(`/tasks/${enc(taskId)}/comments/${enc(commentId)}/`)
+}
+
+export async function updateComment(
+  taskId: string,
+  commentId: string,
+  content: string,
+): Promise<Comment> {
+  return (
+    await api.patch<Comment>(`/tasks/${enc(taskId)}/comments/${enc(commentId)}/`, { content })
+  ).data
+}
+
+// ── Papéis e times do setor ────────────────────────────────────────────────
+export async function updateSectorMemberRole(
+  sectorId: string,
+  memberId: number,
+  role: SectorRole,
+): Promise<SectorMember> {
+  return (await api.patch<SectorMember>(`/sectors/${enc(sectorId)}/members/${memberId}/`, { role }))
+    .data
+}
+
+export async function listSectorTeams(sectorId: string, page = 1): Promise<Page<SectorTeam>> {
+  return (await api.get<Page<SectorTeam>>(`/sectors/${enc(sectorId)}/teams/`, { params: { page } }))
+    .data
+}
+
+export async function addSectorTeam(
+  sectorId: string,
+  payload: AddSectorTeamRequest,
+): Promise<SectorTeam> {
+  return (await api.post<SectorTeam>(`/sectors/${enc(sectorId)}/teams/`, payload)).data
+}
+
+export async function removeSectorTeam(sectorId: string, linkId: number): Promise<void> {
+  await api.delete(`/sectors/${enc(sectorId)}/teams/${linkId}/`)
+}
+
+// ── Links de apoio (tarefa, setor ou organização) ──────────────────────────
+export type LinkTarget = 'task' | 'sector' | 'organization'
+
+const LINK_PATH: Record<LinkTarget, (id: string) => string> = {
+  task: (id) => `/tasks/${enc(id)}/links/`,
+  sector: (id) => `/sectors/${enc(id)}/links/`,
+  organization: (id) => `/organizations/${enc(id)}/links/`,
+}
+
+export async function listLinks(
+  target: LinkTarget,
+  id: string,
+  page = 1,
+): Promise<Page<ResourceLink>> {
+  return (await api.get<Page<ResourceLink>>(LINK_PATH[target](id), { params: { page } })).data
+}
+
+export async function createLink(
+  target: LinkTarget,
+  id: string,
+  payload: CreateResourceLinkRequest,
+): Promise<ResourceLink> {
+  return (await api.post<ResourceLink>(LINK_PATH[target](id), payload)).data
+}
+
+export async function deleteLink(linkId: string): Promise<void> {
+  await api.delete(`/links/${enc(linkId)}/`)
+}
+
+// ── Dashboard ──────────────────────────────────────────────────────────────
+export async function getDashboard(organizationId: string): Promise<Dashboard> {
+  return (await api.get<Dashboard>(`/organizations/${enc(organizationId)}/dashboard/`)).data
 }

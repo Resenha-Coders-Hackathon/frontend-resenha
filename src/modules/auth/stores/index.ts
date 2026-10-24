@@ -89,7 +89,11 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function updateProfile(payload: UpdateUserRequest): Promise<User> {
-    user.value = await updateMe(payload)
+    if (!user.value) throw new Error('Sua sessão expirou. Entre novamente.')
+    const updated = await updateMe(payload)
+    // PATCH returns only the writable fields, not the full user profile.
+    if (!user.value) throw new Error('Sua sessão expirou. Entre novamente.')
+    user.value = { ...user.value, ...updated }
     return user.value
   }
 

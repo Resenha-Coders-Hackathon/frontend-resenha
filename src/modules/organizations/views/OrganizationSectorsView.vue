@@ -178,7 +178,10 @@ async function addPerson() {
 async function linkTeam() {
   const sectorId = selected.value?.id
   if (!sectorId || !teamId.value) return
-  await mutate(() => addSectorTeam(sectorId, teamId.value, teamRole.value), refresh)
+  await mutate(
+    () => addSectorTeam(sectorId, { team_id: teamId.value, role: teamRole.value }),
+    refresh,
+  )
 }
 
 async function changeRole(row: SectorMember | SectorTeam, event: Event, isTeam: boolean) {

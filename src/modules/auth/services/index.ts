@@ -1,6 +1,6 @@
 import { isAxiosError } from 'axios'
 import { api, getErrorMessage } from '@/app/plugins/axios'
-import type { DetailResponse } from '@/shared/types'
+import type { DetailResponse, Page } from '@/shared/types'
 import type {
   GoogleLoginRequest,
   LoginCredentials,
@@ -9,6 +9,7 @@ import type {
   RegistrationConfirmation,
   RegistrationRequest,
   UpdateUserRequest,
+  UpdatedUserProfile,
   User,
   UserSession,
 } from '../types'
@@ -97,8 +98,8 @@ export const verifyPasswordReset = (payload: PasswordResetVerification) =>
 export const confirmPasswordReset = (payload: PasswordResetConfirmation) =>
   post(API_PATHS.passwordResetConfirm, payload)
 
-export async function updateMe(payload: UpdateUserRequest): Promise<User> {
-  return (await api.patch<User>(API_PATHS.updateMe, payload)).data
+export async function updateMe(payload: UpdateUserRequest): Promise<UpdatedUserProfile> {
+  return (await api.patch<UpdatedUserProfile>(API_PATHS.updateMe, payload)).data
 }
 
 export async function listSessions(): Promise<UserSession[]> {
@@ -115,4 +116,19 @@ export async function revokeAllSessions(): Promise<DetailResponse> {
 
 export async function deactivateMe(): Promise<DetailResponse> {
   return (await api.post<DetailResponse>(API_PATHS.deactivateMe)).data
+}
+
+export interface ListUsersParams {
+  search?: string
+  page?: number
+}
+
+/** Paginated user directory (name/e-mail search). */
+export async function listUsers({ search, page = 1 }: ListUsersParams = {}): Promise<Page<User>> {
+  const params = { page, ...(search && { search }) }
+  return (await api.get<Page<User>>('/users/list/', { params })).data
+}
+
+export async function getUser(id: string): Promise<User> {
+  return (await api.get<User>(`/users/${encodeURIComponent(id)}/`)).data
 }

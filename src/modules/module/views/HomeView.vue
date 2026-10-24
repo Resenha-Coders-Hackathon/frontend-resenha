@@ -62,7 +62,7 @@ const chartData = computed(() => {
 </script>
 
 <template>
-  <section class="mx-auto flex min-h-dvh w-full flex-col px-4 pt-10 sm:px-6 md:px-8 xl:px-10">
+  <section class="mx-auto flex min-h-[calc(100dvh-3.5rem)] w-full flex-col px-4 pt-10 sm:px-6 md:px-8 xl:px-10">
     <SubheaderComp
       :title="`Bom dia, ${authStore.user?.name}`"
       description="Sexta, 23 de outubro · você tem 6 tarefas abertas"

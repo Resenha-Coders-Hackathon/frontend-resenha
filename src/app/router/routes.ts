@@ -10,6 +10,12 @@ import { notificationsRoutes } from '@/modules/notifications/router'
 import { organizationRoutes } from '@/modules/organizations/router'
 import { paymentsRoutes } from '@/modules/payments/router'
 
+import { reportsRoutes } from '@/modules/reports/router'
+
+import { teamsRoutes } from '@/modules/teams/router'
+
+import { uploadsRoutes } from '@/modules/uploads/router'
+
 export const routes: RouteRecordRaw[] = [
   ...authRoutes,
   ...chatRoutes,
@@ -21,4 +27,7 @@ export const routes: RouteRecordRaw[] = [
   ...moduleRoutes,
   ...notificationsRoutes,
   ...paymentsRoutes,
+  ...uploadsRoutes,
+  ...teamsRoutes,
+  ...reportsRoutes,
 ]

@@ -1,75 +1,69 @@
 import { api } from '@/app/plugins/axios'
-import type { Page } from '@/shared/types'
-import type { Team, TeamMember, CreateTeamRequest, TeamRole } from '../types'
+import type { Page, UUID } from '@/shared/types'
+import type {
+  AddTeamMemberRequest,
+  CreateTeamRequest,
+  Team,
+  TeamMember,
+  UpdateTeamMemberRoleRequest,
+  UpdateTeamRequest,
+} from '../types'
 
-const base = (organizationId: string) =>
-  `/organizations/${encodeURIComponent(organizationId)}/teams/`
+const enc = encodeURIComponent
+const base = (orgId: UUID) => `/organizations/${enc(orgId)}/teams/`
 
-export async function listTeams(organizationId: string, page = 1): Promise<Page<Team>> {
-  return (await api.get<Page<Team>>(base(organizationId), { params: { page } })).data
+export async function listTeams(orgId: UUID, page = 1): Promise<Page<Team>> {
+  return (await api.get<Page<Team>>(base(orgId), { params: { page } })).data
 }
 
-export async function createTeam(organizationId: string, data: CreateTeamRequest): Promise<Team> {
-  return (await api.post<Team>(base(organizationId), data)).data
+export async function createTeam(orgId: UUID, payload: CreateTeamRequest): Promise<Team> {
+  return (await api.post<Team>(base(orgId), payload)).data
+}
+
+export async function getTeam(orgId: UUID, teamId: UUID): Promise<Team> {
+  return (await api.get<Team>(`${base(orgId)}${enc(teamId)}/`)).data
 }
 
 export async function updateTeam(
-  organizationId: string,
-  teamId: string,
-  data: CreateTeamRequest,
+  orgId: UUID,
+  teamId: UUID,
+  payload: UpdateTeamRequest,
 ): Promise<Team> {
-  return (await api.patch<Team>(`${base(organizationId)}${encodeURIComponent(teamId)}/`, data)).data
+  return (await api.patch<Team>(`${base(orgId)}${enc(teamId)}/`, payload)).data
 }
 
-export async function deleteTeam(organizationId: string, teamId: string): Promise<void> {
-  await api.delete(`${base(organizationId)}${encodeURIComponent(teamId)}/`)
+export async function deleteTeam(orgId: UUID, teamId: UUID): Promise<void> {
+  await api.delete(`${base(orgId)}${enc(teamId)}/`)
 }
 
 export async function listTeamMembers(
-  organizationId: string,
-  teamId: string,
+  orgId: UUID,
+  teamId: UUID,
   page = 1,
 ): Promise<Page<TeamMember>> {
   return (
-    await api.get<Page<TeamMember>>(
-      `${base(organizationId)}${encodeURIComponent(teamId)}/members/`,
-      { params: { page } },
-    )
+    await api.get<Page<TeamMember>>(`${base(orgId)}${enc(teamId)}/members/`, { params: { page } })
   ).data
 }
 
 export async function addTeamMember(
-  organizationId: string,
-  teamId: string,
-  userId: string,
-  role: TeamRole,
+  orgId: UUID,
+  teamId: UUID,
+  payload: AddTeamMemberRequest,
 ): Promise<TeamMember> {
-  return (
-    await api.post<TeamMember>(`${base(organizationId)}${encodeURIComponent(teamId)}/members/`, {
-      user_id: userId,
-      role,
-    })
-  ).data
+  return (await api.post<TeamMember>(`${base(orgId)}${enc(teamId)}/members/`, payload)).data
 }
 
-export async function updateTeamMember(
-  organizationId: string,
-  teamId: string,
+export async function updateTeamMemberRole(
+  orgId: UUID,
+  teamId: UUID,
   memberId: number,
-  role: TeamRole,
+  payload: UpdateTeamMemberRoleRequest,
 ): Promise<TeamMember> {
-  return (
-    await api.patch<TeamMember>(
-      `${base(organizationId)}${encodeURIComponent(teamId)}/members/${memberId}/`,
-      { role },
-    )
-  ).data
+  return (await api.patch<TeamMember>(`${base(orgId)}${enc(teamId)}/members/${memberId}/`, payload))
+    .data
 }
 
-export async function removeTeamMember(
-  organizationId: string,
-  teamId: string,
-  memberId: number,
-): Promise<void> {
-  await api.delete(`${base(organizationId)}${encodeURIComponent(teamId)}/members/${memberId}/`)
+export async function removeTeamMember(orgId: UUID, teamId: UUID, memberId: number): Promise<void> {
+  await api.delete(`${base(orgId)}${enc(teamId)}/members/${memberId}/`)
 }
