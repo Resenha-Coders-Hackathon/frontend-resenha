@@ -1,15 +1,43 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
+import { getErrorMessage } from '@/app/plugins/axios'
 import { BaseButton, CardComp, ChartComp, SubheaderComp, TopbarComp } from '@/shared/components'
 import { useAuthStore } from '@/modules/auth'
+import { useNotificationsStore } from '@/modules/notifications'
+import { useOrganizationsStore } from '@/modules/organizations'
+import { getDashboard } from '../services'
+import type { Dashboard } from '../types'
 import { avatar, BADGE, BADGE_BASE, TOOLBAR_BUTTON } from '../utils/ui'
-import { ACTIVITY, HOME_KPIS, OPEN_BY_SECTOR, TODAY, WEEKLY_DONE } from '../utils/userHome'
-
-// Página só de interface: listas e números são de exemplo, sem backend.
+import { activityText, dueBadge, kpis, relativeTime, weekLabel } from '../utils/userHome'
 
 const router = useRouter()
 const auth = useAuthStore()
+const organizations = useOrganizationsStore()
+const notifications = useNotificationsStore()
+
+const data = ref<Dashboard | null>(null)
+const loading = ref(false)
+
+// O dashboard é da organização escolhida na barra lateral.
+watch(
+  () => organizations.current?.id,
+  async (id) => {
+    data.value = null
+    if (!id) return
+    loading.value = true
+    try {
+      const loaded = await getDashboard(id)
+      if (id === organizations.current?.id) data.value = loaded
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Não foi possível carregar o dashboard.'))
+    } finally {
+      loading.value = false
+    }
+  },
+  { immediate: true },
+)
 
 // mesmo formato dos gráficos da Home (/): laranja da marca e cantos arredondados
 const CHART_STYLE = { backgroundColor: '#ff6700', borderRadius: 6 }
@@ -26,24 +54,42 @@ const today = new Date().toLocaleDateString('pt-BR', {
   day: 'numeric',
   month: 'long',
 })
-const description = `${today.charAt(0).toUpperCase()}${today.slice(1)} · você tem ${HOME_KPIS[0]!.data} tarefas abertas`
+const todayIso = new Date().toLocaleDateString('sv-SE') // YYYY-MM-DD no fuso local
+const description = computed(
+  () =>
+    `${today.charAt(0).toUpperCase()}${today.slice(1)} · você tem ${data.value?.open_tasks ?? 0} tarefas abertas`,
+)
 
-const weeklyData = {
-  labels: WEEKLY_DONE.labels,
-  datasets: [{ label: 'Tarefas concluídas', ...CHART_STYLE, data: WEEKLY_DONE.values }],
-}
+const cards = computed(() => (data.value ? kpis(data.value, notifications.unreadCount) : []))
 
-const sectorData = {
-  labels: OPEN_BY_SECTOR.labels,
-  datasets: [{ label: 'Tarefas abertas', ...CHART_STYLE, data: OPEN_BY_SECTOR.values }],
-}
+const weeklyData = computed(() => ({
+  labels: (data.value?.weekly_done ?? []).map((w) => weekLabel(w.week_start)),
+  datasets: [
+    {
+      label: 'Tarefas concluídas',
+      ...CHART_STYLE,
+      data: (data.value?.weekly_done ?? []).map((w) => w.done),
+    },
+  ],
+}))
+
+const sectorData = computed(() => ({
+  labels: (data.value?.open_by_sector ?? []).map((s) => s.sector),
+  datasets: [
+    {
+      label: 'Tarefas abertas',
+      ...CHART_STYLE,
+      data: (data.value?.open_by_sector ?? []).map((s) => s.open),
+    },
+  ],
+}))
 </script>
 
 <template>
   <div
     class="flex min-h-dvh w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
   >
-    <TopbarComp :crumbs="['Norte Studio', 'Início']" has-notifications />
+    <TopbarComp :crumbs="[organizations.current?.name ?? 'Início', 'Início']" has-notifications />
 
     <section class="flex flex-1 flex-col gap-[16px] px-[16px] pt-[24px] pb-[32px] sm:px-[28px]">
       <SubheaderComp :title="greeting" :description="description" class="mb-0!">
@@ -59,7 +105,7 @@ const sectorData = {
 
       <div class="grid gap-[12px] sm:grid-cols-2 xl:grid-cols-4">
         <CardComp
-          v-for="kpi in HOME_KPIS"
+          v-for="kpi in cards"
           :key="kpi.title"
           :title="kpi.title"
           :data="kpi.data"
@@ -80,9 +126,15 @@ const sectorData = {
               Ver todas
             </RouterLink>
           </header>
+          <p v-if="loading" role="status" class="py-[12px] text-[13px] text-(--text-muted)">
+            Carregando…
+          </p>
+          <p v-else-if="!data?.today.length" class="py-[12px] text-[13px] text-(--text-muted)">
+            Nada para hoje. Tarefas atribuídas a você com entrega até amanhã aparecem aqui.
+          </p>
           <ul class="flex flex-col">
             <li
-              v-for="item in TODAY"
+              v-for="item in data?.today"
               :key="item.id"
               class="flex items-center gap-[12px] border-b border-(--border-default) py-[12px] last:border-b-0 dark:border-(--border-inverse)"
             >
@@ -92,14 +144,20 @@ const sectorData = {
               >
                 <span
                   class="material-symbols-outlined text-[17px]! text-(--text-secondary) dark:text-(--text-inverse-muted)"
-                  >{{ item.icon }}</span
+                  >view_kanban</span
                 >
               </span>
               <span class="flex min-w-0 flex-1 flex-col leading-normal">
                 <span class="truncate text-[13.5px] font-medium">{{ item.title }}</span>
-                <span class="text-[12px] text-(--text-muted)">{{ item.meta }}</span>
+                <span class="text-[12px] text-(--text-muted)">{{ item.sector_name }}</span>
               </span>
-              <span :class="[BADGE_BASE, BADGE[item.tone]]">{{ item.badge }}</span>
+              <span
+                :class="[
+                  BADGE_BASE,
+                  BADGE[dueBadge(item.due_date, item.is_overdue, todayIso).tone],
+                ]"
+                >{{ dueBadge(item.due_date, item.is_overdue, todayIso).label }}</span
+              >
             </li>
           </ul>
         </section>
@@ -110,26 +168,32 @@ const sectorData = {
           <h2 class="pb-[4px] text-[15px]! leading-normal! font-semibold! tracking-normal!">
             Atividade recente
           </h2>
+          <p
+            v-if="!loading && !data?.activity.length"
+            class="py-[12px] text-[13px] text-(--text-muted)"
+          >
+            Sem atividade ainda. Comentários e tarefas concluídas aparecem aqui.
+          </p>
           <ul class="flex flex-col">
             <li
-              v-for="item in ACTIVITY"
-              :key="item.id"
+              v-for="item in data?.activity"
+              :key="`${item.kind}-${item.at}-${item.task_title}`"
               class="flex items-center gap-[12px] border-b border-(--border-default) py-[12px] last:border-b-0 dark:border-(--border-inverse)"
             >
               <span
                 :class="[
                   'grid size-[32px] shrink-0 place-items-center rounded-full text-[11px] leading-none font-semibold text-white',
-                  avatar(item.person).color
+                  avatar(item.person ?? '?').color
                     ? ''
                     : 'bg-(--text-primary) dark:bg-(--text-inverse) dark:text-(--text-primary)',
                 ]"
-                :style="{ backgroundColor: avatar(item.person).color || undefined }"
+                :style="{ backgroundColor: avatar(item.person ?? '?').color || undefined }"
                 aria-hidden="true"
-                >{{ avatar(item.person).initials }}</span
+                >{{ avatar(item.person ?? '?').initials }}</span
               >
               <span class="flex min-w-0 flex-col leading-normal">
-                <span class="text-[13.5px] font-medium">{{ item.text }}</span>
-                <span class="text-[12px] text-(--text-muted)">{{ item.when }}</span>
+                <span class="text-[13.5px] font-medium">{{ activityText(item) }}</span>
+                <span class="text-[12px] text-(--text-muted)">{{ relativeTime(item.at) }}</span>
               </span>
             </li>
           </ul>
