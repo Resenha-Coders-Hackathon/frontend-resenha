@@ -24,7 +24,7 @@ defineEmits<{ open: [] }>()
     </span>
     <button
       type="button"
-      class="h-[30px] shrink-0 cursor-pointer rounded-[8px] border border-(--border-default) px-[10px] text-[12.5px] font-medium transition-colors hover:bg-(--bg-subtle) dark:border-(--border-inverse) dark:hover:bg-white/10"
+      class="h-[30px] shrink-0 cursor-pointer rounded-[8px] border border-(--border-default) px-[10px] text-[12.5px] font-medium transition-colors hover:border-(--bg-orange)/40 hover:bg-(--bg-orange)/5 hover:text-(--bg-orange) dark:border-(--border-inverse) dark:hover:bg-(--bg-orange)/10"
       @click="$emit('open')"
     >
       Abrir

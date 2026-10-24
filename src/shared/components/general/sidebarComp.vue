@@ -54,7 +54,6 @@ const organizationItems = computed<MenuItem[]>(() => [
   { link: '/arquivos', icon: 'folder', label: 'Arquivos' },
   { link: '/relatorios', icon: 'bar_chart', label: 'Relatórios' },
   { link: '/assistente', icon: 'auto_awesome', label: 'Assistente IA' },
-  { link: '/mapbox', icon: 'map', label: 'Mapa' },
 ])
 
 const accountItems: MenuItem[] = [

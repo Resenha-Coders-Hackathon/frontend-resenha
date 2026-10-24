@@ -15,7 +15,7 @@ const model = defineModel<boolean>({ default: false })
 
     <input v-model="model" type="checkbox" role="switch" class="peer sr-only" />
     <span
-      class="relative h-[22px] w-[38px] shrink-0 rounded-full bg-(--bg-muted) transition-colors peer-checked:bg-(--surface-inverse) peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 after:absolute after:top-[3px] after:left-[3px] after:size-[16px] after:rounded-full after:bg-white after:shadow-sm after:transition-transform peer-checked:after:translate-x-[16px] dark:bg-black/40 dark:peer-checked:bg-(--surface) dark:peer-checked:after:bg-(--surface-inverse)"
+      class="relative h-[22px] w-[38px] shrink-0 rounded-full bg-(--bg-muted) transition-colors peer-checked:bg-(--bg-orange) peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-(--bg-orange) after:absolute after:top-[3px] after:left-[3px] after:size-[16px] after:rounded-full after:bg-white after:shadow-sm after:transition-transform peer-checked:after:translate-x-[16px] dark:bg-black/40 dark:peer-checked:bg-(--bg-orange)"
       aria-hidden="true"
     ></span>
   </label>

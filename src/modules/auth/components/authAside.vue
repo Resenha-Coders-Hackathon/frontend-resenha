@@ -43,7 +43,7 @@ onMounted(() => {
 
 <template>
   <aside
-    class="auth-aside sticky top-0 isolate hidden min-h-dvh flex-col overflow-hidden bg-black p-6 text-white lg:flex xl:p-9"
+    class="auth-aside sticky top-0 isolate hidden h-dvh max-h-dvh min-h-0 flex-col overflow-hidden bg-black p-6 text-white lg:flex xl:p-9"
   >
     <img
       :src="image"
@@ -71,7 +71,7 @@ onMounted(() => {
       <img src="/wordmark-inverse.svg" alt="ResenhaCoders" class="w-52" />
     </h3>
 
-    <figure class="relative z-10 flex flex-1 flex-col justify-end gap-4">
+    <figure class="relative z-10 flex min-h-0 flex-1 flex-col justify-end gap-4 overflow-y-auto">
       <blockquote class="text-4xl font-semibold tracking-[-0.01em]">
         Do pedido à entrega,
         <span class="text-(--accent-orange)">cada tarefa</span>

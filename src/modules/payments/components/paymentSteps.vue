@@ -15,15 +15,13 @@ const isActive = (index: number) => index + 1 === props.current && !props.comple
 
 const circleClasses = (index: number) => {
   if (isDone(index) || isActive(index)) {
-    return 'bg-(--surface-inverse) text-(--text-inverse) dark:bg-(--text-inverse) dark:text-(--text-primary)'
+    return 'bg-(--bg-orange) text-white'
   }
   return 'border border-(--border-default) text-(--text-muted) dark:border-(--border-inverse)'
 }
 
 const lineClasses = (index: number) =>
-  isDone(index)
-    ? 'bg-(--border-strong) dark:bg-(--text-inverse)'
-    : 'bg-(--border-default) dark:bg-(--border-inverse)'
+  isDone(index) ? 'bg-(--bg-orange)' : 'bg-(--border-default) dark:bg-(--border-inverse)'
 </script>
 
 <template>
@@ -48,7 +46,7 @@ const lineClasses = (index: number) =>
         <span
           :class="[
             'whitespace-nowrap text-[13px] leading-normal font-medium',
-            isDone(index) || isActive(index) ? '' : 'text-(--text-muted)',
+            isActive(index) ? 'text-(--bg-orange)' : isDone(index) ? '' : 'text-(--text-muted)',
           ]"
         >
           {{ step }}

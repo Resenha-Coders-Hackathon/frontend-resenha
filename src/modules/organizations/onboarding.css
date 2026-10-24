@@ -1,4 +1,5 @@
 .onboarding {
+  --onboarding-accent: var(--bg-orange);
   --onboarding-surface: var(--surface);
   --onboarding-ink: var(--text-primary);
   --onboarding-muted: var(--text-secondary);
@@ -44,6 +45,9 @@
   flex: 1;
   min-width: 8px;
 }
+.onboarding-steps li.reached:not(:last-child)::after {
+  background: var(--onboarding-accent);
+}
 .onboarding-step-number {
   width: 24px;
   height: 24px;
@@ -55,11 +59,11 @@
   background: var(--onboarding-subtle);
 }
 .onboarding-steps li.reached {
-  color: var(--onboarding-ink);
+  color: var(--onboarding-accent);
 }
 .onboarding-steps li.reached .onboarding-step-number {
-  background: var(--onboarding-ink);
-  color: var(--onboarding-surface);
+  background: var(--onboarding-accent);
+  color: #fff;
 }
 .onboarding-form {
   display: grid;
@@ -85,6 +89,21 @@
   font: inherit;
   font-size: 16px;
   line-height: 24px;
+}
+.onboarding-field input:focus-visible,
+.onboarding-field textarea:focus-visible,
+.onboarding-field select:focus-visible,
+.onboarding-address:focus-within,
+.onboarding-email-tags:focus-within {
+  border-color: var(--onboarding-accent);
+  outline: 0;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--onboarding-accent) 14%, transparent);
+}
+.onboarding .onboarding-form > div:has(#organization-name) > div:focus-within,
+.onboarding .onboarding-form > div:has(#new-sector) > div:focus-within {
+  border-color: var(--onboarding-accent);
+  color: var(--onboarding-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--onboarding-accent) 14%, transparent);
 }
 .onboarding-field textarea {
   resize: vertical;
@@ -125,6 +144,10 @@
   font-size: 13px;
   color: var(--onboarding-muted);
 }
+.onboarding-actions a:hover,
+.onboarding-skip:hover {
+  color: var(--onboarding-accent);
+}
 .onboarding-email-tags {
   display: flex;
   flex-wrap: wrap;
@@ -148,10 +171,10 @@
   align-items: center;
   gap: 6px;
   padding: 3px 9px;
-  background: var(--onboarding-subtle);
+  background: color-mix(in srgb, var(--onboarding-accent) 9%, var(--onboarding-surface));
   border-radius: 99px;
   font-size: 11.5px;
-  color: var(--onboarding-muted);
+  color: var(--onboarding-accent);
   overflow-wrap: anywhere;
 }
 .onboarding-email-tag button {
@@ -180,8 +203,12 @@
   min-height: 36px;
 }
 .organization-location-options label.selected {
-  color: var(--onboarding-ink);
-  outline: 1px solid var(--onboarding-border);
+  color: var(--onboarding-accent);
+  background: color-mix(in srgb, var(--onboarding-accent) 7%, var(--onboarding-surface));
+  outline: 1px solid color-mix(in srgb, var(--onboarding-accent) 55%, transparent);
+}
+.organization-location-options input {
+  accent-color: var(--onboarding-accent);
 }
 .organization-location-hint {
   font-size: 12px;
@@ -205,14 +232,17 @@
   font-size: 13px;
   box-shadow: none;
 }
+.organization-location-search .mapboxgl-ctrl-geocoder:focus-within {
+  border-color: var(--onboarding-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--onboarding-accent) 14%, transparent);
+}
 .organization-location-search .mapboxgl-ctrl-geocoder input {
   color: inherit;
   height: 52px;
   font-size: 16px;
 }
 .organization-location-search .mapboxgl-ctrl-geocoder input:focus {
-  outline: 2px solid var(--onboarding-ink);
-  outline-offset: 2px;
+  outline: none;
 }
 .organization-location-search .mapboxgl-ctrl-geocoder--icon-search {
   top: 16px;
@@ -227,7 +257,8 @@
 }
 .organization-location-search .mapboxgl-ctrl-geocoder .suggestions > .active > a,
 .organization-location-search .mapboxgl-ctrl-geocoder .suggestions > li > a:hover {
-  background: var(--onboarding-subtle);
+  background: color-mix(in srgb, var(--onboarding-accent) 9%, var(--onboarding-surface));
+  color: var(--onboarding-accent);
 }
 .onboarding-optional {
   font-size: 12px;
@@ -246,6 +277,10 @@
   color: var(--onboarding-muted);
   overflow-wrap: anywhere;
 }
+.onboarding-upload:hover {
+  border-color: color-mix(in srgb, var(--onboarding-accent) 55%, var(--onboarding-border));
+  color: var(--onboarding-accent);
+}
 .onboarding-upload input {
   position: absolute;
   inset: 0;
@@ -253,7 +288,7 @@
   cursor: pointer;
 }
 .onboarding-upload:focus-within {
-  outline: 2px solid var(--onboarding-ink);
+  outline: 2px solid var(--onboarding-accent);
   outline-offset: 3px;
 }
 .onboarding-address {
@@ -299,16 +334,24 @@
   gap: 6px;
   padding: 4px 9px;
   border-radius: 99px;
+  border: 1px solid transparent;
   background: var(--onboarding-subtle);
   color: var(--onboarding-muted);
   font-size: 11.5px;
 }
+.onboarding-sector-picker button:not([aria-pressed='true']):hover,
+.onboarding-sector-picker label:hover {
+  border-color: color-mix(in srgb, var(--onboarding-accent) 35%, transparent);
+  background: color-mix(in srgb, var(--onboarding-accent) 7%, var(--onboarding-surface));
+  color: var(--onboarding-accent);
+}
 .onboarding-sector-picker input {
-  accent-color: var(--onboarding-ink);
+  accent-color: var(--onboarding-accent);
 }
 .onboarding-sector-picker button[aria-pressed='true'] {
-  background: var(--onboarding-ink);
-  color: var(--onboarding-surface);
+  border-color: var(--onboarding-accent);
+  background: var(--onboarding-accent);
+  color: #fff;
 }
 
 .dark .onboarding-select > img,

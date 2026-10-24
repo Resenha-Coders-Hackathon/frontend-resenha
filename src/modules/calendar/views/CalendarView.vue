@@ -119,6 +119,10 @@ const dayLabel = (date: string, count: number) =>
       <header class="flex flex-wrap items-end justify-between gap-[12px]">
         <div>
           <div class="flex items-center gap-[6px]">
+            <span
+              class="size-[8px] rounded-full bg-(--bg-orange) shadow-[0_0_10px_rgba(255,103,0,0.35)]"
+              aria-hidden="true"
+            />
             <h1
               class="text-[26px]! leading-tight! font-semibold! tracking-[-0.02em]!"
               aria-live="polite"
@@ -127,7 +131,7 @@ const dayLabel = (date: string, count: number) =>
             </h1>
             <button
               type="button"
-              class="grid size-[32px] cursor-pointer place-items-center rounded-[8px] hover:bg-(--bg-muted) dark:hover:bg-white/10"
+              class="grid size-[32px] cursor-pointer place-items-center rounded-[8px] border border-transparent transition-colors duration-200 hover:border-(--bg-orange)/25 hover:bg-(--bg-orange)/5 hover:text-(--bg-orange) dark:hover:bg-(--bg-orange)/10"
               aria-label="Mês anterior"
               @click="go(-1)"
             >
@@ -137,7 +141,7 @@ const dayLabel = (date: string, count: number) =>
             </button>
             <button
               type="button"
-              class="grid size-[32px] cursor-pointer place-items-center rounded-[8px] hover:bg-(--bg-muted) dark:hover:bg-white/10"
+              class="grid size-[32px] cursor-pointer place-items-center rounded-[8px] border border-transparent transition-colors duration-200 hover:border-(--bg-orange)/25 hover:bg-(--bg-orange)/5 hover:text-(--bg-orange) dark:hover:bg-(--bg-orange)/10"
               aria-label="Próximo mês"
               @click="go(1)"
             >
@@ -154,7 +158,7 @@ const dayLabel = (date: string, count: number) =>
         <div class="flex flex-wrap gap-[8px]">
           <BaseButton
             label="Hoje"
-            variant="secondary"
+            variant="primary"
             :full-width="false"
             class="mt-0!"
             @click="goToday"
@@ -183,7 +187,7 @@ const dayLabel = (date: string, count: number) =>
       </header>
 
       <div
-        class="rounded-[16px] border border-(--border-default) bg-(--surface) p-[16px] dark:border-(--border-inverse) dark:bg-(--surface-inverse)"
+        class="rounded-[16px] border border-(--border-default) border-t-2 border-t-(--bg-orange)/60 bg-(--surface) p-[16px] dark:border-(--border-inverse) dark:border-t-(--bg-orange)/60 dark:bg-(--surface-inverse)"
         :aria-busy="loading"
       >
         <div
@@ -203,7 +207,7 @@ const dayLabel = (date: string, count: number) =>
               :class="[
                 'flex min-h-[84px] min-w-0 flex-col gap-[4px] rounded-[10px] border p-[6px] sm:min-h-[118px]',
                 day.date === today
-                  ? 'border-[#f6c6ae] bg-[#fdeadf] dark:border-[#ff6700]/40 dark:bg-[#ff6700]/10'
+                  ? 'border-(--bg-orange)/55 bg-(--bg-orange)/[0.06] ring-1 ring-(--bg-orange)/10 dark:border-(--bg-orange)/55 dark:bg-(--bg-orange)/10'
                   : day.inMonth
                     ? 'border-(--border-default) bg-(--surface) dark:border-(--border-inverse) dark:bg-(--surface-inverse)'
                     : 'border-(--border-default) bg-(--bg-subtle) dark:border-(--border-inverse) dark:bg-black/20',
@@ -213,7 +217,7 @@ const dayLabel = (date: string, count: number) =>
                 :class="[
                   'text-[13px] leading-none',
                   day.date === today
-                    ? 'font-semibold text-[#c42b2b] dark:text-[#ff8a8a]'
+                    ? 'grid size-[26px] place-items-center rounded-full bg-(--bg-orange) font-semibold text-white shadow-[0_2px_8px_rgba(255,103,0,0.3)]'
                     : day.inMonth
                       ? ''
                       : 'text-(--text-muted)',
@@ -236,7 +240,7 @@ const dayLabel = (date: string, count: number) =>
                   <button
                     type="button"
                     :class="[
-                      'flex w-full cursor-pointer items-center gap-[4px] rounded-[5px] px-[6px] py-[2px] text-left text-[11.5px] leading-[16px]',
+                      'flex w-full cursor-pointer items-center gap-[4px] rounded-[5px] px-[6px] py-[2px] text-left text-[11.5px] leading-[16px] transition-[filter,box-shadow] duration-200 hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--bg-orange)',
                       CHIP[item.state],
                       item.in_google && GOOGLE_RING,
                     ]"
@@ -274,7 +278,7 @@ const dayLabel = (date: string, count: number) =>
           <li
             v-for="item in agenda"
             :key="item.id"
-            class="flex cursor-pointer items-center gap-[10px] border-b border-(--border-default) py-[12px] last:border-b-0 dark:border-(--border-inverse)"
+            class="flex cursor-pointer items-center gap-[10px] border-b border-(--border-default) py-[12px] transition-colors duration-200 hover:text-(--bg-orange) last:border-b-0 dark:border-(--border-inverse)"
             @click="openItem(item)"
           >
             <span

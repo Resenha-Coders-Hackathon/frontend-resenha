@@ -13,7 +13,7 @@ const due = computed(() =>
 )
 
 const PRIORITY: Record<TaskPriority, { label: string; bars: number; color: string }> = {
-  low: { label: 'Baixa', bars: 1, color: 'text-[#2563eb] dark:text-[#8fb1ff]' },
+  low: { label: 'Baixa', bars: 1, color: 'text-[#f97316] dark:text-[#fb923c]' },
   medium: { label: 'Média', bars: 2, color: 'text-[#d97706] dark:text-[#f5b14c]' },
   high: { label: 'Alta', bars: 3, color: 'text-[#dc2626] dark:text-[#ff7b7b]' },
   urgent: { label: 'Urgente', bars: 3, color: 'text-[#dc2626] dark:text-[#ff7b7b]' },
@@ -24,7 +24,7 @@ const PRIORITY: Record<TaskPriority, { label: string; bars: number; color: strin
   <div
     class="flex min-w-0 items-start gap-[12px] rounded-[12px] border border-(--border-default) bg-(--surface) px-[12px] py-[12px] dark:border-(--border-inverse) dark:bg-black/20"
   >
-    <span class="material-symbols-outlined text-[20px]! text-(--chat-ai)" aria-hidden="true"
+    <span class="material-symbols-outlined text-[20px]! text-(--bg-orange)" aria-hidden="true"
       >task_alt</span
     >
     <div class="flex min-w-0 flex-1 flex-col gap-[6px] leading-normal">
@@ -52,7 +52,7 @@ const PRIORITY: Record<TaskPriority, { label: string; bars: number; color: strin
           </span>
           {{ PRIORITY[task.priority].label }}
         </span>
-        <span v-if="task.completed_at" class="text-(--chat-ai)">Concluída</span>
+        <span v-if="task.completed_at" class="text-(--bg-orange)">Concluída</span>
       </p>
       <p class="break-all font-mono text-[10px] text-(--text-muted)" :title="task.id">
         ID: {{ task.id }}

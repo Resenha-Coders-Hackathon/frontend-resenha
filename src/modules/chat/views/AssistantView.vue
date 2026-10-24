@@ -254,7 +254,7 @@ async function analyze() {
                   class="flex max-w-[640px] flex-col gap-[8px]"
                 >
                   <template v-if="action.ok || action.confirmation_required">
-                    <p class="text-[12px] font-medium text-(--chat-ai)">
+                    <p class="text-[12px] font-medium text-(--bg-orange)">
                       {{ ACTION_LABELS[action.name] ?? 'Resultado da solicitação' }}
                     </p>
                     <AssistantTaskCard v-if="action.task" :task="action.task" />
@@ -313,7 +313,7 @@ async function analyze() {
                   v-if="entry.report"
                   :href="entry.report.url"
                   :download="entry.report.file_name"
-                  class="flex w-fit items-center gap-[6px] rounded-[9px] bg-(--chat-ai) px-[12px] py-[8px] text-[13px] font-medium text-white hover:opacity-90 dark:text-white"
+                  class="flex w-fit items-center gap-[6px] rounded-[9px] bg-(--bg-orange) px-[12px] py-[8px] text-[13px] font-medium text-white transition-colors hover:bg-[#e85d00] dark:text-white"
                 >
                   <span class="material-symbols-outlined text-[17px]!" aria-hidden="true"
                     >download</span
@@ -357,7 +357,7 @@ async function analyze() {
               :key="prompt"
               type="button"
               :disabled="composerDisabled"
-              class="h-[30px] cursor-pointer rounded-full border border-(--border-default) bg-(--surface) px-[12px] text-[12.5px] transition-colors hover:border-(--chat-ai) hover:text-(--chat-ai) disabled:cursor-not-allowed disabled:opacity-50 dark:border-(--border-inverse) dark:bg-transparent"
+              class="h-[30px] cursor-pointer rounded-full border border-(--border-default) bg-(--surface) px-[12px] text-[12.5px] transition-colors hover:border-(--bg-orange) hover:bg-(--bg-orange)/5 hover:text-(--bg-orange) disabled:cursor-not-allowed disabled:opacity-50 dark:border-(--border-inverse) dark:bg-transparent dark:hover:bg-(--bg-orange)/10"
               @click="draft = prompt"
             >
               {{ prompt }}
@@ -411,7 +411,6 @@ async function analyze() {
           <fieldset class="min-w-0" :disabled="composerDisabled">
             <ChatComposer
               v-model="draft"
-              accent="ai"
               placeholder="Ex.: crie uma tarefa para estudar Django amanhã no setor Estudos…"
               submit-label="Enviar mensagem"
               submit-icon="send"

@@ -22,7 +22,7 @@ const details = computed(() => {
     :href="file.url"
     target="_blank"
     rel="noopener noreferrer"
-    class="flex w-fit max-w-full items-center gap-[10px] rounded-[10px] border border-(--border-default) bg-(--surface) py-[8px] pr-[14px] pl-[8px] transition-colors hover:border-(--text-muted) dark:border-(--border-inverse) dark:bg-black/20"
+    class="flex w-fit max-w-full items-center gap-[10px] rounded-[10px] border border-(--border-default) bg-(--surface) py-[8px] pr-[14px] pl-[8px] transition-colors hover:border-(--bg-orange)/45 hover:bg-(--bg-orange)/[0.03] dark:border-(--border-inverse) dark:bg-black/20 dark:hover:bg-(--bg-orange)/[0.06]"
   >
     <span
       class="grid size-[32px] shrink-0 place-items-center rounded-[8px] bg-[#e8efff] text-[#2563eb] dark:bg-[#2563eb]/20 dark:text-[#8fb1ff]"

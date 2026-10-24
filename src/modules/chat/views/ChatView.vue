@@ -248,7 +248,7 @@ watch(() => [chat.activeId, items.value.length], scrollToEnd, { immediate: true 
         <template #header>
           <span
             v-if="active.kind !== 'direct'"
-            class="grid size-[32px] shrink-0 place-items-center rounded-[9px] bg-(--bg-subtle) text-(--text-secondary) dark:bg-black/30 dark:text-(--text-inverse-muted)"
+            class="grid size-[32px] shrink-0 place-items-center rounded-[9px] border border-(--bg-orange)/25 bg-(--bg-orange)/[0.08] text-(--bg-orange) dark:bg-(--bg-orange)/15"
             aria-hidden="true"
           >
             <span class="material-symbols-outlined text-[18px]!">tag</span>
@@ -260,7 +260,7 @@ watch(() => [chat.activeId, items.value.length], scrollToEnd, { immediate: true 
             <p class="truncate text-[12px] text-(--text-muted)">{{ subtitle }}</p>
           </div>
           <BaseButton
-            variant="secondary"
+            variant="primary"
             label="Iniciar Meet"
             icon="videocam"
             icon-position="left"
@@ -271,7 +271,7 @@ watch(() => [chat.activeId, items.value.length], scrollToEnd, { immediate: true 
           />
           <button
             type="button"
-            class="grid size-[34px] shrink-0 cursor-pointer place-items-center rounded-[10px] border border-(--border-default) transition-colors hover:bg-(--bg-subtle) dark:border-(--border-inverse) dark:hover:bg-white/10"
+            class="grid size-[34px] shrink-0 cursor-pointer place-items-center rounded-[10px] border border-(--border-default) transition-all duration-200 hover:-translate-y-0.5 hover:border-(--bg-orange)/35 hover:bg-(--bg-orange)/5 hover:text-(--bg-orange) active:translate-y-0 dark:border-(--border-inverse) dark:hover:bg-(--bg-orange)/10"
             aria-label="Mais opções do canal"
           >
             <span class="material-symbols-outlined text-[18px]!" aria-hidden="true"
@@ -306,7 +306,7 @@ watch(() => [chat.activeId, items.value.length], scrollToEnd, { immediate: true 
             <li v-for="member in mentionOptions" :key="member.user_id" role="option">
               <button
                 type="button"
-                class="flex w-full cursor-pointer items-center gap-[8px] rounded-[7px] px-[8px] py-[6px] text-left text-[13px] hover:bg-(--bg-subtle) dark:hover:bg-white/10"
+                class="flex w-full cursor-pointer items-center gap-[8px] rounded-[7px] px-[8px] py-[6px] text-left text-[13px] transition-colors hover:bg-(--bg-orange)/5 hover:text-(--bg-orange) dark:hover:bg-(--bg-orange)/10"
                 @click="pickMention(member)"
               >
                 <ChatAvatar :name="member.name" :size="24" />
@@ -360,7 +360,7 @@ watch(() => [chat.activeId, items.value.length], scrollToEnd, { immediate: true 
               />
               <button
                 type="button"
-                class="ml-[4px] flex h-[30px] cursor-pointer items-center gap-[6px] rounded-[8px] border border-(--border-default) px-[10px] text-[12.5px] font-medium transition-colors hover:bg-(--bg-subtle) dark:border-(--border-inverse) dark:hover:bg-white/10"
+                class="ml-[4px] flex h-[30px] cursor-pointer items-center gap-[6px] rounded-[8px] border border-(--border-default) px-[10px] text-[12.5px] font-medium transition-all duration-200 hover:border-(--bg-orange)/35 hover:bg-(--bg-orange)/5 hover:text-(--bg-orange) dark:border-(--border-inverse) dark:hover:bg-(--bg-orange)/10"
                 @click="router.hasRoute('Assistant') && router.push({ name: 'Assistant' })"
               >
                 <span
