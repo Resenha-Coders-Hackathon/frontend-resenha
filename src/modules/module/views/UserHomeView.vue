@@ -108,12 +108,6 @@ const sectorData = computed(() => ({
         >
           <header class="flex items-center justify-between pb-[4px]">
             <h2 class="text-[15px]! leading-normal! font-semibold! tracking-normal!">Para hoje</h2>
-            <RouterLink
-              :to="{ name: 'MyTasks' }"
-              class="text-[13px] font-medium text-(--bg-orange) hover:underline"
-            >
-              Ver todas
-            </RouterLink>
           </header>
           <p v-if="loading" role="status" class="py-[12px] text-[13px] text-(--text-muted)">
             Carregando…

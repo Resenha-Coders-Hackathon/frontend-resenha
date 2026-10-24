@@ -14,6 +14,5 @@ export function notificationTitle(title: string): string {
 // Para onde a notificação leva, a partir do que o backend guarda em `data`.
 export function notificationPath(data: AppNotification['data']): string {
   if (data.channel_id) return '/chat'
-  if (data.task_id) return '/minhas-tarefas'
   return '/notificacoes'
 }

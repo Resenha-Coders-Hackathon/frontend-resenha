@@ -16,11 +16,6 @@ export const moduleRoutes: RouteRecordRaw[] = [
         component: () => import('../views/UserHomeView.vue'),
       },
       {
-        path: '/minhas-tarefas',
-        name: 'MyTasks',
-        component: () => import('../views/MyTasksView.vue'),
-      },
-      {
         path: '/:pathMatch(.*)*',
         name: 'NotFound',
         component: () => import('../views/NotFoundView.vue'),
