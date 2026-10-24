@@ -43,23 +43,6 @@ export function dueBadge(
   return days === 0 ? { label: 'Hoje', tone: 'warning' } : { label: 'Amanhã', tone: 'neutral' }
 }
 
-export function relativeTime(iso: string, now = Date.now()): string {
-  const minutes = Math.round((now - Date.parse(iso)) / 60_000)
-  if (minutes < 1) return 'agora'
-  if (minutes < 60) return `há ${minutes} min`
-  const hours = Math.round(minutes / 60)
-  if (hours < 24) return `há ${hours} h`
-  const days = Math.round(hours / 24)
-  return days === 1 ? 'ontem' : `há ${days} dias`
-}
-
-export function activityText(a: Dashboard['activity'][number]): string {
-  const who = a.person ?? 'Alguém'
-  return a.kind === 'comment'
-    ? `${who} comentou em ${a.task_title}`
-    : `${who} concluiu ${a.task_title}`
-}
-
 export function weekLabel(weekStart: string): string {
   return new Date(`${weekStart}T00:00:00`).toLocaleDateString('pt-BR', {
     day: '2-digit',

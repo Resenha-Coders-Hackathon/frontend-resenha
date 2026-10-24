@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/modules/auth'
-import { useSectorsStore } from '@/modules/module'
 import { useOrganizationsStore } from '@/modules/organizations'
 import { useNotificationsStore } from '@/modules/notifications'
 
@@ -15,13 +14,10 @@ interface MenuItem {
   also?: string[]
 }
 
-const MAX_SECTORS = 8
-
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const organizations = useOrganizationsStore()
-const sectors = useSectorsStore()
 const notifications = useNotificationsStore()
 const isOpen = ref<boolean>(true)
 
@@ -35,7 +31,6 @@ const organizationItems = computed<MenuItem[]>(() => {
   const id = current.value?.id
   return [
     { link: '/home-usuario', icon: 'home', label: 'Visão geral' },
-    { link: '/kanban', icon: 'view_kanban', label: 'Mural' },
     { link: '/minhas-tarefas', icon: 'task_alt', label: 'Minhas tarefas' },
     { link: '/chat', icon: 'chat', label: 'Mensagens' },
     { link: '/equipe', icon: 'groups', label: 'Equipe', also: ['/setores'] },
@@ -82,10 +77,8 @@ const itemClass = (active: boolean) => [
 const initial = (name: string) => name.trim().charAt(0).toUpperCase() || '?'
 const orgLabel = (name: string, personal: boolean) => (personal ? 'Espaço pessoal' : name)
 
-const visibleSectors = computed(() => sectors.sectors.slice(0, MAX_SECTORS))
-const selectedSector = computed(() => route.query.setor)
 
-// páginas sem guard (ex.: /kanban) abrem sem o usuário carregado: confere a sessão
+// páginas sem guard abrem sem o usuário carregado: confere a sessão
 onMounted(async () => {
   if (!auth.user) await auth.loadUser().catch(() => undefined)
   if (auth.user && !organizations.organizations.length) {
@@ -93,14 +86,6 @@ onMounted(async () => {
   }
 })
 
-// trocou de organização (ou de conta): os setores do menu passam a ser os dela
-watch(
-  () => [auth.user?.id, current.value?.id] as const,
-  ([user, id]) => {
-    if (user && id) void sectors.load(id).catch(() => undefined)
-  },
-  { immediate: true },
-)
 
 function chooseOrganization(id: string) {
   switcherOpen.value = false
@@ -227,29 +212,6 @@ async function signOut() {
               </RouterLink>
             </li>
           </ul>
-
-          <template v-if="visibleSectors.length">
-            <h3
-              class="mt-3 ml-1 text-xs font-semibold tracking-widest text-(--text-muted) uppercase"
-            >
-              Setores
-            </h3>
-            <ul class="grid gap-1">
-              <li v-for="sector in visibleSectors" :key="sector.id">
-                <RouterLink
-                  :to="{ path: '/kanban', query: { setor: sector.id } }"
-                  :class="itemClass(route.path === '/kanban' && selectedSector === sector.id)"
-                >
-                  <span
-                    class="size-2.5 shrink-0 rounded-full bg-(--text-muted)"
-                    :style="sector.color ? { backgroundColor: sector.color } : undefined"
-                    aria-hidden="true"
-                  />
-                  <span class="truncate">{{ sector.name }}</span>
-                </RouterLink>
-              </li>
-            </ul>
-          </template>
         </template>
         <ul v-else class="grid gap-1">
           <li v-for="item in authItems" :key="item.link">

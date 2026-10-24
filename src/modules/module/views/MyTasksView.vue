@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { BaseButton, SubheaderComp, TopbarComp } from '@/shared/components'
 import { MY_TASKS, TASK_PRIORITY, TASK_STATUS, type MyTask } from '../utils/myTasks'
 import { avatar, BADGE, BADGE_BASE, TOOLBAR_BUTTON } from '../utils/ui'
 
 // Página só de interface: as tarefas são de exemplo, sem backend.
 
-const router = useRouter()
 const tab = ref('open')
 
 const FILTERS: Record<string, (task: MyTask) => boolean> = {
@@ -48,14 +46,6 @@ const COLUMNS = ['Tarefa', 'Setor', 'Status', 'Prioridade', 'Entrega', 'Respons�
             icon-position="left"
             :full-width="false"
             :class="TOOLBAR_BUTTON"
-          />
-          <BaseButton
-            label="Nova tarefa"
-            icon="add"
-            icon-position="left"
-            :full-width="false"
-            :class="TOOLBAR_BUTTON"
-            @click="router.push({ name: 'Mural' })"
           />
         </div>
       </SubheaderComp>

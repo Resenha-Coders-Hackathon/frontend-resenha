@@ -1,4 +1,4 @@
-import type { ISODate, ISODateTime, UUID } from '@/shared/types'
+import type { ISODate, UUID } from '@/shared/types'
 
 /** GET /organizations/:id/dashboard/ — limited to the sectors the user can see. */
 export interface Dashboard {
@@ -11,10 +11,4 @@ export interface Dashboard {
   today: { id: UUID; title: string; sector_name: string; due_date: ISODate; is_overdue: boolean }[]
   weekly_done: { week_start: ISODate; done: number }[]
   open_by_sector: { sector: string; open: number }[]
-  activity: {
-    kind: 'comment' | 'done'
-    person: string | null
-    task_title: string
-    at: ISODateTime
-  }[]
 }
