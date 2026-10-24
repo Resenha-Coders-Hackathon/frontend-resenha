@@ -86,7 +86,7 @@ const input =
   >
     <header class="mb-4 flex items-start justify-between gap-3">
       <div>
-        <h2 id="charge-title" class="text-lg font-semibold">
+        <h2 id="charge-title" class="text-[20px]! leading-tight! font-semibold! tracking-normal!">
           <template v-if="stage === 'approved'">Pagamento aprovado</template>
           <template v-else-if="stage === 'rejected'">Pagamento recusado</template>
           <template v-else>{{ charge.title }}</template>
@@ -155,7 +155,7 @@ const input =
       <span
         :class="[
           'material-symbols-outlined text-[56px]!',
-          stage === 'approved' ? 'text-(--sucess)' : 'text-(--destructive)',
+          stage === 'approved' ? 'text-[#15924a]' : 'text-[#dc2626]',
         ]"
         aria-hidden="true"
         >{{ stage === 'approved' ? 'check_circle' : 'cancel' }}</span
