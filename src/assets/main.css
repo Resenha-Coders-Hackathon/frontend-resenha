@@ -60,6 +60,12 @@ html {
   color: var(--text-inverse);
 }
 
+.dark select,
+.dark select option {
+  background-color: var(--surface-inverse);
+  color: var(--text-inverse);
+}
+
 .dark ::selection {
   background-color: rgb(255 103 0 / 0.35);
 }
