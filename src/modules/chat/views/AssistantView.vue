@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { BaseButton } from '@/shared/components'
 import { useAuthStore } from '@/modules/auth'
@@ -17,6 +18,10 @@ import { formatSize, formatTime } from '../utils'
 
 const auth = useAuthStore()
 const ai = useAiStore()
+const route = useRoute()
+const router = useRouter()
+const accessChecked = ref(false)
+const hasAccess = computed(() => accessChecked.value && auth.user?.is_subscriber === true)
 const search = ref('')
 const draft = ref('')
 const files = ref<File[]>([])
@@ -54,6 +59,22 @@ watch(
   },
   { immediate: true, flush: 'sync' },
 )
+
+onMounted(async () => {
+  try {
+    const user = await auth.loadUser()
+    if (!user) {
+      await router.replace({ name: 'Login', query: { redirect: route.fullPath } })
+    } else if (!user.is_subscriber) {
+      await router.replace({ name: 'Plans' })
+    } else {
+      accessChecked.value = true
+    }
+  } catch {
+    toast.error('Não foi possível verificar seu acesso à IA. Tente novamente.')
+    await router.replace({ name: 'Login', query: { redirect: route.fullPath } })
+  }
+})
 
 watch(
   () => ai.error,
@@ -106,7 +127,10 @@ async function analyze() {
 </script>
 
 <template>
-  <div class="flex h-dvh w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)">
+  <div
+    v-if="hasAccess"
+    class="flex h-dvh w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
+  >
     <ChatTopbar
       v-model:search="search"
       :crumbs="['Assistente IA', historyTitle]"
