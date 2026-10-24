@@ -2,22 +2,23 @@
 import { computed, ref, watch } from 'vue'
 import { toast } from 'vue-sonner'
 import { getErrorMessage } from '@/app/plugins/axios'
-import { BaseButton, BaseInput } from '@/shared/components'
-import type { TaskPriority } from '@/shared/types'
 import { syncTaskToCalendar } from '@/modules/calendar_sync/services'
 import { useOrganizationsStore } from '@/modules/organizations'
-import { SubheaderKanban, KanbanColumn } from '../components'
+import { SubheaderKanban, KanbanColumn, TaskDrawer } from '../components'
 import { useKanbanStore, useSectorsStore } from '../stores'
+import { useSectorAccessStore } from '../stores/access'
+import type { CreateTaskRequest } from '../types'
 
 const organizations = useOrganizationsStore()
 const sectors = useSectorsStore()
 const kanban = useKanbanStore()
+const access = useSectorAccessStore()
 
 const sectorId = ref('')
 const loading = ref(false)
-const dialog = ref<HTMLDialogElement | null>(null)
+const drawerOpen = ref(false)
 const saving = ref(false)
-const form = ref({ title: '', description: '', priority: 'medium' as TaskPriority, due_date: '', status: '' })
+const drawerStatus = ref('')
 const sector = computed(() => sectors.sectors.find((s) => s.id === sectorId.value))
 
 // A organização escolhida na barra lateral define os setores do mural.
@@ -42,30 +43,22 @@ watch(
 watch(sectorId, async (id) => {
   if (!id) return
   try {
-    await kanban.load(id)
+    await Promise.all([kanban.load(id), access.load(id)])
   } catch (error) {
     toast.error(getErrorMessage(error, 'Não foi possível carregar o mural.'))
   }
 })
 
 function openCreate(statusId = '') {
-  form.value = { title: '', description: '', priority: 'medium', due_date: '', status: statusId }
-  dialog.value?.showModal()
+  drawerStatus.value = statusId
+  drawerOpen.value = true
 }
 
-async function create() {
-  if (saving.value || !form.value.title.trim()) return
+async function create(payload: CreateTaskRequest) {
   saving.value = true
   try {
-    const { title, description, priority, due_date, status } = form.value
-    await kanban.addTask({
-      title: title.trim(),
-      description,
-      priority,
-      ...(due_date && { due_date }),
-      ...(status && { status }),
-    })
-    dialog.value?.close()
+    await kanban.addTask(payload)
+    drawerOpen.value = false
     toast.success('Tarefa criada.')
   } catch (error) {
     toast.error(getErrorMessage(error, 'Não foi possível criar a tarefa.'))
@@ -87,9 +80,7 @@ async function addToCalendar(taskId: string) {
     await syncTaskToCalendar(taskId)
     toast.success('Tarefa adicionada ao Google Calendar.')
   } catch (error) {
-    toast.error(
-      getErrorMessage(error, 'Conecte o Google em Configurações para usar o calendário.'),
-    )
+    toast.error(getErrorMessage(error, 'Conecte o Google em Configurações para usar o calendário.'))
   }
 }
 </script>
@@ -137,32 +128,15 @@ async function addToCalendar(taskId: string) {
       />
     </div>
 
-    <dialog
-      ref="dialog"
-      class="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-2xl border border-(--border-default) bg-(--surface) p-6 text-(--text-primary) dark:border-(--border-inverse) dark:bg-(--surface-inverse) dark:text-(--text-inverse)"
-    >
-      <form class="grid gap-1" @submit.prevent="create">
-        <h2 class="text-xl font-semibold">Nova tarefa</h2>
-        <BaseInput v-model="form.title" label="Título" required />
-        <BaseInput v-model="form.description" label="Descrição" />
-        <BaseInput v-model="form.due_date" label="Entrega" type="date" />
-        <label class="mt-5 grid gap-1 text-sm">
-          Prioridade
-          <select
-            v-model="form.priority"
-            class="rounded-xl border border-(--border-default) bg-transparent px-3 py-2 dark:border-(--border-inverse)"
-          >
-            <option value="low">Baixa</option>
-            <option value="medium">Média</option>
-            <option value="high">Alta</option>
-            <option value="urgent">Urgente</option>
-          </select>
-        </label>
-        <div class="mt-5 flex justify-end gap-2">
-          <BaseButton label="Cancelar" variant="ghost" :full-width="false" @click="dialog?.close()" />
-          <BaseButton label="Criar tarefa" type="submit" :full-width="false" :loading="saving" />
-        </div>
-      </form>
-    </dialog>
+    <TaskDrawer
+      :open="drawerOpen"
+      :sector-name="sector?.name ?? ''"
+      :statuses="kanban.statuses"
+      :members="access.members"
+      :initial-status="drawerStatus"
+      :saving="saving"
+      @close="drawerOpen = false"
+      @submit="create"
+    />
   </section>
 </template>
