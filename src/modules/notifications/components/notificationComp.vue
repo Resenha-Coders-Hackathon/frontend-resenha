@@ -3,8 +3,11 @@ import { onMounted, ref } from 'vue'
 import { toast } from 'vue-sonner'
 import { BaseButton } from '@/shared/components'
 import { useNotificationsStore } from '../stores'
+import { useOpenNotification } from '../composables/useOpenNotification'
+import { notificationPath, notificationTitle } from '../utils'
 
 const notifications = useNotificationsStore()
+const openNotification = useOpenNotification()
 const isChangingPush = ref(false)
 const isSending = ref(false)
 
@@ -118,7 +121,7 @@ function formatDate(date: string): string {
         class="rounded-xl border border-(--border-default) dark:border-(--border-inverse) bg-(--surface) dark:bg-(--surface-inverse) p-4"
       >
         <div class="flex flex-wrap items-center justify-between gap-2">
-          <h2 class="text-lg! leading-normal!">{{ item.title }}</h2>
+          <h2 class="text-lg! leading-normal!">{{ notificationTitle(item.title) }}</h2>
           <span v-if="!item.is_read" class="text-sm font-semibold">Não lida</span>
         </div>
         <p class="mt-2 whitespace-pre-wrap break-words">{{ item.message }}</p>
@@ -127,6 +130,13 @@ function formatDate(date: string): string {
           class="text-sm text-(--text-secondary) dark:text-(--text-inverse-muted)"
           >{{ formatDate(item.created_at) }}</time
         >
+        <BaseButton
+          v-if="notificationPath(item.data) !== '/notificacoes'"
+          label="Abrir"
+          size="sm"
+          :full-width="false"
+          @click="openNotification(item)"
+        />
         <BaseButton
           v-if="!item.is_read"
           label="Marcar como lida"
