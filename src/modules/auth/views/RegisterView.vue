@@ -53,11 +53,6 @@ async function handleGoogleCredential(credential: string) {
   if (isGoogleSubmitting.value) return
 
   googleErrorMessage.value = ''
-  if (!acceptedTerms.value) {
-    googleErrorMessage.value = 'Aceite os Termos de uso e a Política de privacidade para continuar.'
-    return
-  }
-
   isGoogleSubmitting.value = true
 
   try {
@@ -148,6 +143,9 @@ async function handleGoogleCredential(credential: string) {
       </div>
 
       <GoogleButton button-text="signup_with" @credential="handleGoogleCredential" />
+      <p class="mt-2 text-center text-[12px] leading-4.5 text-(--text-muted)">
+        Ao continuar com o Google, você aceita os Termos de uso e a Política de privacidade.
+      </p>
       <p v-if="googleErrorMessage" role="alert" class="auth-error mt-3">
         {{ googleErrorMessage }}
       </p>
