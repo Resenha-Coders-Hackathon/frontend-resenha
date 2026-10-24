@@ -9,7 +9,7 @@ defineProps<{
 
 <template>
   <div
-    class="flex h-dvh flex-col bg-(--bg-subtle) px-4 py-6 sm:px-12 dark:bg-(--background-inverse)"
+    class="flex h-dvh flex-col bg-(--bg-subtle) px-5 py-6 sm:px-14 lg:px-16 dark:bg-(--background-inverse)"
   >
     <div class="flex items-center justify-center py-12">
       <div

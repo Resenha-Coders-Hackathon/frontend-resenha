@@ -113,7 +113,9 @@ const dayLabel = (date: string, count: number) =>
   >
     <TopbarComp :crumbs="['Calendário']" />
 
-    <section class="flex flex-1 flex-col gap-[16px] px-[16px] pt-[24px] pb-[32px] sm:px-[28px]">
+    <section
+      class="flex flex-1 flex-col gap-[16px] px-[20px] pt-[24px] pb-[32px] sm:px-[36px] xl:px-[44px]"
+    >
       <header class="flex flex-wrap items-end justify-between gap-[12px]">
         <div>
           <div class="flex items-center gap-[6px]">

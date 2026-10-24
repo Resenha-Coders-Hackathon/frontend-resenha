@@ -155,10 +155,11 @@ async function move(taskId: string, statusId: string, position: number) {
     <TopbarComp
       v-model:search="search"
       :crumbs="[sector?.name ?? 'Setor']"
+      show-search
       search-placeholder="Buscar nesta lista"
     />
 
-    <section class="flex min-h-0 flex-1 flex-col gap-4 px-4 pt-6 pb-4 sm:px-7">
+    <section class="flex min-h-0 flex-1 flex-col gap-4 px-5 pt-6 pb-4 sm:px-9 xl:px-11">
       <p v-if="missing" role="alert" class="text-sm">
         Setor não encontrado ou sem acesso.
         <RouterLink class="underline" :to="{ name: 'Team' }">Ver equipe e setores</RouterLink>

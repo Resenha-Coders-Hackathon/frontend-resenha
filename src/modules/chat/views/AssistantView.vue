@@ -19,17 +19,11 @@ const auth = useAuthStore()
 const ai = useAiStore()
 const route = useRoute()
 const router = useRouter()
-const search = ref('')
 const draft = ref('')
 const files = ref<File[]>([])
 const scroller = useTemplateRef<HTMLElement>('scroller')
 const fileInput = useTemplateRef<HTMLInputElement>('file-input')
 const historyTitle = computed(() => ai.active?.title ?? 'Nova conversa')
-const visibleHistory = computed(() =>
-  ai.conversations.filter((item) =>
-    item.title.toLocaleLowerCase('pt-BR').includes(search.value.trim().toLocaleLowerCase('pt-BR')),
-  ),
-)
 const composerDisabled = computed(() => ai.isBusy || !!ai.active?.pending || !!ai.active?.expired)
 
 const PROMPTS = [
@@ -125,9 +119,11 @@ async function analyze() {
   <div
     class="flex h-[calc(100dvh-3.75rem)] md:h-dvh w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
   >
-    <TopbarComp v-model:search="search" :crumbs="['Assistente IA', historyTitle]" />
+    <TopbarComp :crumbs="['Assistente IA', historyTitle]" />
 
-    <div class="flex min-h-0 flex-1 flex-col p-[12px] sm:p-[20px] lg:p-[28px]">
+    <div
+      class="flex min-h-0 flex-1 flex-col px-[20px] py-[12px] sm:px-[32px] sm:py-[20px] lg:px-[40px] lg:py-[28px]"
+    >
       <ChatPanelLayout tinted>
         <template #aside>
           <div class="flex items-center gap-[10px] px-[18px] pt-[18px]">
@@ -155,7 +151,7 @@ async function analyze() {
           <ChatSectionTitle>Conversas desta sessão</ChatSectionTitle>
           <nav aria-label="Histórico de conversas" class="flex flex-col gap-[2px] pb-[12px]">
             <button
-              v-for="item in visibleHistory"
+              v-for="item in ai.conversations"
               :key="item.id"
               type="button"
               :disabled="ai.isBusy"

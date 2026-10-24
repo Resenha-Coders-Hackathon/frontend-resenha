@@ -15,7 +15,7 @@ withDefaults(defineProps<{ crumbs: string[]; title?: string; description?: strin
     <TopbarComp :crumbs="crumbs" />
 
     <section
-      class="mx-auto flex w-full max-w-[1120px] flex-1 flex-col gap-[20px] px-[16px] pt-[24px] pb-[40px] sm:px-[28px]"
+      class="mx-auto flex w-full max-w-[1120px] flex-1 flex-col gap-[20px] px-[20px] pt-[24px] pb-[40px] sm:px-[36px]"
     >
       <slot name="top" />
       <header v-if="title" class="flex flex-col gap-[4px] leading-normal">

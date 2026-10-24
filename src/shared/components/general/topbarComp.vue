@@ -8,9 +8,13 @@ import ThemeSwitcher from './themeSwitcher.vue'
   A organização atual é colocada na frente do caminho pelo layout; o sino mostra as não lidas.
 */
 
-const props = withDefaults(defineProps<{ crumbs: string[]; searchPlaceholder?: string }>(), {
-  searchPlaceholder: 'Buscar tarefas, pessoas, arquivos',
-})
+const props = withDefaults(
+  defineProps<{ crumbs: string[]; showSearch?: boolean; searchPlaceholder?: string }>(),
+  {
+    showSearch: false,
+    searchPlaceholder: 'Buscar tarefas, pessoas, arquivos',
+  },
+)
 
 const search = defineModel<string>('search', { default: '' })
 const shell = useShell()
@@ -21,7 +25,7 @@ const path = computed(() =>
 
 <template>
   <div
-    class="flex items-center gap-[12px] border-b border-(--border-default) bg-(--surface) px-[16px] py-[14px] sm:px-[28px] dark:border-(--border-inverse) dark:bg-(--surface-inverse)"
+    class="relative flex items-center gap-[12px] border-b border-(--border-default) bg-(--surface) px-[20px] py-[14px] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-10 after:rounded-full after:bg-(--bg-orange)/75 sm:px-[36px] xl:px-[44px] dark:border-(--border-inverse) dark:bg-(--surface-inverse)"
   >
     <nav aria-label="Navegação estrutural" class="min-w-0 flex-1">
       <ol class="flex items-center gap-[6px] text-[13px] leading-normal text-(--text-muted)">
@@ -29,6 +33,11 @@ const path = computed(() =>
           <span v-if="index > 0" class="material-symbols-outlined text-[15px]!" aria-hidden="true"
             >chevron_right</span
           >
+          <span
+            v-if="index === path.length - 1"
+            class="size-1.5 shrink-0 rounded-full bg-(--bg-orange)"
+            aria-hidden="true"
+          ></span>
           <span
             :class="[
               'truncate',
@@ -45,6 +54,7 @@ const path = computed(() =>
     </nav>
 
     <label
+      v-if="showSearch"
       class="hidden w-[300px] items-center gap-[8px] rounded-[10px] border border-(--border-default) bg-(--bg-subtle) px-[10px] py-[9px] focus-within:border-(--bg-orange) focus-within:ring-2 focus-within:ring-(--bg-orange)/15 md:flex dark:border-(--border-inverse) dark:bg-black/30"
     >
       <span class="material-symbols-outlined text-[17px]! text-(--text-muted)" aria-hidden="true"
@@ -63,15 +73,13 @@ const path = computed(() =>
       >
     </label>
 
-    <span
-      class="grid size-[38px] shrink-0 place-items-center rounded-[10px] border border-(--border-default) bg-(--surface) dark:border-(--border-inverse) dark:bg-transparent [&_.material-symbols-outlined]:mt-0! [&_.material-symbols-outlined]:text-[18px]! [&_.material-symbols-outlined]:lg:scale-100!"
-    >
-      <ThemeSwitcher aria-label="Alternar tema" class="grid cursor-pointer place-items-center" />
-    </span>
+    <ThemeSwitcher
+      class="[&_.material-symbols-outlined]:text-[18px]! [&_.material-symbols-outlined]:lg:scale-100!"
+    />
 
     <RouterLink
       to="/notificacoes"
-      class="relative grid size-[38px] shrink-0 cursor-pointer place-items-center rounded-[10px] border border-(--border-default) bg-(--surface) transition-colors hover:border-(--bg-orange)/40 hover:bg-(--bg-orange)/5 hover:text-(--bg-orange) dark:border-(--border-inverse) dark:bg-transparent"
+      class="relative grid size-[38px] shrink-0 cursor-pointer place-items-center rounded-[10px] border border-(--border-default) bg-(--surface) transition-all duration-300 hover:-translate-y-0.5 hover:border-(--bg-orange)/40 hover:bg-(--bg-orange)/5 hover:text-(--bg-orange) active:translate-y-0 active:scale-[0.98] dark:border-(--border-inverse) dark:bg-transparent"
       :aria-label="
         shell.unread.value ? `Notificações: ${shell.unread.value} não lidas` : 'Notificações'
       "

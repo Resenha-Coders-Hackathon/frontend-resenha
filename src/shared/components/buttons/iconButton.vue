@@ -22,23 +22,27 @@ withDefaults(defineProps<Props>(), {
     :aria-label="label"
     :disabled="disabled"
     :class="[
-      'flex items-center justify-center rounded-full transition-all duration-300 mt-5',
+      'group flex items-center justify-center rounded-full transition-all duration-300 ease-out mt-5',
       size === 'sm' ? 'h-8 w-8' : 'h-10 w-10',
       {
-        'text-(--outline) hover:bg-(--surface-container-low) hover:text-(--on-surface) dark:hover:bg-(--surface-container-dark) dark:hover:text-white active:bg-(--surface-container-low) active:text-(--on-surface) dark:active:bg-(--surface-container-dark) dark:active:text-white':
+        'text-(--outline) hover:bg-(--bg-orange)/5 hover:text-(--bg-orange) dark:hover:bg-(--bg-orange)/10 active:bg-(--bg-orange)/10':
           variant === 'default',
 
-        'bg-(--primary-container) text-white shadow-md hover:scale-105 hover:shadow-lg active:scale-105 active:shadow-lg dark:bg-(--primary-container-dark)':
+        'bg-(--bg-orange) text-white shadow-md hover:brightness-105 dark:bg-(--bg-orange)':
           variant === 'primary',
 
-        'text-(--primary) hover:bg-(--surface-container-low) active:bg-(--surface-container-low) dark:text-(--primary-dark) dark:hover:bg-(--surface-container-dark) dark:active:bg-(--surface-container-dark)':
+        'text-(--primary) hover:bg-(--bg-orange)/5 hover:text-(--bg-orange) dark:text-(--primary-dark) dark:hover:bg-(--bg-orange)/10':
           variant === 'danger',
 
+        'hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]': !disabled,
         'cursor-not-allowed opacity-50': disabled,
       },
     ]"
   >
-    <span class="material-symbols-outlined" :class="size === 'sm' ? 'text-[16px]' : 'text-[20px]'">
+    <span
+      class="material-symbols-outlined transition-transform duration-300 group-hover:translate-x-0.5"
+      :class="size === 'sm' ? 'text-[16px]' : 'text-[20px]'"
+    >
       {{ icon }}
     </span>
   </button>

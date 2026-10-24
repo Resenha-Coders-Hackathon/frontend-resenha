@@ -5,7 +5,12 @@ const props = withDefaults(defineProps<{ compact?: boolean }>(), { compact: fals
 </script>
 
 <template>
-  <div :class="['flex flex-col px-4 pt-15 pb-8 sm:px-12', props.compact ? 'h-dvh' : 'min-h-dvh']">
+  <div
+    :class="[
+      'flex flex-col px-5 pt-15 pb-8 sm:px-14 lg:px-16',
+      props.compact ? 'h-dvh' : 'min-h-dvh',
+    ]"
+  >
     <div
       :class="['flex flex-1 items-center justify-center', props.compact ? 'min-h-0 py-2' : 'py-12']"
     >

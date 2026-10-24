@@ -26,7 +26,6 @@ const router = useRouter()
 const auth = useAuthStore()
 const organizations = useOrganizationsStore()
 const chat = useChatStore()
-const search = ref('')
 const draft = ref('')
 const scroller = useTemplateRef<HTMLElement>('scroller')
 
@@ -48,12 +47,8 @@ const EMPTY_CHANNEL: ChatChannel = {
   last_message: null,
 }
 
-const needle = computed(() => search.value.trim().toLowerCase())
-const visible = computed(() =>
-  chat.channels.filter((channel) => channel.name.toLowerCase().includes(needle.value)),
-)
-const sectors = computed(() => visible.value.filter((channel) => channel.kind !== 'direct'))
-const directs = computed(() => visible.value.filter((channel) => channel.kind === 'direct'))
+const sectors = computed(() => chat.channels.filter((channel) => channel.kind !== 'direct'))
+const directs = computed(() => chat.channels.filter((channel) => channel.kind === 'direct'))
 const activeId = computed(() => chat.activeId ?? '')
 const active = computed(() => chat.channels.find((c) => c.id === chat.activeId) ?? EMPTY_CHANNEL)
 const typing = computed(() => chat.typing[activeId.value])
@@ -213,11 +208,12 @@ watch(() => [chat.activeId, items.value.length], scrollToEnd, { immediate: true 
     class="flex h-[calc(100dvh-3.75rem)] md:h-dvh w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
   >
     <TopbarComp
-      v-model:search="search"
       :crumbs="['Mensagens', active.kind === 'direct' ? active.name : `#${active.name}`]"
     />
 
-    <div class="flex min-h-0 flex-1 flex-col p-[12px] sm:p-[20px] lg:p-[28px]">
+    <div
+      class="flex min-h-0 flex-1 flex-col px-[20px] py-[12px] sm:px-[32px] sm:py-[20px] lg:px-[40px] lg:py-[28px]"
+    >
       <ChatPanelLayout>
         <template #aside>
           <h2

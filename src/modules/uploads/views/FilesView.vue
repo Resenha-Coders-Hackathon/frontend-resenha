@@ -95,7 +95,9 @@ const where = (file: OrganizationFile) => file.task_title ?? file.sector_name ??
   >
     <TopbarComp :crumbs="['Arquivos']" />
 
-    <section class="flex flex-1 flex-col gap-[16px] px-[16px] pt-[24px] pb-[32px] sm:px-[28px]">
+    <section
+      class="flex flex-1 flex-col gap-[16px] px-[20px] pt-[24px] pb-[32px] sm:px-[36px] xl:px-[44px]"
+    >
       <SubheaderComp
         title="Arquivos"
         description="Tudo que foi anexado à organização, aos setores e às tarefas"

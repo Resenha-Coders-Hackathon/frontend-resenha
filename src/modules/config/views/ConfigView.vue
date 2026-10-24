@@ -94,7 +94,6 @@ const LANGUAGES: SelectOption[] = [
 const { theme, setTheme } = useTheme()
 
 const activeTab = ref<ConfigTabId>('profile')
-const search = ref('')
 const current = computed(() => TABS.find((tab) => tab.id === activeTab.value) ?? TABS[0]!)
 
 // os dados são JSON simples; structuredClone não aceita os proxies reativos do Vue
@@ -365,9 +364,11 @@ function handleCancel() {
   <div
     class="flex min-h-dvh w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
   >
-    <TopbarComp v-model:search="search" :crumbs="['Configurações', current.label]" />
+    <TopbarComp :crumbs="['Configurações', current.label]" />
 
-    <section class="flex flex-1 flex-col gap-[16px] px-[16px] pt-[24px] pb-[28px] sm:px-[28px]">
+    <section
+      class="flex flex-1 flex-col gap-[16px] px-[20px] pt-[24px] pb-[28px] sm:px-[36px] xl:px-[44px]"
+    >
       <SubheaderComp
         :title="current.title"
         :description="current.description"

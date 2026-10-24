@@ -83,7 +83,7 @@ const itemClass = (active: boolean) => [
   active && isOpen.value
     ? 'border-l-[3px] border-(--bg-orange) bg-(--bg-orange)/10 dark:bg-(--bg-orange)/15'
     : 'border-l-[3px] border-transparent hover:bg-(--background-inverse)/30 dark:hover:bg-white/5',
-  'group relative flex cursor-pointer items-center justify-start gap-2 rounded-xl px-2 py-1.5 text-sm font-medium transition-all duration-300',
+  'group relative flex cursor-pointer items-center justify-start gap-2 rounded-xl px-[5px] py-1.5 text-sm font-medium transition-all duration-300',
 ]
 
 const iconFrameClass = 'grid size-12 shrink-0 place-items-center'
@@ -91,12 +91,9 @@ const iconFrameClass = 'grid size-12 shrink-0 place-items-center'
 const iconContainerClass = (active: boolean) => [
   'grid size-10 shrink-0 place-items-center border border-transparent transition-all duration-300 ease-in-out group-hover:scale-105',
   active
-    ? 'border-(--bg-orange)/70 bg-(--bg-orange) text-white shadow-[0_4px_16px_rgba(255,122,15,0.28)] ring-4 ring-(--bg-orange)/10'
-    : 'rounded-full group-hover:bg-(--background-inverse)/10',
+    ? 'rounded-xl border-(--bg-orange)/70 bg-(--bg-orange) text-white shadow-[0_4px_16px_rgba(255,122,15,0.28)] ring-4 ring-(--bg-orange)/10'
+    : 'rounded-xl group-hover:bg-(--background-inverse)/10',
 ]
-
-const activeIconStyle = (active: boolean) =>
-  active ? { borderRadius: isOpen.value ? '12px' : '50%' } : undefined
 
 const initial = (name: string) => name.trim().charAt(0).toUpperCase() || '?'
 const orgLabel = (name: string, personal: boolean) => (personal ? 'Espaço pessoal' : name)
@@ -180,13 +177,11 @@ async function signOut() {
           to="/"
           aria-label="ResenhaCoders — início"
           :title="isOpen ? undefined : 'ResenhaCoders'"
-          class="mb-3 flex h-10 items-center justify-start gap-2 px-2 text-2xl font-bold"
+          class="mb-3 flex h-12 items-center justify-start gap-2 px-2 text-2xl font-bold"
         >
-          <span
-            class="grid size-9 shrink-0 place-items-center rounded-xl bg-(--bg-orange) text-base font-bold text-white"
-            aria-hidden="true"
-            >R</span
-          >
+          <span class="grid size-12 shrink-0 place-items-center" aria-hidden="true">
+            <img src="/icons/logo.svg" alt="" class="size-10 rounded-xl object-cover" />
+          </span>
           <img
             :src="isDark ? '/wordmark-inverse.svg' : '/wordmark.svg'"
             alt="ResenhaCoders"
@@ -203,7 +198,10 @@ async function signOut() {
           <button
             type="button"
             :class="[
-              'flex w-full cursor-pointer items-center gap-2 rounded-xl border border-(--border-default) px-2 py-2 text-left transition-colors hover:bg-(--background-inverse)/10 dark:border-(--border-inverse) dark:hover:bg-white/5',
+              'flex cursor-pointer items-center bg-(--surface) text-left transition-all duration-300 dark:bg-(--surface-inverse)',
+              isOpen
+                ? 'h-12 w-full gap-2 rounded-xl border border-(--border-default) px-2 py-2 dark:border-(--border-inverse)'
+                : 'ml-2 size-12 justify-center rounded-2xl border border-(--border-default) p-0 dark:border-(--border-inverse)',
             ]"
             aria-haspopup="listbox"
             :aria-expanded="switcherOpen"
@@ -214,18 +212,13 @@ async function signOut() {
             @click="switcherOpen = !switcherOpen"
             @keydown.esc="switcherOpen = false"
           >
-            <span
-              class="grid size-7 shrink-0 place-items-center rounded-lg bg-(--background-inverse) text-xs font-bold text-(--text-inverse) dark:bg-white/15"
-              aria-hidden="true"
-              >{{ initial(current?.name ?? '') }}</span
-            >
-            <span
-              :class="[
-                'min-w-0 flex-1 transition-opacity duration-200',
-                isOpen ? 'opacity-100' : 'opacity-0',
-              ]"
-              :aria-hidden="!isOpen"
-            >
+            <span class="grid size-12 shrink-0 place-items-center" aria-hidden="true">
+              <span
+                class="grid size-7 place-items-center rounded-lg border border-white/20 bg-black text-xs font-bold text-white"
+                >{{ initial(current?.name ?? '') }}</span
+              >
+            </span>
+            <span v-if="isOpen" class="min-w-0 flex-1">
               <span class="block truncate text-sm font-semibold">
                 {{ current ? orgLabel(current.name, current.is_personal) : 'Sem organização' }}
               </span>
@@ -234,11 +227,9 @@ async function signOut() {
               </span>
             </span>
             <span
-              :class="[
-                'material-symbols-outlined shrink-0 text-(--text-muted) transition-opacity duration-200',
-                isOpen ? 'opacity-100' : 'opacity-0',
-              ]"
-              :aria-hidden="!isOpen"
+              v-if="isOpen"
+              class="material-symbols-outlined shrink-0 text-(--text-muted)"
+              aria-hidden="true"
               >unfold_more</span
             >
             <span
@@ -322,10 +313,7 @@ async function signOut() {
                 :title="isOpen ? undefined : item.label"
               >
                 <span :class="iconFrameClass" aria-hidden="true">
-                  <span
-                    :class="iconContainerClass(isActive(item))"
-                    :style="activeIconStyle(isActive(item))"
-                  >
+                  <span :class="iconContainerClass(isActive(item))">
                     <span
                       :class="[
                         'material-symbols-outlined text-[28px]!',
@@ -361,7 +349,7 @@ async function signOut() {
           <template v-if="visibleSectors.length">
             <h3
               :class="[
-                'mt-3 ml-1 text-xs font-semibold tracking-widest text-(--text-muted) uppercase transition-opacity duration-200',
+                'mt-3 ml-2 text-xs font-semibold tracking-widest text-(--text-muted) uppercase transition-opacity duration-200',
                 isOpen ? 'opacity-100' : 'opacity-0',
               ]"
               :aria-hidden="!isOpen"
@@ -382,16 +370,11 @@ async function signOut() {
                   <span :class="iconFrameClass" aria-hidden="true">
                     <span
                       :class="[
-                        'grid size-10 shrink-0 place-items-center rounded-full transition-all duration-200',
+                        'grid size-10 shrink-0 place-items-center transition-all duration-300 ease-in-out',
                         startsWith(route.path, `/setores/${sector.id}`)
-                          ? 'border border-(--bg-orange)/70 bg-(--bg-orange)/15 ring-4 ring-(--bg-orange)/10 shadow-[0_4px_16px_rgba(255,122,15,0.16)]'
-                          : '',
+                          ? 'rounded-xl border border-(--bg-orange)/70 bg-(--bg-orange)/15 ring-4 ring-(--bg-orange)/10 shadow-[0_4px_16px_rgba(255,122,15,0.16)]'
+                          : 'rounded-full',
                       ]"
-                      :style="
-                        startsWith(route.path, `/setores/${sector.id}`)
-                          ? { borderRadius: isOpen ? '12px' : '50%' }
-                          : undefined
-                      "
                     >
                       <span
                         :class="[
@@ -426,10 +409,7 @@ async function signOut() {
               :title="isOpen ? undefined : item.label"
             >
               <span :class="iconFrameClass" aria-hidden="true">
-                <span
-                  :class="iconContainerClass(isActive(item))"
-                  :style="activeIconStyle(isActive(item))"
-                >
+                <span :class="iconContainerClass(isActive(item))">
                   <span
                     :class="[
                       'material-symbols-outlined text-[28px]!',
@@ -455,7 +435,7 @@ async function signOut() {
       <div v-if="auth.user" class="grid gap-1">
         <h3
           :class="[
-            'ml-1 text-xs font-semibold tracking-widest text-(--text-muted) uppercase transition-opacity duration-200',
+            'ml-2 text-xs font-semibold tracking-widest text-(--text-muted) uppercase transition-opacity duration-200',
             isOpen ? 'opacity-100' : 'opacity-0',
           ]"
           :aria-hidden="!isOpen"
@@ -472,10 +452,7 @@ async function signOut() {
               :title="isOpen ? undefined : item.label"
             >
               <span :class="iconFrameClass" aria-hidden="true">
-                <span
-                  :class="iconContainerClass(isActive(item))"
-                  :style="activeIconStyle(isActive(item))"
-                >
+                <span :class="iconContainerClass(isActive(item))">
                   <span
                     :class="[
                       'material-symbols-outlined text-[28px]!',
@@ -508,7 +485,7 @@ async function signOut() {
           </li>
         </ul>
         <p
-          class="truncate px-5 pt-2 pb-1 text-xs text-(--text-muted) transition-opacity duration-200"
+          class="truncate px-16 pt-2 pb-1 text-xs text-(--text-muted) transition-opacity duration-200"
           :class="isOpen ? 'opacity-100' : 'opacity-0'"
           :aria-hidden="!isOpen"
           :title="auth.user.email"
@@ -524,7 +501,7 @@ async function signOut() {
           :title="isOpen ? undefined : 'Sair'"
           @click="signOut"
         >
-          <span class="grid size-10 shrink-0 place-items-center" aria-hidden="true">
+          <span class="grid size-12 shrink-0 place-items-center" aria-hidden="true">
             <span class="material-symbols-outlined text-[28px]!">logout</span>
           </span>
           <span
