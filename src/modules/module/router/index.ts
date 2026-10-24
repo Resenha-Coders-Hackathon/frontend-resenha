@@ -1,6 +1,21 @@
 import type { RouteRecordRaw } from 'vue-router'
 
 export const moduleRoutes: RouteRecordRaw[] = [
+  // páginas públicas exigidas pela tela de consentimento OAuth do Google
+  {
+    path: '/politica-de-privacidade',
+    name: 'PrivacyPolicy',
+    meta: { requiresAuth: false },
+    props: { doc: 'privacidade' },
+    component: () => import('../views/LegalView.vue'),
+  },
+  {
+    path: '/termos-de-servico',
+    name: 'TermsOfService',
+    meta: { requiresAuth: false },
+    props: { doc: 'termos' },
+    component: () => import('../views/LegalView.vue'),
+  },
   {
     path: '/',
     meta: { transitionGroup: 'default' },
