@@ -109,6 +109,7 @@ export const useAiStore = defineStore('ai', () => {
         actions: result.actions,
         confirmation_token: result.confirmation_token,
         choices: result.choices ?? [],
+        unverified: result.unverified ?? false,
       })
       return true
     } catch (e) {

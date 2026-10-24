@@ -49,10 +49,22 @@ const PROMPTS = [
   'Quais setores posso usar?',
 ]
 
-function taskCommand(kind: 'complete' | 'edit' | 'delete', task: AiTask) {
+const DRAFTS = {
+  edit: 'Altere {ref}: ',
+  priority: 'Mude a prioridade d{ref} para ',
+  due: 'Defina o prazo d{ref} para ',
+  assignee: 'Atribua {ref} a ',
+  checklist: 'Adicione ao checklist d{ref}: ',
+} as const
+
+function taskCommand(
+  kind: 'complete' | 'delete' | keyof typeof DRAFTS,
+  task: AiTask,
+) {
   const ref = `a tarefa "${task.title}" (id ${task.id})`
-  if (kind === 'edit') {
-    draft.value = `Altere ${ref}: `
+  if (kind !== 'complete' && kind !== 'delete') {
+    // The user finishes the sentence; nothing is sent until they submit.
+    draft.value = DRAFTS[kind].replace('{ref}', ref)
     return
   }
   // Deletion still needs the server-issued confirmation before anything is removed.
@@ -457,7 +469,7 @@ async function analyze() {
             <ChatComposer
               v-model="draft"
               accent="ai"
-              placeholder="Ex.: crie uma tarefa para estudar Django amanhã no setor Estudos…"
+              placeholder="Ex.: crie uma tarefa de prioridade alta para revisar o relatório sexta-feira…"
               submit-label="Enviar mensagem"
               submit-icon="send"
               @submit="send"

@@ -271,3 +271,10 @@ test('sends the organization context and keeps backend choices on the answer', a
   await ai.ask('Revisar')
   assert.equal(calls[1]?.context, undefined)
 })
+
+test('keeps the backend unverified flag on the assistant message', async () => {
+  api.askAi = async () => answer({ unverified: true })
+  const ai = useAiStore()
+  await ai.ask('Crie uma tarefa')
+  assert.equal(ai.messages.at(-1)?.unverified, true)
+})

@@ -5,7 +5,15 @@ import type { TaskPriority } from '@/shared/types'
 import ChatAvatar from './chatAvatar.vue'
 
 const props = defineProps<{ task: AiTask; disabled?: boolean }>()
-const emit = defineEmits<{ command: [kind: 'complete' | 'edit' | 'delete', task: AiTask] }>()
+const emit = defineEmits<{ command: [kind: 'complete' | 'edit' | 'delete' | 'priority' | 'due' | 'assignee' | 'checklist', task: AiTask] }>()
+
+const ATTRIBUTES = [
+  ['edit', 'Editar'],
+  ['priority', 'Prioridade'],
+  ['due', 'Prazo'],
+  ['assignee', 'Responsável'],
+  ['checklist', 'Checklist'],
+] as const
 
 const due = computed(() =>
   props.task.due_date
@@ -69,12 +77,14 @@ const PRIORITY: Record<TaskPriority, { label: string; bars: number; color: strin
           Concluir
         </button>
         <button
+          v-for="[kind, label] in ATTRIBUTES"
+          :key="kind"
           type="button"
           :disabled="disabled"
           class="h-[26px] cursor-pointer rounded-full border border-(--border-default) px-[10px] text-[12px] transition-colors hover:border-(--chat-ai) hover:text-(--chat-ai) disabled:cursor-not-allowed disabled:opacity-50 dark:border-(--border-inverse)"
-          @click="emit('command', 'edit', task)"
+          @click="emit('command', kind, task)"
         >
-          Editar
+          {{ label }}
         </button>
         <button
           type="button"
