@@ -132,7 +132,7 @@ async function signOut() {
     <nav class="py-4 flex flex-col justify-between min-h-full gap-6">
       <div class="grid gap-2">
         <RouterLink to="/" class="text-2xl font-bold mb-3">
-          <img :src="[isDark ? '/wordmark-inverse.svg' : '/wordmark.svg']" alt="" class="mx-auto" />
+          <img :src="isDark ? '/wordmark-inverse.svg' : '/wordmark.svg'" alt="" class="mx-auto" />
         </RouterLink>
 
         <!-- Seletor de organização -->
