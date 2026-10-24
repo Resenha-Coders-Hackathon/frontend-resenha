@@ -2,12 +2,13 @@
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import type { IMenuItems } from '@/shared/types'
+import { useAuthStore } from '@/modules/auth'
 
 const route = useRoute()
+const authStore = useAuthStore()
 const isOpen = ref<boolean>(true)
 
 const menuItems: IMenuItems[] = [
-  { link: '/organizacoes', label: 'Organizações' },
   {
     link: '/',
     icon: 'home',
@@ -34,18 +35,6 @@ const menuItems: IMenuItems[] = [
   {
     link: '/pagamento',
     label: 'Pagamento',
-  },
-  
-]
-
-const authItems: IMenuItems[] = [
-  {
-    link: '/registrar',
-    label: 'Criar conta',
-  },
-  {
-    link: '/entrar',
-    label: 'Entrar',
   },
 ]
 </script>
@@ -107,26 +96,11 @@ const authItems: IMenuItems[] = [
       </div>
 
       <div class="grid gap-2">
-        <h3 class="uppercase font-semibold tracking-widest text-(--text-muted) text-xs ml-1">
-          Configurações
-        </h3>
-
-        <ul class="grid gap-2">
-          <li v-for="(item, index) in authItems" :key="index">
-            <RouterLink
-              :to="item.link"
-              :class="[
-                route.name === item.label
-                  ? 'bg-(--background-inverse) text-(--text-inverse)'
-                  : 'hover:bg-(--background-inverse)/30',
-                'text-sm rounded-xl flex items-center gap-2 px-5 py-1.5 cursor-pointer font-medium transition-all duration-300',
-              ]"
-            >
-              <span class="material-symbols-outlined">{{ item.icon }}</span>
-              <span>{{ item.label }}</span>
-            </RouterLink>
-          </li>
-        </ul>
+        <div></div>
+        <div>
+          <h4 class="font-semibold">{{ authStore.user?.name }}</h4>
+          <p class="text-(--text-muted) text-sm">Admin - Produto</p>
+        </div>
       </div>
     </nav>
   </aside>

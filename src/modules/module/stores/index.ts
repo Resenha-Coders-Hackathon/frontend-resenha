@@ -14,6 +14,7 @@ import {
   listTasks,
   moveTask,
   updateSector,
+  updateStatus,
   updateTask,
 } from '../services'
 import type {
@@ -25,6 +26,7 @@ import type {
   Status,
   Task,
   UpdateSectorRequest,
+  UpdateStatusRequest,
   UpdateTaskRequest,
 } from '../types'
 
@@ -97,6 +99,25 @@ export const useKanbanStore = defineStore('kanban', () => {
     statuses.value = statuses.value.filter((s) => s.id !== statusId)
   }
 
+  async function editStatus(id: string, payload: UpdateStatusRequest): Promise<Status> {
+    const sector = requireSector()
+    const previousCategory = statuses.value.find((status) => status.id === id)?.category
+    const updated = await updateStatus(sector, id, payload)
+    if (sectorId.value === sector) {
+      statuses.value = statuses.value
+        .map((status) => (status.id === id ? updated : status))
+        .sort((a, b) => a.position - b.position)
+      // The backend synchronizes completion dates when a column changes category.
+      if (previousCategory !== updated.category) {
+        const refreshed = await fetchAllPages((page) =>
+          listTasks(sector, { page, ordering: 'position' }),
+        )
+        if (sectorId.value === sector) tasks.value = refreshed
+      }
+    }
+    return updated
+  }
+
   async function addTask(payload: CreateTaskRequest): Promise<Task> {
     const created = await createTask(requireSector(), payload)
     tasks.value = [...tasks.value, created]
@@ -114,14 +135,34 @@ export const useKanbanStore = defineStore('kanban', () => {
 
   // Atualização otimista; em erro volta ao estado anterior e relança.
   async function move(id: string, statusId: string, position?: number): Promise<Task> {
+    const sector = requireSector()
     const previous = tasks.value
     const current = previous.find((t) => t.id === id)
     if (!current) throw new Error('Tarefa não encontrada.')
-    replace({ ...current, status_id: statusId, position: position ?? current.position })
+    const status = statuses.value.find((item) => item.id === statusId)
+    if (!status) throw new Error('Coluna não encontrada.')
+    const siblings = tasksByStatus(statusId).filter((task) => task.id !== id)
+    if (current.status_id !== statusId && status.wip_limit && siblings.length >= status.wip_limit) {
+      throw new Error(
+        'Esta coluna atingiu o limite de tarefas. Aumente o limite ou mova uma tarefa.',
+      )
+    }
+    const targetPosition = Math.max(0, Math.min(position ?? siblings.length, siblings.length))
+    const completedAt =
+      status.category === 'done' ? (current.completed_at ?? new Date().toISOString()) : null
+    siblings.splice(targetPosition, 0, {
+      ...current,
+      status_id: statusId,
+      completed_at: completedAt,
+      is_overdue: completedAt ? false : current.is_overdue,
+    })
+    const ordered = new Map(siblings.map((task, index) => [task.id, { ...task, position: index }]))
+    tasks.value = tasks.value.map((task) => ordered.get(task.id) ?? task)
     try {
-      return replace(await moveTask(id, { status: statusId, position }))
+      const moved = await moveTask(id, { status: statusId, position: targetPosition })
+      return sectorId.value === sector ? replace(moved) : moved
     } catch (error) {
-      tasks.value = previous
+      if (sectorId.value === sector) tasks.value = previous
       throw error
     }
   }
@@ -143,6 +184,7 @@ export const useKanbanStore = defineStore('kanban', () => {
     load,
     tasksByStatus,
     addStatus,
+    editStatus,
     removeStatus,
     addTask,
     editTask,

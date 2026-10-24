@@ -1,108 +1,108 @@
-<script setup lang="ts">
-import { CardKanban } from '.'
-import type { ITasks } from '@/shared/types'
+﻿<script setup lang="ts">
+import { ref } from 'vue'
+import CardKanban from './cardKanban.vue'
+import type { Status, Task } from '../types'
 
-defineProps<{
-  title: string
-  cards: string[]
+interface Props {
+  status: Status
+  tasks: Task[]
+  total: number
+  draggingId: string | null
+  disabled?: boolean
+}
+defineProps<Props>()
+const emit = defineEmits<{
+  open: [id: string]
+  create: [statusId: string]
+  edit: [status: Status]
+  move: [taskId: string, statusId: string]
+  drag: [id: string | null]
 }>()
-
-const tasks: ITasks[] = [
-  {
-    id: 'a1b2c3d4-1111-4111-8111-111111111111',
-    sector_id: 'b2c3d4e5-2222-4222-8222-222222222222',
-    status_id: 'c3d4e5f6-3333-4333-8333-333333333333',
-    parent_id: null,
-    title: 'Conferir pedidos pendentes',
-    description: 'Verificar os pedidos que aguardam confirmação de pagamento.',
-    priority: 'high',
-    due_date: '2026-10-22',
-    completed_at: null,
-    assignee_id: 'd4e5f6a7-4444-4444-8444-444444444444',
-    assignee_name: 'Nicole Mello',
-    position: 0,
-    is_overdue: true,
-    created_at: '2026-10-20T09:00:00Z',
-  },
-  {
-    id: 'a1b2c3d4-1111-4111-8111-111111111112',
-    sector_id: 'b2c3d4e5-2222-4222-8222-222222222222',
-    status_id: 'c3d4e5f6-3333-4333-8333-333333333334',
-    parent_id: null,
-    title: 'Organizar rota de entregas',
-    description: 'Definir a sequência de entregas considerando os endereços.',
-    priority: 'medium',
-    due_date: '2026-10-26',
-    completed_at: null,
-    assignee_id: 'd4e5f6a7-4444-4444-8444-444444444445',
-    assignee_name: 'Thayná Becker',
-    position: 1,
-    is_overdue: false,
-    created_at: '2026-10-21T13:30:00Z',
-  },
-  {
-    id: 'a1b2c3d4-1111-4111-8111-111111111113',
-    sector_id: 'b2c3d4e5-2222-4222-8222-222222222223',
-    status_id: 'c3d4e5f6-3333-4333-8333-333333333333',
-    parent_id: null,
-    title: 'Atualizar cadastro de fornecedores',
-    description: 'Revisar os dados de contato dos fornecedores ativos.',
-    priority: 'low',
-    due_date: null,
-    completed_at: null,
-    assignee_id: null,
-    assignee_name: null,
-    position: 2,
-    is_overdue: false,
-    created_at: '2026-10-22T10:15:00Z',
-  },
-  {
-    id: 'a1b2c3d4-1111-4111-8111-111111111114',
-    sector_id: 'b2c3d4e5-2222-4222-8222-222222222222',
-    status_id: 'c3d4e5f6-3333-4333-8333-333333333335',
-    parent_id: 'a1b2c3d4-1111-4111-8111-111111111111',
-    title: 'Confirmar pagamentos recebidos',
-    description: 'Comparar os comprovantes com os registros financeiros.',
-    priority: 'high',
-    due_date: '2026-10-22',
-    completed_at: '2026-10-22T16:45:00Z',
-    assignee_id: 'd4e5f6a7-4444-4444-8444-444444444444',
-    assignee_name: 'Nicole Mello',
-    position: 3,
-    is_overdue: false,
-    created_at: '2026-10-20T09:30:00Z',
-  },
-]
+const over = ref(false)
+function leave(event: DragEvent) {
+  if (
+    !(event.currentTarget instanceof HTMLElement) ||
+    !(event.relatedTarget instanceof Node) ||
+    !event.currentTarget.contains(event.relatedTarget)
+  )
+    over.value = false
+}
+function drop(event: DragEvent, statusId: string) {
+  over.value = false
+  const id = event.dataTransfer?.getData('application/x-kanban-task')
+  if (id) emit('move', id, statusId)
+  emit('drag', null)
+}
 </script>
 
 <template>
-  <div class="bg-(--surface) dark:bg-(--surface-inverse) rounded-xl w-full">
-    <div class="border-b border-(--border-default) py-3 px-4">
-      <div class="flex justify-between">
-        <h3 class="flex gap-1 text-sm">
-          <span class="material-symbols-outlined">history</span>
-          <span class="font-semibold">{{ title }}</span>
-
-          <span class="text-xs text-(--text-muted)">
-            {{ cards.length }}
-          </span>
-        </h3>
-
-        <div class="text-(--text-muted)">
-          <button class="material-symbols-outlined">add</button>
-          <button class="material-symbols-outlined">more_horiz</button>
-        </div>
-      </div>
-
-      <ul class="grid gap-3">
-        <li v-for="(task, index) in tasks" :key="index">
-          <CardKanban :task="task" />
-        </li>
-      </ul>
-
-      <p class="text-sm">
-        {{ cards ? 'Existem itens atrasados' : 'Não há itens atrasados' }}
-      </p>
+  <section
+    class="kb-column"
+    :class="{ 'is-over': over && draggingId && !disabled }"
+    :aria-label="status.name"
+    @dragover.prevent="over = true"
+    @dragleave="leave"
+    @drop.prevent="!disabled && drop($event, status.id)"
+  >
+    <header class="flex items-center gap-2 px-1.5 pb-2">
+      <span
+        class="kb-status-dot"
+        :style="{ '--status-color': status.color }"
+        aria-hidden="true"
+      ></span>
+      <h2
+        class="min-w-0 flex-1 truncate text-[13.5px]! leading-5! font-semibold"
+        :title="status.name"
+      >
+        {{ status.name }}
+      </h2>
+      <span class="text-[11px] text-(--kanban-muted)"
+        >{{ total }}<span v-if="status.wip_limit"> / {{ status.wip_limit }}</span></span
+      >
+      <button
+        class="kb-icon"
+        :disabled="disabled"
+        :aria-label="`Adicionar tarefa em ${status.name}`"
+        @click="emit('create', status.id)"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">add</span>
+      </button>
+      <button
+        class="kb-icon"
+        :disabled="disabled"
+        :aria-label="`Personalizar coluna ${status.name}`"
+        @click="emit('edit', status)"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">more_horiz</span>
+      </button>
+    </header>
+    <div v-if="status.wip_limit" class="mb-2 h-[3px] overflow-hidden rounded bg-(--kanban-border)">
+      <div
+        class="h-full"
+        :style="{
+          backgroundColor: status.color,
+          width: `${Math.min(100, (total / status.wip_limit) * 100)}%`,
+        }"
+      ></div>
     </div>
-  </div>
+    <ul class="grid gap-2.5">
+      <li v-for="task in tasks" :key="task.id">
+        <CardKanban
+          :task="task"
+          :disabled="disabled"
+          :dragging="draggingId === task.id"
+          @open="emit('open', $event)"
+          @drag="emit('drag', $event)"
+          @end="emit('drag', null)"
+        />
+      </li>
+    </ul>
+    <p v-if="!tasks.length" class="px-3 py-8 text-center text-xs text-(--kanban-muted)">
+      {{ total ? 'Nenhuma tarefa neste filtro.' : 'Arraste tarefas para cá ou crie a primeira.' }}
+    </p>
+    <button class="kb-add-task" :disabled="disabled" @click="emit('create', status.id)">
+      <span class="material-symbols-outlined text-[16px]!" aria-hidden="true">add</span>Adicionar
+      tarefa
+    </button>
+  </section>
 </template>
