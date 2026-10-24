@@ -18,6 +18,7 @@ import {
 } from '@/modules/ai'
 import type { AiTask } from '@/modules/ai'
 import {
+  AiBrandName,
   AssistantTaskCard,
   AssistantTaskDraft,
   ChatAvatar,
@@ -53,29 +54,10 @@ const PROMPTS = [
   'Quais setores posso usar?',
 ]
 
-const DRAFTS = {
-  edit: 'Altere {ref}: ',
-  priority: 'Mude a prioridade d{ref} para ',
-  due: 'Defina o prazo d{ref} para ',
-  assignee: 'Atribua {ref} a ',
-  checklist: 'Adicione ao checklist d{ref}: ',
-} as const
-
-function taskCommand(
-  kind: 'complete' | 'delete' | keyof typeof DRAFTS,
-  task: AiTask,
-) {
-  const ref = `a tarefa "${task.title}" (id ${task.id})`
-  if (kind !== 'complete' && kind !== 'delete') {
-    // The user finishes the sentence; nothing is sent until they submit.
-    draft.value = DRAFTS[kind].replace('{ref}', ref)
-    return
-  }
-  // Deletion still needs the server-issued confirmation before anything is removed.
-  void ai.ask(
-    kind === 'complete' ? `Conclua ${ref}.` : `Exclua ${ref}.`,
-    organizations.current?.id,
-  )
+function taskDelete(task: AiTask) {
+  // Deletion is the one task action that still goes through the assistant,
+  // so the server can issue its single-use confirmation token.
+  void ai.ask(`Exclua a tarefa "${task.title}" (id ${task.id}).`, organizations.current?.id)
 }
 
 watch(
@@ -159,19 +141,21 @@ async function analyze() {
   <div
     class="flex h-[calc(100dvh-3.75rem)] md:h-dvh w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
   >
-    <TopbarComp v-model:search="search" :crumbs="['Assistente IA', historyTitle]" />
+    <TopbarComp v-model:search="search" :crumbs="['Inceptum AI', historyTitle]" />
 
     <div class="flex min-h-0 flex-1 flex-col p-[12px] sm:p-[20px] lg:p-[28px]">
       <ChatPanelLayout tinted>
         <template #aside>
           <div class="flex items-center gap-[10px] px-[18px] pt-[18px]">
-            <ChatAvatar name="Assistente" variant="ai" :size="30" />
-            <h2 class="text-[17px]! leading-normal! font-semibold! tracking-normal!">Assistente</h2>
+            <ChatAvatar name="Inceptum AI" variant="ai" :size="30" />
+            <h2 class="text-[17px]! leading-normal! font-semibold! tracking-normal!">
+              <AiBrandName />
+            </h2>
           </div>
           <p
             class="px-[18px] pt-[12px] text-[12.5px] leading-[19px] text-(--text-secondary) dark:text-(--text-inverse-muted)"
           >
-            Consulte, crie e organize suas tarefas por mensagem. O assistente usa os setores aos
+            Consulte, crie e organize suas tarefas por mensagem. A Inceptum AI usa os setores aos
             quais você tem acesso.
           </p>
           <div
@@ -208,10 +192,10 @@ async function analyze() {
         </template>
 
         <template #header>
-          <ChatAvatar name="Assistente" variant="ai" :size="32" />
+          <ChatAvatar name="Inceptum AI" variant="ai" :size="32" />
           <div class="flex min-w-0 flex-1 flex-col leading-normal">
-            <h1 class="text-[15px]! leading-normal! font-semibold! tracking-normal!">
-              Assistente IA
+            <h1 class="text-[16px]! leading-normal! font-semibold! tracking-normal!">
+              <AiBrandName />
             </h1>
             <p class="truncate text-[12px] text-(--text-muted)">Tarefas e setores da sua conta</p>
           </div>
@@ -238,7 +222,8 @@ async function analyze() {
             v-if="!ai.messages.length"
             class="flex flex-col items-center gap-[10px] py-[60px] text-center"
           >
-            <ChatAvatar name="Assistente" variant="ai" :size="44" />
+            <ChatAvatar name="Inceptum AI" variant="ai" :size="44" />
+            <p class="leading-normal"><AiBrandName class="text-[24px]" /></p>
             <p class="text-[15px] font-semibold">Como posso ajudar?</p>
             <p class="max-w-[420px] text-[13px] leading-[20px] text-(--text-muted)">
               Peça para criar uma tarefa, consultar seus prazos ou atualizar uma prioridade. Informe
@@ -272,10 +257,10 @@ async function analyze() {
             </article>
 
             <article v-else class="flex gap-[10px]">
-              <ChatAvatar name="Assistente" variant="ai" :size="36" />
+              <ChatAvatar name="Inceptum AI" variant="ai" :size="36" />
               <div class="flex min-w-0 flex-1 flex-col gap-[10px]">
                 <p class="flex items-baseline gap-[8px] leading-normal">
-                  <span class="text-[13.5px] font-semibold">Assistente IA</span>
+                  <AiBrandName class="text-[13.5px]" />
                   <span class="text-[11.5px] text-(--text-muted)">{{
                     formatTime(entry.created_at)
                   }}</span>
@@ -330,7 +315,7 @@ async function analyze() {
                       :key="task.id"
                       :task="task"
                       :disabled="ai.isBusy || !!ai.active?.pending || !!ai.active?.expired"
-                      @command="taskCommand"
+                      @delete="taskDelete"
                     />
                     <p
                       v-for="note in aiActionNotes(action)"

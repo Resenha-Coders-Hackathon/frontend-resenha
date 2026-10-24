@@ -23,7 +23,7 @@ const tabs: Item[] = [
 const more: Item[] = [
   { to: '/arquivos', label: 'Arquivos', icon: 'folder' },
   { to: '/relatorios', label: 'Relatórios', icon: 'bar_chart' },
-  { to: '/assistente', label: 'Assistente IA', icon: 'auto_awesome' },
+  { to: '/assistente', label: 'Inceptum AI', icon: 'auto_awesome' },
   { to: '/mapbox', label: 'Mapa', icon: 'map' },
   { to: '/notificacoes', label: 'Notificações', icon: 'notifications' },
   {
