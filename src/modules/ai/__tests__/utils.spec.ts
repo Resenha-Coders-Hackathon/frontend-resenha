@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { aiActionDeleted, aiActionLabel, aiActionTasks, aiActionTone } from '../utils/index.ts'
+import { aiVisibleActions, aiActionDeleted, aiActionLabel, aiActionTasks, aiActionTone } from '../utils/index.ts'
 import type { AiAction } from '../types/index.ts'
 
 const task = { id: 't1', title: 'Revisar', priority: 'high' }
@@ -29,4 +29,11 @@ test('tone and deletion reflect the receipt status, not the model text', () => {
   assert.equal(aiActionTone(receipt({ status: 'uncertain' })), 'error')
   assert.equal(aiActionDeleted(receipt({ action: 'task_delete' })), true)
   assert.equal(aiActionDeleted(receipt({ action: 'task_delete', status: 'confirmation_required' })), false)
+})
+
+test('hides failed reads but keeps failed writes visible', () => {
+  const read = receipt({ action: 'status_list', writes: false, status: 'failed' })
+  const write = receipt({ status: 'failed' })
+  assert.deepEqual(aiVisibleActions([read, write]), [write])
+  assert.deepEqual(aiVisibleActions(undefined), [])
 })

@@ -11,6 +11,7 @@ import {
   aiActionTasks,
   aiActionTone,
   aiErrorDetails,
+  aiVisibleActions,
   useAiStore,
 } from '@/modules/ai'
 import type { AiTask } from '@/modules/ai'
@@ -283,7 +284,7 @@ async function analyze() {
                 </p>
 
                 <div
-                  v-for="(action, index) in entry.actions"
+                  v-for="(action, index) in aiVisibleActions(entry.actions)"
                   :key="`${action.action}-${index}`"
                   class="flex max-w-[640px] flex-col gap-[8px]"
                 >
@@ -304,7 +305,7 @@ async function analyze() {
                     v-else-if="aiActionTone(action) === 'pending'"
                     class="text-[12px] font-medium text-(--destructive)"
                   >
-                    {{ aiActionLabel(action) }}: nada foi apagado ainda. Confirme abaixo.
+                    Exclusão pendente: nada foi apagado ainda. Confirme abaixo.
                   </p>
                   <template v-else>
                     <p class="text-[12px] font-medium text-(--chat-ai)">

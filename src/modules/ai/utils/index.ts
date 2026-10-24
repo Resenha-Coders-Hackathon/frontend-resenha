@@ -76,3 +76,8 @@ export function aiActionTasks(action: AiAction): AiTask[] {
 export function aiActionDeleted(action: AiAction): boolean {
   return action.status === 'succeeded' && action.action.endsWith('_delete')
 }
+
+/** Failed reads are noise for the user; failed or uncertain writes must stay visible. */
+export function aiVisibleActions(actions: AiAction[] | undefined): AiAction[] {
+  return (actions ?? []).filter((a) => a.writes || a.status !== 'failed')
+}
