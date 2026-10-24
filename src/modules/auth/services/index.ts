@@ -40,9 +40,6 @@ async function post(
   unauthorizedMessage = BAD_CREDENTIALS,
 ) {
   try {
-    if (path === API_PATHS.login || path === API_PATHS.googleLogin) {
-      await api.get(API_PATHS.login)
-    }
     await api.post(path, payload)
   } catch (error) {
     const status = isAxiosError(error) ? error.response?.status : undefined

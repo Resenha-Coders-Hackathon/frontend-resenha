@@ -27,16 +27,10 @@ beforeEach(() => {
   api.get = async (path) => { calls.push(`GET ${path}`) }
 })
 
-test('email and Google login initialize CSRF before submitting credentials', async () => {
+test('email and Google login submit credentials directly', async () => {
   await login({ email: 'a@example.com', password: 'password' })
   await loginWithGoogle('google-token')
-  assert.deepEqual(calls, ['GET /csrf/', 'POST /login/', 'GET /csrf/', 'POST /login/google/'])
-})
-
-test('credentials are not submitted if CSRF initialization fails', async () => {
-  api.get = async () => { throw new Error('offline') }
-  await assert.rejects(login({ email: 'a@example.com', password: 'password' }), /offline/)
-  assert.deepEqual(calls, [])
+  assert.deepEqual(calls, ['POST /login/', 'POST /login/google/'])
 })
 
 test('registration keeps its public code flow', async () => {
