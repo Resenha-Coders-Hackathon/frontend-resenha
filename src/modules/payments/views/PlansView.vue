@@ -23,7 +23,11 @@ function choose(plan: Plan) {
 <template>
   <PaymentPage :crumbs="['Norte Studio', 'Conta', 'Planos']">
     <header class="flex flex-col items-center gap-[10px] pt-[16px] text-center">
-      <p class="text-[13px] leading-normal font-medium text-(--bg-orange)">Planos e faturamento</p>
+      <p
+        class="font-mono text-[11px] leading-normal tracking-[0.16em] text-(--bg-orange) uppercase"
+      >
+        Planos e faturamento
+      </p>
       <h1 class="text-[30px]! leading-tight! font-semibold! tracking-[-0.03em]! sm:text-[36px]!">
         O Kanban é grátis. A IA trabalha no Pro.
       </h1>

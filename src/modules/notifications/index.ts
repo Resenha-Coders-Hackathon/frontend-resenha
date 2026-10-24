@@ -1,5 +1,3 @@
 export { useNotificationsStore } from './stores'
 export { useNotificationSession } from './composables/useNotificationSession'
-export { default as NotificationBell } from './components/notificationBell.vue'
-export { useOpenNotification } from './composables/useOpenNotification'
-export { notificationTitle } from './utils'
+export { default as NotificationLink } from './components/notificationLink.vue'
