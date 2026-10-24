@@ -3,7 +3,6 @@ export type PaymentStatus =
 
 export interface CreatePaymentData {
   title: string
-  amount: string
   name: string
   cpf: string
 }
@@ -38,3 +37,19 @@ export interface PaginatedPayments {
 }
 
 export type * from './ui'
+
+export interface CreateCardPaymentData {
+  title: string
+  cpf: string
+  email: string
+  token: string
+  installments: number
+  payment_method_id: string
+  issuer_id?: number
+}
+
+export interface CreateCardPaymentResponse {
+  payment_id: string
+  status: PaymentStatus
+  status_detail: string
+}

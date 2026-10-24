@@ -35,7 +35,7 @@ O usuário somente deverá receber acesso Premium após a confirmação de um pa
 
 Implemente o fluxo necessário para:
 
-1. Criar uma assinatura mensal vinculada ao usuário.
+1. Criar uma assinatura vinculada ao usuário.
 2. Retornar os dados necessários para que o frontend conclua a contratação.
 3. Receber notificações do Mercado Pago por webhook.
 4. Verificar a autenticidade das notificações.
@@ -125,9 +125,7 @@ Ao finalizar, informe os arquivos criados ou modificados, as configurações e v
 
 **Restrições finais:**
 
-- Não modificar o frontend.
 - Não reimplementar o chatbot ou as funcionalidades de IA.
-- Não substituir a autenticação existente.
 - Não introduzir novas camadas arquiteturais desnecessárias.
 - Não modificar Models existentes além do necessário.
 - Não implementar cobranças avulsas como substitutas da assinatura recorrente.

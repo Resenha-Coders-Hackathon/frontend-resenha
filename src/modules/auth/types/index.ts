@@ -6,6 +6,9 @@ export interface User {
   name: string
   email: string
   created_at: ISODateTime
+  /** Only /users/me/ exposes billing access and the server-defined price. */
+  is_subscriber?: boolean
+  subscription_price?: string
 }
 
 /** UserSessionSerializer response. */

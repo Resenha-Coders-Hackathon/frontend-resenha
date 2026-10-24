@@ -3,11 +3,13 @@ import type { RouteRecordRaw } from 'vue-router'
 export const paymentsRoutes: RouteRecordRaw[] = [
   {
     path: '/faturamento',
+    meta: { requiresAuth: true },
     component: () => import('@/app/layouts/DefaultLayout.vue'),
     children: [{ path: '', name: 'Billing', component: () => import('../views/BillingView.vue') }],
   },
   {
     path: '/planos',
+    meta: { requiresAuth: true },
     component: () => import('@/app/layouts/DefaultLayout.vue'),
     children: [
       {
@@ -19,6 +21,7 @@ export const paymentsRoutes: RouteRecordRaw[] = [
   },
   {
     path: '/pagamentos',
+    meta: { requiresAuth: true },
     component: () => import('@/app/layouts/DefaultLayout.vue'),
     children: [
       {
