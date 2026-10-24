@@ -39,7 +39,7 @@ function editSector(id: string) {
 
 <template>
   <div
-    class="flex min-h-[calc(100dvh-6rem)] w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
+    class="flex min-h-[calc(100dvh-3.5rem)] w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
   >
     <TopbarComp :crumbs="['Norte Studio', 'Equipe e setores']" has-notifications />
 
@@ -92,7 +92,7 @@ function editSector(id: string) {
           {{ item.label }}
           <span
             v-if="item.count !== undefined"
-            class="rounded-[5px] bg-(--bg-muted) px-[5px] text-[10.5px] leading-[16px] text-(--text-secondary) dark:bg-white/10 dark:text-(--text-inverse-muted)"
+            class="rounded-[5px] bg-(--bg-muted) px-[5px] font-mono text-[10.5px] leading-[16px] text-(--text-secondary) dark:bg-white/10 dark:text-(--text-inverse-muted)"
             >{{ item.count }}</span
           >
         </button>
@@ -164,7 +164,8 @@ function editSector(id: string) {
                   >{{ avatar(memberById(id)?.name ?? '').initials }}</span
                 >
               </span>
-              <span class="text-[11.5px] text-(--text-secondary) dark:text-(--text-inverse-muted)"
+              <span
+                class="font-mono text-[11.5px] text-(--text-secondary) dark:text-(--text-inverse-muted)"
                 >{{ sector.openTasks }} abertas</span
               >
             </span>
@@ -223,7 +224,7 @@ function editSector(id: string) {
                           {{ member.name }}
                           <span
                             v-if="member.isMe"
-                            :class="[BADGE_BASE, BADGE.neutral, 'text-[10.5px]']"
+                            :class="[BADGE_BASE, BADGE.neutral, 'font-mono text-[10.5px]']"
                             >você</span
                           >
                         </span>
@@ -236,7 +237,7 @@ function editSector(id: string) {
                       <span
                         v-for="sector in member.sectors"
                         :key="sector"
-                        :class="[BADGE_BASE, BADGE.neutral, 'text-[10.5px]']"
+                        :class="[BADGE_BASE, BADGE.neutral, 'font-mono text-[10.5px]']"
                         >{{ sector }}</span
                       >
                     </span>
@@ -246,7 +247,7 @@ function editSector(id: string) {
                       ROLES[member.role].label
                     }}</span>
                   </td>
-                  <td class="px-[18px] py-[11px] text-[12px]">{{ member.openTasks }}</td>
+                  <td class="px-[18px] py-[11px] font-mono text-[12px]">{{ member.openTasks }}</td>
                   <td class="px-[18px] py-[11px]">
                     <span class="flex items-center gap-[6px]">
                       <span

@@ -28,7 +28,7 @@ async function handleSubmit() {
     await auth.signIn({ email: email.value.trim(), password: password.value })
     authFlow.clear()
     toast.success('Que bom ter você de volta!')
-    await router.push(navigation.destination.value)
+    await router.push(navigation.afterLogin.value)
   } catch (error) {
     errorMessage.value =
       error instanceof Error ? error.message : 'Não foi possível entrar. Tente novamente.'
@@ -47,7 +47,7 @@ async function handleGoogleCredential(credential: string) {
     await auth.signInWithGoogle(credential)
     authFlow.clear()
     toast.success('Você entrou com sua conta Google.')
-    await router.push(navigation.destination.value)
+    await router.push(navigation.afterLogin.value)
   } catch (error) {
     googleErrorMessage.value =
       error instanceof Error ? error.message : 'Não foi possível entrar com Google.'

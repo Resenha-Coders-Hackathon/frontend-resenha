@@ -1,26 +1,16 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useOrganizationsStore } from '@/modules/organizations'
 import ThemeSwitcher from './themeSwitcher.vue'
 
 /* COMO USAR:
   <TopbarComp :crumbs="['Norte Studio', 'Conta', 'Planos']" has-notifications />
 */
 
-const props = withDefaults(
+withDefaults(
   defineProps<{ crumbs: string[]; searchPlaceholder?: string; hasNotifications?: boolean }>(),
   { searchPlaceholder: 'Buscar tarefas, pessoas, arquivos', hasNotifications: false },
 )
 
 const search = defineModel<string>('search', { default: '' })
-
-// o primeiro item é sempre a organização: mostra a que está selecionada
-const organizations = useOrganizationsStore()
-const items = computed(() =>
-  props.crumbs.map((crumb, index) =>
-    index === 0 ? (organizations.current?.name ?? crumb) : crumb,
-  ),
-)
 </script>
 
 <template>
@@ -30,7 +20,7 @@ const items = computed(() =>
     <nav aria-label="Navegação estrutural" class="min-w-0 flex-1">
       <ol class="flex items-center gap-[6px] text-[13px] leading-normal text-(--text-muted)">
         <li
-          v-for="(crumb, index) in items"
+          v-for="(crumb, index) in crumbs"
           :key="crumb"
           class="flex min-w-0 items-center gap-[6px]"
         >
@@ -40,11 +30,11 @@ const items = computed(() =>
           <span
             :class="[
               'truncate',
-              index === items.length - 1
+              index === crumbs.length - 1
                 ? 'font-semibold text-(--text-primary) dark:text-(--text-inverse)'
                 : '',
             ]"
-            :aria-current="index === items.length - 1 ? 'page' : undefined"
+            :aria-current="index === crumbs.length - 1 ? 'page' : undefined"
           >
             {{ crumb }}
           </span>
@@ -66,7 +56,7 @@ const items = computed(() =>
         class="min-w-0 flex-1 bg-transparent text-[13px] leading-normal outline-none placeholder:text-(--text-muted)"
       />
       <kbd
-        class="rounded-[5px] border border-(--border-default) px-[5px] text-[10px] leading-[16px] text-(--text-muted) dark:border-(--border-inverse)"
+        class="rounded-[5px] border border-(--border-default) px-[5px] font-mono text-[10px] leading-[16px] text-(--text-muted) dark:border-(--border-inverse)"
         >⌘K</kbd
       >
     </label>

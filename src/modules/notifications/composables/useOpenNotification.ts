@@ -4,7 +4,7 @@ import { useNotificationsStore } from '../stores'
 import { notificationPath } from '../utils'
 import type { AppNotification } from '../types'
 
-// Marca como lida, troca para a organização da notificação (quando há) e abre o destino.
+// Marca como lida, seleciona a organização da notificação (se houver) e abre o destino.
 export function useOpenNotification() {
   const router = useRouter()
   const notifications = useNotificationsStore()

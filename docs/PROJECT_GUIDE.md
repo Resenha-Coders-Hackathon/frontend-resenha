@@ -129,21 +129,31 @@ to `package.json`, and add an `npm run test` step to `.github/workflows/frontend
 
 ## 4. Authentication (how the frontend uses it)
 
-The backend sets `access_token` (15 min) and `refresh_token` (1 day) as HttpOnly cookies
+The backend sets `access_token` (30 min) and `refresh_token` (1 day) as HttpOnly cookies
 on `POST /api/v1/login/`; JavaScript never reads them.
 
 - Send every request with credentials; send `X-CSRFToken` on writes.
+- Before e-mail or Google login, the auth service calls `GET /csrf/` to initialize
+  the CSRF cookie. Login rotates it; axios reads the new cookie for subsequent
+  writes and refresh. JWTs are returned only as HttpOnly cookies.
 - On `401` from a protected call, try `POST /api/v1/refresh/` once, then retry; if it fails,
   clear the auth store and go to `/entrar`.
-- Public auth routes: `/entrar` (Login) and `/registrar` (Register), under `DefaultLayout`.
+- All pages require authentication by default, including home, Kanban, chat,
+  assistant, settings, maps, plans and payments. The guard validates the session
+  through `GET /users/me/` before each private navigation, even with a cached profile.
+- Public auth routes (login, registration and password recovery) use `AuthLayout` and
+  `meta: { requiresAuth: false, guestOnly: true }`. Authenticated users are sent to
+  the safe return destination or home. The invitation landing is explicitly public.
 - Registration, password reset and e-mail change are **request → verify → confirm** with a
   6-digit code (15 min, 5 attempts). Build the UI as three steps.
 - Google login: `POST /api/v1/login/google/` with the Google ID token (`GoogleButton`).
 
-> Status on this branch: login/register screens are UI only and the axios plugin is empty.
-> The implementation (`api` instance, auth service/store, `requiresAuth` route guard) lives in
-> `feat-login` and is the reference for the rules above. Routes needing a session set
-> `meta: { requiresAuth: true }`; the guard in `app/router` loads the user via `GET /users/me/`.
+The route registry lives in `src/app/router/routes.ts`; the authentication guard lives
+in `src/app/router/guards.ts`. Network/server failures cancel private navigation and
+show an error without clearing the cached account. Confirmed session expiration
+clears the user and device-session list, and preserves the full destination in the
+login redirect query. Session checks delegate redirection to the guard to avoid
+recursive login navigation. See [`ROUTE_SECURITY.md`](ROUTE_SECURITY.md).
 
 ### HTTP client rules
 

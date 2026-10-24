@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+// TODO: CÓDIGO COMENTADOO, REVISAR MAIS TARDE.
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { toast } from 'vue-sonner'
 import { useTheme } from '@/app/composables/useTheme'
+import { getErrorMessage } from '@/app/plugins/axios'
+import { useAuthStore } from '@/modules/auth'
+import { profilePayload, notificationSettings, validateAvatar } from '../utils'
+import { fetchSettings, updateSettings, uploadAvatar } from '../services'
 import { BaseButton, SubheaderComp } from '@/shared/components'
 import {
   ConfigTabs,
@@ -10,19 +15,34 @@ import {
   PreferencesTab,
   ProfileTab,
   SecurityTab,
+  AvatarCropDialog,
+  AvatarCameraDialog,
 } from '../components'
 import type {
   ActiveSession,
   ConfigTab,
   ConfigTabId,
   NotificationSettings,
-  PasswordForm,
   PreferenceSettings,
   ProfileForm,
   SelectOption,
 } from '../types'
 
-// Página só de interface: os dados ficam locais e "Salvar" não chama o backend.
+const auth = useAuthStore()
+const isLoading = ref(true)
+const isSaving = ref(false)
+const isUploadingAvatar = ref(false)
+const avatarUploadError = ref('')
+let avatarUpload: AbortController | undefined
+const cropSource = ref<File | null>(null)
+const cameraOpen = ref(false)
+const pendingAvatar = ref<File | null>(null)
+const avatarPreview = ref('')
+let disposed = false
+const loadError = ref('')
+const sessionsError = ref('')
+const isLoadingSessions = ref(false)
+const endingSession = ref<number | null>(null)
 
 const TABS: ConfigTab[] = [
   {
@@ -64,7 +84,7 @@ const LANGUAGES: SelectOption[] = [
   { value: 'es', label: 'Español' },
 ]
 
-const { isDark } = useTheme()
+const { theme, setTheme } = useTheme()
 
 const activeTab = ref<ConfigTabId>('profile')
 const search = ref('')
@@ -75,103 +95,271 @@ const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value))
 
 const saved = {
   profile: ref<ProfileForm>({
-    firstName: 'Paulo Artur',
-    lastName: 'Pereira',
-    email: 'paulo@norte.studio',
-    role: 'Desenvolvedor front-end',
-    timezone: 'America/Sao_Paulo',
-    language: 'pt-BR',
-    bio: 'Cuido do produto e do front-end do Inceptum.',
+    name: '',
+    email: '',
+    timezone: '',
+    language: '',
+    bio: '',
+    avatar_url: '',
   }),
   notifications: ref<NotificationSettings>({
-    emailAssigned: true,
-    emailMentions: true,
-    emailDeadlines: true,
-    emailDigest: false,
-    appComments: true,
-    appStatus: true,
-    appAi: false,
+    email_product: true,
+    email_weekly_digest: false,
+    email_security: true,
+    email_assigned: true,
+    email_mentions: true,
+    email_deadlines: true,
+    app_comments: true,
+    app_status: true,
+    app_ai: false,
+    push_enabled: true,
   }),
-  sessions: ref<ActiveSession[]>([
-    { id: 'linux', device: 'Chrome no Linux', detail: 'Florianópolis, SC · agora', current: true },
-    {
-      id: 'iphone',
-      device: 'Safari no iPhone',
-      detail: 'Florianópolis, SC · há 2 dias',
-      current: false,
-    },
-  ]),
   preferences: ref<PreferenceSettings>({
-    theme: isDark.value ? 'dark' : 'light',
-    dateFormat: 'dd/mm/yyyy',
-    weekStart: 'sunday',
-    compactCards: false,
-    showCompleted: true,
+    theme: theme.value,
+    date_format: 'dd/mm/yyyy',
+    week_start: 'sunday',
+    compact_cards: false,
+    show_completed: true,
   }),
 }
 
-const emptyPassword = (): PasswordForm => ({ current: '', next: '', confirmation: '' })
-
 const profile = ref(clone(saved.profile.value))
+// Preserve valid server values even when they are not among the suggested options.
+const timezones = computed(() =>
+  TIMEZONES.some((option) => option.value === profile.value.timezone)
+    ? TIMEZONES
+    : [...TIMEZONES, { value: profile.value.timezone, label: profile.value.timezone }],
+)
+const languages = computed(() =>
+  LANGUAGES.some((option) => option.value === profile.value.language)
+    ? LANGUAGES
+    : [...LANGUAGES, { value: profile.value.language, label: profile.value.language }],
+)
 const notifications = ref(clone(saved.notifications.value))
-const password = ref(emptyPassword())
-const sessions = ref(clone(saved.sessions.value))
+const sessions = computed<ActiveSession[]>(() =>
+  auth.sessions.map((session) => ({
+    id: session.id,
+    device: session.device,
+    detail: `${session.location || 'Localização não informada'} · ${session.ip ?? 'IP indisponível'} · Última atividade: ${new Date(session.last_activity).toLocaleString('pt-BR')}`,
+    current: session.current,
+  })),
+)
 const preferences = ref(clone(saved.preferences.value))
 
 // o tema é aplicado na hora, para a pessoa ver o resultado antes de salvar
 watch(
   () => preferences.value.theme,
-  (theme) => (isDark.value = theme === 'dark'),
+  (value) => setTheme(value),
 )
 
-const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
-
-function validate(): string {
-  if (activeTab.value === 'profile') {
-    if (!profile.value.firstName.trim()) return 'Informe seu nome.'
-    if (!/^\S+@\S+\.\S+$/.test(profile.value.email.trim())) return 'Informe um e-mail válido.'
+async function loadProfile(): Promise<void> {
+  isLoading.value = true
+  loadError.value = ''
+  try {
+    const [user, settings] = await Promise.all([auth.loadUser(), fetchSettings()])
+    if (!user) throw new Error('Sua sessão expirou. Entre novamente.')
+    saved.profile.value = {
+      ...saved.profile.value,
+      name: user.name,
+      email: user.email,
+      bio: user.bio,
+      avatar_url: user.avatar_url,
+      timezone: settings.timezone,
+      language: settings.locale,
+    }
+    profile.value = clone(saved.profile.value)
+    saved.notifications.value = notificationSettings(settings)
+    notifications.value = clone(saved.notifications.value)
+    saved.preferences.value = {
+      theme: settings.theme,
+      date_format: settings.date_format,
+      week_start: settings.week_start,
+      compact_cards: settings.compact_cards,
+      show_completed: settings.show_completed,
+    }
+    preferences.value = clone(saved.preferences.value)
+    setTheme(settings.theme)
+  } catch (error) {
+    loadError.value = getErrorMessage(error, 'Não foi possível carregar seu perfil.')
+  } finally {
+    isLoading.value = false
   }
-  if (activeTab.value === 'security' && !same(password.value, emptyPassword())) {
-    const { current: currentPassword, next, confirmation } = password.value
-    if (!currentPassword) return 'Informe a senha atual.'
-    if (next.length < 9 || /^\d+$/.test(next))
-      return 'A nova senha precisa de 9 caracteres e não pode ser só números.'
-    if (next !== confirmation) return 'As senhas não coincidem.'
-  }
-  return ''
 }
 
-function handleSave() {
-  const error = validate()
-  if (error) {
-    toast.error(error)
-    return
+onMounted(loadProfile)
+onBeforeUnmount(() => {
+  disposed = true
+  avatarUpload?.abort()
+  clearPendingAvatar()
+  if (preferences.value.theme !== saved.preferences.value.theme) {
+    setTheme(saved.preferences.value.theme)
   }
+})
 
-  saved.profile.value = clone(profile.value)
-  saved.notifications.value = clone(notifications.value)
-  saved.sessions.value = clone(sessions.value)
-  saved.preferences.value = clone(preferences.value)
-  password.value = emptyPassword()
-  toast.success('Alterações salvas.')
+function selectAvatar(file: File): void {
+  if (isSaving.value || isUploadingAvatar.value) return
+  avatarUploadError.value = ''
+  try {
+    validateAvatar(file)
+    cropSource.value = file
+  } catch (error) {
+    avatarUploadError.value = getErrorMessage(error, 'Não foi possível abrir sua foto.')
+  }
+}
+
+function cameraPhoto(file: File): void {
+  cameraOpen.value = false
+  selectAvatar(file)
+}
+
+function clearPendingAvatar(): void {
+  if (avatarPreview.value) URL.revokeObjectURL(avatarPreview.value)
+  avatarPreview.value = ''
+  pendingAvatar.value = null
+}
+
+function confirmCrop(file: File): void {
+  clearPendingAvatar()
+  pendingAvatar.value = file
+  avatarPreview.value = URL.createObjectURL(file)
+  cropSource.value = null
+  avatarUploadError.value = ''
+}
+
+async function loadSessions(): Promise<void> {
+  if (isLoadingSessions.value) return
+  isLoadingSessions.value = true
+  sessionsError.value = ''
+  try {
+    await auth.loadSessions()
+  } catch (error) {
+    sessionsError.value = getErrorMessage(error, 'Não foi possível carregar suas sessões.')
+  } finally {
+    isLoadingSessions.value = false
+  }
+}
+
+watch(activeTab, (tab) => {
+  if (tab === 'security') void loadSessions()
+})
+
+async function endSession(id: number): Promise<void> {
+  if (endingSession.value !== null || !auth.sessions.some((s) => s.id === id && !s.current)) return
+  endingSession.value = id
+  try {
+    await auth.endSession(id)
+    toast.success('Sessão encerrada.')
+  } catch (error) {
+    toast.error(getErrorMessage(error, 'Não foi possível encerrar a sessão.'))
+  } finally {
+    endingSession.value = null
+  }
+}
+
+async function handleSave(): Promise<void> {
+  if (
+    activeTab.value === 'security' ||
+    isLoading.value ||
+    isSaving.value ||
+    isUploadingAvatar.value ||
+    loadError.value
+  )
+    return
+  isSaving.value = true
+  try {
+    if (activeTab.value === 'profile') {
+      const payload = profilePayload(profile.value)
+      if (pendingAvatar.value) {
+        avatarUploadError.value = ''
+        const controller = new AbortController()
+        avatarUpload = controller
+        isUploadingAvatar.value = true
+        try {
+          const url = await uploadAvatar(pendingAvatar.value, controller.signal)
+          if (disposed) return
+          payload.avatar_url = url
+          profile.value.avatar_url = url
+          // Reuse a successful upload if the subsequent profile PATCH needs a retry.
+          clearPendingAvatar()
+        } catch (error) {
+          if (!disposed)
+            avatarUploadError.value = getErrorMessage(
+              error,
+              'Não foi possível enviar sua foto. Tente novamente.',
+            )
+          throw error
+        } finally {
+          isUploadingAvatar.value = false
+          avatarUpload = undefined
+        }
+      }
+      const updated = await auth.updateProfile(payload)
+      // Preserve a successful profile write if the separate settings write fails.
+      saved.profile.value = {
+        ...saved.profile.value,
+        name: updated.name,
+        email: updated.email,
+        bio: updated.bio,
+        avatar_url: updated.avatar_url,
+      }
+      const settings = await updateSettings({
+        timezone: profile.value.timezone,
+        locale: profile.value.language,
+      })
+      saved.profile.value = {
+        ...saved.profile.value,
+        timezone: settings.timezone,
+        language: settings.locale,
+      }
+      profile.value = clone(saved.profile.value)
+    } else if (activeTab.value === 'notifications') {
+      const settings = await updateSettings({ ...notifications.value })
+      saved.notifications.value = notificationSettings(settings)
+      notifications.value = clone(saved.notifications.value)
+    } else {
+      const settings = await updateSettings({ ...preferences.value })
+      saved.preferences.value = {
+        theme: settings.theme,
+        date_format: settings.date_format,
+        week_start: settings.week_start,
+        compact_cards: settings.compact_cards,
+        show_completed: settings.show_completed,
+      }
+      preferences.value = clone(saved.preferences.value)
+      setTheme(settings.theme)
+    }
+    if (!disposed) toast.success('Alterações salvas.')
+  } catch (error) {
+    if (!disposed) toast.error(getErrorMessage(error, 'Não foi possível atualizar seu perfil.'))
+  } finally {
+    isSaving.value = false
+  }
 }
 
 function handleCancel() {
-  profile.value = clone(saved.profile.value)
-  notifications.value = clone(saved.notifications.value)
-  sessions.value = clone(saved.sessions.value)
-  preferences.value = clone(saved.preferences.value)
-  password.value = emptyPassword()
+  if (isSaving.value || isUploadingAvatar.value) return
+  avatarUploadError.value = ''
+  if (activeTab.value === 'profile') {
+    clearPendingAvatar()
+    cropSource.value = null
+    cameraOpen.value = false
+    profile.value = clone(saved.profile.value)
+  }
+  if (activeTab.value === 'notifications') notifications.value = clone(saved.notifications.value)
+  if (activeTab.value === 'preferences') {
+    preferences.value = clone(saved.preferences.value)
+    setTheme(preferences.value.theme)
+  }
 }
 </script>
 
 <template>
   <div
-    class="flex min-h-[calc(100dvh-6rem)] w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
+    class="flex min-h-[calc(100dvh-3.5rem)] w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
   >
     <ConfigTopbar
       v-model:search="search"
-      :crumbs="['Norte Studio', 'Configurações', current.label]"
+      :crumbs="['Minha conta', 'Configurações', current.label]"
     />
 
     <section class="flex flex-1 flex-col gap-[16px] px-[16px] pt-[24px] pb-[28px] sm:px-[28px]">
@@ -186,12 +374,15 @@ function handleCancel() {
             label="Cancelar"
             :full-width="false"
             class="mt-0!"
+            :disabled="isSaving || isLoading || isUploadingAvatar"
             @click="handleCancel"
           />
           <BaseButton
             label="Salvar alterações"
             :full-width="false"
             class="mt-0!"
+            :loading="isSaving"
+            :disabled="activeTab === 'security' || isLoading || isUploadingAvatar || !!loadError"
             @click="handleSave"
           />
         </div>
@@ -199,28 +390,59 @@ function handleCancel() {
 
       <ConfigTabs v-model="activeTab" :tabs="TABS" />
 
+      <p v-if="isLoading" role="status">Carregando perfil…</p>
+      <div v-else-if="loadError" role="alert">
+        <p>{{ loadError }}</p>
+        <BaseButton label="Tentar novamente" :full-width="false" @click="loadProfile" />
+      </div>
+
       <div
+        v-if="!isLoading && !loadError"
         :id="`config-panel-${activeTab}`"
         role="tabpanel"
         :aria-labelledby="`config-tab-${activeTab}`"
         tabindex="0"
         class="outline-none"
       >
-        <ProfileTab
-          v-if="activeTab === 'profile'"
-          v-model="profile"
-          :timezones="TIMEZONES"
-          :languages="LANGUAGES"
-          @navigate="activeTab = $event"
-        />
-        <NotificationsTab v-else-if="activeTab === 'notifications'" v-model="notifications" />
+        <form v-if="activeTab === 'profile'" @submit.prevent="handleSave">
+          <fieldset :disabled="isSaving" class="min-w-0">
+            <ProfileTab
+              v-model="profile"
+              :timezones="timezones"
+              :languages="languages"
+              :uploading="isUploadingAvatar"
+              :upload-error="avatarUploadError"
+              :avatar-preview="avatarPreview"
+              :pending-avatar="!!pendingAvatar"
+              @select-avatar="selectAvatar"
+              @open-camera="cameraOpen = true"
+              @change-email="$router.push({ name: 'ChangeEmail' })"
+            />
+          </fieldset>
+        </form>
+        <fieldset v-else-if="activeTab === 'notifications'" :disabled="isSaving" class="min-w-0">
+          <NotificationsTab v-model="notifications" />
+        </fieldset>
         <SecurityTab
           v-else-if="activeTab === 'security'"
-          v-model:password="password"
-          v-model:sessions="sessions"
+          :sessions="sessions"
+          :loading="isLoadingSessions"
+          :error="sessionsError"
+          :ending-session="endingSession"
+          @end-session="endSession"
+          @retry="loadSessions"
         />
-        <PreferencesTab v-else v-model="preferences" />
+        <fieldset v-else :disabled="isSaving" class="min-w-0">
+          <PreferencesTab v-model="preferences" />
+        </fieldset>
       </div>
     </section>
+    <AvatarCameraDialog v-if="cameraOpen" @cancel="cameraOpen = false" @confirm="cameraPhoto" />
+    <AvatarCropDialog
+      v-if="cropSource"
+      :file="cropSource"
+      @cancel="cropSource = null"
+      @confirm="confirmCrop"
+    />
   </div>
 </template>

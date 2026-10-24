@@ -39,42 +39,6 @@ See [organization onboarding](ORGANIZATION_ONBOARDING.md) for routes, contracts 
 
 ## Repository baseline
 
-### Kanban implementation (2026-10-23)
-
-- Inspected desktop board `1:103` (1176 × 1024), header `1:129`, card `1:222`,
-  column header `1:209`, task properties `1:1684` and checklist `1:1773`.
-  The initial broad board context was sparse; detailed contexts and screenshots
-  were retrieved for these child nodes. The two user-supplied PNGs also serve as references.
-- Implementation: `src/modules/module/views/KanbanView.vue` and the module's
-  existing card/column/subheader components, with dedicated task and column dialogs.
-  The existing application sidebar and Material Symbols icon system are reused.
-- Store data replaces demo cards. Drag/drop and the drawer status action call
-  `useKanbanStore.move`; column customization uses the existing status PATCH service.
-  Category changes reload tasks because the backend synchronizes completion dates.
-- `--kanban-*` semantic variables in `src/assets/main.css` map the inspected warm
-  surfaces, borders, metadata and priority colors to light/dark appearances.
-  Dark values, narrow viewport scrolling and the full-width mobile drawer are
-  implementation adaptations. They are not claimed as inspected dark/mobile frames.
-- Task creation/editing, checklist and comments use existing typed API services.
-  External attachment/payment integrations pictured in the reference are not mocked
-  as working integrations; the current module has no corresponding service actions.
-- Validation: production build/type-check and scoped ESLint passed. Full `npm run lint`
-  encounters seven ESLint errors in generated `dev-dist/workbox-7e5eb42b.js`.
-  The Node/Chromium check below verifies UI interactions with intercepted API responses;
-  it does not certify live backend credentials or permissions.
-
-```powershell
-npm.cmd run dev -- --host 127.0.0.1 --port 5173
-# In another terminal, from frontend-resenha:
-node src/modules/module/__tests__/kanban.browser.mjs
-```
-
-The browser check uses Chrome installed on Windows, or the `CHROME_PATH` environment
-variable. No dependencies were added. It captures desktop/mobile light/dark images in
-a temporary directory, checks status persistence requests and rollback, task/column
-creation, column editing, checklist, comments, search and viewport overflow.
-Vitest remains uninstalled. Live backend acceptance testing remains separate.
-
 Read [AGENTS.md](../AGENTS.md), [project guide](PROJECT_GUIDE.md),
 [conventions](CONVENTIONS.md) and [team workflow](TEAM_WORKFLOW.md) before implementing.
 Check installed dependencies and current code when those guides differ from the repository.

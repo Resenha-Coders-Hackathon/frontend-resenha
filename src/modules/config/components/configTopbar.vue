@@ -41,7 +41,7 @@ const search = defineModel<string>('search', { default: '' })
         placeholder="Buscar…"
         class="min-w-0 flex-1 bg-transparent text-[13px] leading-normal outline-none placeholder:text-(--text-muted)"
       />
-      <kbd class="text-[11px] font-medium text-(--text-muted)">⌘K</kbd>
+      <kbd class="font-mono text-[11px] font-medium text-(--text-muted)">⌘K</kbd>
     </label>
 
     <button

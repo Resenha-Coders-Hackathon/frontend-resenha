@@ -126,7 +126,7 @@ const authItems: IMenuItems[] = [
         </div>
 
         <nav class="mt-10">
-          <p class="mb-3 text-[13px] font-medium text-(--text-muted)">Navegação</p>
+          <p class="mb-3 text-xs font-semibold uppercase tracking-widest">Navegação</p>
 
           <ul>
             <li v-for="item in menuItems" :key="item.label">
@@ -144,7 +144,7 @@ const authItems: IMenuItems[] = [
         <div
           class="mt-auto mb-5 border-t border-(--border-default) pt-6 dark:border-(--border-inverse)"
         >
-          <p class="mb-3 text-[13px] font-medium text-(--text-muted)">Sua conta</p>
+          <p class="mb-3 text-xs font-semibold uppercase tracking-widest">Sua conta</p>
 
           <ul>
             <li v-for="item in authItems" :key="item.label">

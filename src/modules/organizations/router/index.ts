@@ -2,6 +2,24 @@ import type { RouteRecordRaw } from 'vue-router'
 
 export const organizationRoutes: RouteRecordRaw[] = [
   {
+    path: '/organizacoes/:organizationId/times',
+    name: 'OrganizationTeams',
+    component: () => import('../views/OrganizationTeamsView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/organizacoes/:organizationId/setores',
+    name: 'OrganizationSectors',
+    component: () => import('../views/OrganizationSectorsView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/organizacoes/:organizationId/configuracoes',
+    name: 'OrganizationSettings',
+    component: () => import('../views/OrganizationSettingsView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/w/:slug',
     name: 'OrganizationAddress',
     component: () => import('../views/OrganizationAddressView.vue'),
@@ -29,12 +47,6 @@ export const organizationRoutes: RouteRecordRaw[] = [
     path: '/organizacoes',
     name: 'Organizations',
     component: () => import('../views/OrganizationsView.vue'),
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/organizacoes/:organizationId([0-9a-f-]{36})',
-    name: 'OrganizationOverview',
-    component: () => import('../views/OrganizationOverviewView.vue'),
     meta: { requiresAuth: true },
   },
   {

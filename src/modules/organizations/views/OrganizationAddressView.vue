@@ -13,7 +13,7 @@ async function open() {
   try {
     const organization = await getOrganizationBySlug(String(route.params.slug))
     await router.replace({
-      name: 'OrganizationOverview',
+      name: 'OrganizationMembers',
       params: { organizationId: organization.id },
     })
   } catch (cause) {
