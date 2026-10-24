@@ -1,44 +1,81 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { toast } from 'vue-sonner'
+import { useTheme } from '@/app/composables/useTheme'
+import { getErrorMessage } from '@/app/plugins/axios'
 import { BaseButton, CardComp, ChartComp, SubheaderComp, TopbarComp } from '@/shared/components'
-import { KPIS, LATE_BY_SECTOR, PEOPLE, PERIODS, WEEKLY_DONE } from '../utils/mocks'
-import { avatar, BADGE, BADGE_BASE, TOOLBAR_BUTTON } from '../utils/ui'
+import { avatar } from '@/shared/utils/people'
+import { categoryColors, inkWithAccent } from '@/shared/utils/chartColors'
+import { useOrganizationsStore } from '@/modules/organizations'
+import { getReport } from '../services'
+import type { Report, ReportDays } from '../types'
+import { kpis, peopleCsv, periods } from '../utils'
+import { BADGE, BADGE_BASE, TOOLBAR_BUTTON } from '../utils/ui'
 
-// Página só de interface: os números são de exemplo. O CSV é gerado no navegador.
+const organizations = useOrganizationsStore()
+const { isDark } = useTheme()
 
-const period = ref(1)
+const days = ref<ReportDays>(30)
+const report = ref<Report | null>(null)
+const loading = ref(false)
 
-// mesmo formato dos gráficos da Home (/): laranja da marca e cantos arredondados
-const CHART_STYLE = { backgroundColor: '#ff6700', borderRadius: 6 }
-
-const weeklyData = {
-  labels: WEEKLY_DONE.labels,
-  datasets: [{ label: 'Tarefas concluídas', ...CHART_STYLE, data: WEEKLY_DONE.values }],
+let request = 0
+async function load() {
+  const organization = organizations.current
+  const current = ++request
+  report.value = null
+  if (!organization) return
+  loading.value = true
+  try {
+    const loaded = await getReport(organization.id, days.value)
+    if (current === request) report.value = loaded
+  } catch (error) {
+    if (current === request)
+      toast.error(getErrorMessage(error, 'Não foi possível carregar os relatórios.'))
+  } finally {
+    if (current === request) loading.value = false
+  }
 }
+watch([() => organizations.current?.id, days], load, { immediate: true })
 
-const lateData = {
-  labels: LATE_BY_SECTOR.map((sector) => sector.label),
+const cards = computed(() => (report.value ? kpis(report.value) : []))
+const weeks = computed(() => report.value?.weekly_done ?? [])
+
+const weeklyData = computed(() => ({
+  labels: weeks.value.map((w) => `${w.week_start.slice(8)}/${w.week_start.slice(5, 7)}`),
   datasets: [
     {
-      label: 'Tarefas atrasadas',
-      ...CHART_STYLE,
-      data: LATE_BY_SECTOR.map((sector) => sector.value),
+      label: 'Tarefas concluídas',
+      data: weeks.value.map((w) => w.done),
+      backgroundColor: inkWithAccent(weeks.value.length, isDark.value),
     },
   ],
-}
+}))
+const weeklyTotal = computed(() => weeks.value.reduce((sum, w) => sum + w.done, 0))
+
+const lateData = computed(() => {
+  const sectors = report.value?.overdue_by_sector ?? []
+  return {
+    labels: sectors.map((s) => s.sector),
+    datasets: [
+      {
+        label: 'Tarefas atrasadas',
+        data: sectors.map((s) => s.overdue),
+        backgroundColor: categoryColors(sectors.length),
+      },
+    ],
+  }
+})
 
 const COLUMNS = ['Pessoa', 'Concluídas', 'No prazo', 'Abertas', 'Atrasadas']
+const onTimeTone = (pct: number) =>
+  pct >= 85 ? BADGE.success : pct >= 70 ? BADGE.warning : BADGE.danger
 
 function exportCsv() {
-  const lines = [
-    'pessoa;concluidas;no_prazo;abertas;atrasadas',
-    ...PEOPLE.map((person) =>
-      [person.name, person.done, `${person.onTime}%`, person.open, person.late].join(';'),
-    ),
-  ]
-  const url = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' }))
-  const link = Object.assign(document.createElement('a'), { href: url, download: 'desempenho.csv' })
-  link.click()
+  if (!report.value?.people.length) return toast.info('Não há pessoas com tarefas para exportar.')
+  const blob = new Blob([peopleCsv(report.value.people)], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  Object.assign(document.createElement('a'), { href: url, download: 'desempenho.csv' }).click()
   URL.revokeObjectURL(url)
 }
 </script>
@@ -52,19 +89,24 @@ function exportCsv() {
     <section class="flex flex-1 flex-col gap-[16px] px-[16px] pt-[24px] pb-[32px] sm:px-[28px]">
       <SubheaderComp
         title="Relatórios"
-        description="Outubro de 2026 · todos os setores"
+        :description="`${periods.find((p) => p.days === days)!.label} · setores que você acompanha`"
         class="mb-0!"
       >
         <div class="flex flex-wrap gap-[8px]">
-          <BaseButton
-            variant="secondary"
-            :label="PERIODS[period]"
-            icon="calendar_today"
-            icon-position="left"
-            :full-width="false"
-            :class="TOOLBAR_BUTTON"
-            @click="period = (period + 1) % PERIODS.length"
-          />
+          <label
+            :class="[
+              TOOLBAR_BUTTON,
+              'inline-flex cursor-pointer items-center gap-[8px] border border-(--border-default) bg-(--surface) dark:border-(--border-inverse) dark:bg-(--surface-inverse)',
+            ]"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">calendar_today</span>
+            <span class="sr-only">Período</span>
+            <select v-model="days" class="cursor-pointer bg-transparent outline-none">
+              <option v-for="period in periods" :key="period.days" :value="period.days">
+                {{ period.label }}
+              </option>
+            </select>
+          </label>
           <BaseButton
             variant="secondary"
             label="Exportar CSV"
@@ -79,17 +121,27 @@ function exportCsv() {
 
       <div class="grid gap-[12px] sm:grid-cols-2 xl:grid-cols-4">
         <CardComp
-          v-for="kpi in KPIS"
+          v-for="kpi in cards"
           :key="kpi.title"
           :title="kpi.title"
           :data="kpi.data"
           :description="kpi.description"
+          :tone="kpi.tone"
         />
       </div>
 
       <div class="grid gap-[16px] lg:grid-cols-2">
-        <ChartComp title="Concluídas por semana" :chart-data="weeklyData" />
-        <ChartComp title="Atrasos por setor" :chart-data="lateData" />
+        <ChartComp
+          title="Concluídas por semana"
+          :chart-data="weeklyData"
+          :headline="String(weeklyTotal)"
+          note="em 6 semanas"
+        />
+        <ChartComp
+          title="Atrasos por setor"
+          :chart-data="lateData"
+          empty="Nenhuma tarefa atrasada. Bom trabalho!"
+        />
       </div>
 
       <section
@@ -118,8 +170,8 @@ function exportCsv() {
             </thead>
             <tbody>
               <tr
-                v-for="person in PEOPLE"
-                :key="person.id"
+                v-for="person in report?.people ?? []"
+                :key="person.user_id"
                 class="border-b border-(--border-default) text-[13px] leading-normal last:border-b-0 dark:border-(--border-inverse)"
               >
                 <td class="px-[18px] py-[12px]">
@@ -133,20 +185,35 @@ function exportCsv() {
                     {{ person.name }}
                   </span>
                 </td>
-                <td class="px-[18px] py-[12px]">{{ person.done }}</td>
+                <td class="px-[18px] py-[12px]">{{ person.completed }}</td>
                 <td class="px-[18px] py-[12px]">
-                  <span :class="[BADGE_BASE, person.onTime >= 85 ? BADGE.success : BADGE.warning]"
-                    >{{ person.onTime }}%</span
+                  <span
+                    v-if="person.on_time_pct !== null"
+                    :class="[BADGE_BASE, onTimeTone(person.on_time_pct)]"
+                    >{{ person.on_time_pct }}%</span
                   >
+                  <span v-else class="text-(--text-muted)">—</span>
                 </td>
                 <td class="px-[18px] py-[12px]">{{ person.open }}</td>
                 <td
                   :class="[
                     'px-[18px] py-[12px]',
-                    person.late ? 'font-medium text-(--destructive)' : '',
+                    person.overdue ? 'font-medium text-(--destructive)' : '',
                   ]"
                 >
-                  {{ person.late }}
+                  {{ person.overdue }}
+                </td>
+              </tr>
+              <tr v-if="!report?.people.length">
+                <td
+                  :colspan="COLUMNS.length"
+                  class="px-[18px] py-[28px] text-center text-[13px] text-(--text-muted)"
+                >
+                  {{
+                    loading
+                      ? 'Carregando relatórios…'
+                      : 'Ninguém com tarefas atribuídas ainda. Atribua tarefas para ver o desempenho.'
+                  }}
                 </td>
               </tr>
             </tbody>

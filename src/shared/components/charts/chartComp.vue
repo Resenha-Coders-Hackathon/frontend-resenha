@@ -20,6 +20,8 @@ defineProps<{
   headline?: string
   /** Texto pequeno ao lado do destaque, como "+12%". */
   note?: string
+  /** Mensagem no lugar do gráfico quando não há barras. */
+  empty?: string
 }>()
 
 const chartOptions = {
@@ -45,7 +47,10 @@ const chartOptions = {
       <span v-if="note" class="text-[13px] text-(--text-muted)">{{ note }}</span>
     </p>
 
-    <div class="relative h-[200px] min-w-0">
+    <p v-if="empty && !chartData.labels?.length" class="py-[24px] text-[13px] text-(--text-muted)">
+      {{ empty }}
+    </p>
+    <div v-else class="relative h-[200px] min-w-0">
       <Bar :data="chartData" :options="chartOptions" />
     </div>
   </div>

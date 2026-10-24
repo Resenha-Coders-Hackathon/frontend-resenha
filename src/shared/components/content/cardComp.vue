@@ -3,6 +3,8 @@ defineProps<{
   title: string
   data: string | number
   description?: string
+  /** Cor da descrição: verde para melhora, vermelho para piora. */
+  tone?: 'good' | 'bad'
 }>()
 </script>
 
@@ -12,6 +14,17 @@ defineProps<{
   >
     <p class="text-sm text-(--text-muted)">{{ title }}</p>
     <p class="text-2xl font-semibold">{{ data }}</p>
-    <p class="text-xs text-(--text-muted)">{{ description }}</p>
+    <p
+      :class="[
+        'text-xs',
+        tone === 'good'
+          ? 'text-[#127a3e] dark:text-[#7ed9a2]'
+          : tone === 'bad'
+            ? 'text-[#c42b2b] dark:text-[#ff8a8a]'
+            : 'text-(--text-muted)',
+      ]"
+    >
+      {{ description }}
+    </p>
   </div>
 </template>
