@@ -41,7 +41,7 @@ async function post(
 ) {
   try {
     if (path === API_PATHS.login || path === API_PATHS.googleLogin) {
-      await api.get('/csrf/')
+      await api.get(API_PATHS.login)
     }
     await api.post(path, payload)
   } catch (error) {
