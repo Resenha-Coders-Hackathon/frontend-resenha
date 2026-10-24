@@ -31,6 +31,7 @@ import type {
 } from '../types'
 import { PRIORITIES } from './priority'
 import PriorityBars from './priorityBars.vue'
+import TaskCharges from './taskCharges.vue'
 import TaskGoogle from './taskGoogle.vue'
 
 /* Painel lateral: sem `task` cria uma tarefa; com `task` mostra e edita os detalhes. */
@@ -517,6 +518,7 @@ const field =
               :can-edit="canEdit"
               @attached="onAttached"
             />
+            <TaskCharges v-if="task" :task-id="task.id" :can-edit="canEdit" />
             <div v-if="canEdit" class="grid grid-cols-3 gap-2">
               <button
                 v-for="origin in ['drive', 'docs', 'meet'] as const"
