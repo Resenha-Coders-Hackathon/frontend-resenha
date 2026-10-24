@@ -1,5 +1,6 @@
 import type { RouteRecordRaw } from 'vue-router'
 import { authRoutes } from '@/modules/auth/router'
+import { calendarRoutes } from '@/modules/calendar'
 import { chatRoutes } from '@/modules/chat/router'
 import { configRoutes } from '@/modules/config/router'
 import { geolocationRoutes } from '@/modules/geolocation/router'
@@ -18,6 +19,7 @@ import { uploadsRoutes } from '@/modules/uploads/router'
 
 export const routes: RouteRecordRaw[] = [
   ...authRoutes,
+  ...calendarRoutes,
   ...chatRoutes,
   ...configRoutes,
   ...organizationRoutes,

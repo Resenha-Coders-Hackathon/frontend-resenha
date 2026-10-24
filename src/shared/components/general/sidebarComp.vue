@@ -35,6 +35,7 @@ const organizationItems = computed<MenuItem[]>(() => {
   const id = current.value?.id
   return [
     { link: '/home-usuario', icon: 'home', label: 'Visão geral' },
+    { link: '/calendario', icon: 'calendar_month', label: 'Calendário' },
     { link: '/chat', icon: 'chat', label: 'Mensagens' },
     { link: '/equipe', icon: 'groups', label: 'Equipe', also: ['/setores'] },
     ...(id
