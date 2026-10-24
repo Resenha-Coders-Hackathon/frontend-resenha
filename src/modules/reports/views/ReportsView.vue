@@ -1,34 +1,28 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useTheme } from '@/app/composables/useTheme'
+import { ref } from 'vue'
 import { BaseButton, CardComp, ChartComp, SubheaderComp, TopbarComp } from '@/shared/components'
 import { KPIS, LATE_BY_SECTOR, PEOPLE, PERIODS, WEEKLY_DONE } from '../utils/mocks'
 import { avatar, BADGE, BADGE_BASE, TOOLBAR_BUTTON } from '../utils/ui'
 
 // Página só de interface: os números são de exemplo. O CSV é gerado no navegador.
 
-const { isDark } = useTheme()
 const period = ref(1)
 
-// barras "tinta" acompanham o tema; a semana atual fica em laranja
-const weeklyData = computed(() => ({
+// mesmo formato dos gráficos da Home (/): laranja da marca e cantos arredondados
+const CHART_STYLE = { backgroundColor: '#ff6700', borderRadius: 6 }
+
+const weeklyData = {
   labels: WEEKLY_DONE.labels,
-  datasets: [
-    {
-      data: WEEKLY_DONE.values,
-      backgroundColor: WEEKLY_DONE.values.map((_, index) =>
-        index === WEEKLY_DONE.values.length - 1 ? '#f0541e' : isDark.value ? '#edece8' : '#141412',
-      ),
-    },
-  ],
-}))
+  datasets: [{ label: 'Tarefas concluídas', ...CHART_STYLE, data: WEEKLY_DONE.values }],
+}
 
 const lateData = {
   labels: LATE_BY_SECTOR.map((sector) => sector.label),
   datasets: [
     {
+      label: 'Tarefas atrasadas',
+      ...CHART_STYLE,
       data: LATE_BY_SECTOR.map((sector) => sector.value),
-      backgroundColor: LATE_BY_SECTOR.map((sector) => sector.color),
     },
   ],
 }
@@ -51,7 +45,7 @@ function exportCsv() {
 
 <template>
   <div
-    class="flex min-h-dvh w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
+    class="flex min-h-[calc(100dvh-3.5rem)] w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
   >
     <TopbarComp :crumbs="['Norte Studio', 'Relatórios']" has-notifications />
 

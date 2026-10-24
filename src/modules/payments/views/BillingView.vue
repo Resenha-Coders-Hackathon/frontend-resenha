@@ -69,7 +69,7 @@ function exportInvoices() {
 
 <template>
   <div
-    class="flex min-h-dvh w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
+    class="flex min-h-[calc(100dvh-3.5rem)] w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
   >
     <TopbarComp :crumbs="['Norte Studio', 'Faturamento']" has-notifications />
 

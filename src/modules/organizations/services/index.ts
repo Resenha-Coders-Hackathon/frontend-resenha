@@ -2,6 +2,7 @@ import { api } from '@/app/plugins/axios'
 import type { Page } from '@/shared/types'
 import type {
   AddOrganizationMemberRequest,
+  CreateOrganizationRequest,
   Organization,
   OrganizationMember,
   OrganizationSector,
@@ -13,13 +14,9 @@ export async function listOrganizations(page = 1): Promise<Page<Organization>> {
   return (await api.get<Page<Organization>>('/organizations/', { params: { page } })).data
 }
 
-export async function createOrganization(payload: {
-  name: string
-  description: string
-  logo_url?: string
-  slug?: string
-  team_size?: Organization['team_size']
-}): Promise<Organization> {
+export async function createOrganization(
+  payload: CreateOrganizationRequest,
+): Promise<Organization> {
   return (await api.post<Organization>('/organizations/', payload)).data
 }
 

@@ -5,12 +5,12 @@ import { useAuthNavigation } from '../composables'
 import { BaseButton } from '@/shared/components'
 import { AuthAside, AuthField, AuthSplitLayout } from '../components'
 import { requestPasswordReset } from '../services'
-import { useAuthFlowStore } from '../stores'
+import { useAuthFlowStore, useAuthStore } from '../stores'
 
 const router = useRouter()
 const navigation = useAuthNavigation()
 const authFlow = useAuthFlowStore()
-const email = ref(authFlow.email)
+const email = ref(useAuthStore().user?.email || authFlow.email)
 const isSubmitting = ref(false)
 const errorMessage = ref('')
 

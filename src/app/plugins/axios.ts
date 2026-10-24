@@ -30,28 +30,43 @@ function refreshSession(): Promise<void> {
 
 type RetryableConfig = InternalAxiosRequestConfig & { _retried?: boolean }
 
+async function expireSession(redirect: boolean): Promise<void> {
+  const { default: router } = await import('@/app/router')
+  const { useAuthStore } = await import('@/modules/auth')
+  useAuthStore().clearSession()
+  const current = router.currentRoute.value
+  // During initial navigation the guard handles the redirect itself.
+  if (redirect && current.matched.length && current.meta.requiresAuth !== false) {
+    await router.replace({ path: '/entrar', query: { redirect: current.fullPath } })
+  }
+}
+
 api.interceptors.response.use(undefined, async (error: AxiosError) => {
   const config = error.config as RetryableConfig | undefined
   const isAuthPath = AUTH_PATHS.some((path) => config?.url?.includes(path))
+  const redirect = !config?.url?.endsWith('/users/me/')
 
-  if (error.response?.status !== 401 || !config || config._retried || isAuthPath) {
+  if (error.response?.status !== 401 || !config || isAuthPath) {
+    throw error
+  }
+
+  if (config._retried) {
+    await expireSession(redirect)
     throw error
   }
 
   config._retried = true
   try {
     await refreshSession()
-  } catch {
-    // import dinâmico: o router importa este módulo indiretamente (evita ciclo)
-    const { default: router } = await import('@/app/router')
-    const { useAuthStore } = await import('@/modules/auth')
-    useAuthStore().user = null
-    const { currentRoute } = router
-    // só expulsa de página protegida; o guard cuida da navegação inicial
-    if (currentRoute.value.meta.requiresAuth) {
-      await router.push({ path: '/entrar', query: { redirect: currentRoute.value.fullPath } })
+  } catch (refreshError) {
+    if (
+      axios.isAxiosError(refreshError) &&
+      [401, 403].includes(refreshError.response?.status ?? 0)
+    ) {
+      await expireSession(redirect)
+      throw error
     }
-    throw error
+    throw refreshError
   }
   return api(config)
 })

@@ -6,6 +6,7 @@ import { BaseButton } from '@/shared/components'
 import { AuthField } from '@/modules/auth'
 import { createInvitation, type InviteRole } from '@/modules/invitations'
 import OnboardingLayout from '../components/onboardingLayout.vue'
+import OrganizationLocationPicker from '../components/organizationLocationPicker.vue'
 import {
   createOrganization,
   getOrganization,
@@ -14,7 +15,7 @@ import {
   createOrganizationSector,
 } from '../services'
 import { useOrganizationsStore } from '../stores'
-import type { Organization, OrganizationSector } from '../types'
+import type { Organization, OrganizationLocation, OrganizationSector } from '../types'
 import { parseInvitationEmails, workspaceSlug } from '../utils'
 
 const route = useRoute()
@@ -25,6 +26,8 @@ const name = ref('')
 const slug = ref('')
 const slugEdited = ref(false)
 const teamSize = ref<Organization['team_size']>('')
+const location = ref<OrganizationLocation | null>(null)
+const locationReady = ref(true)
 const createdId = ref('')
 const workspacePrefix = `${window.location.origin}/w/`
 const sectors = ref<OrganizationSector[]>([])
@@ -71,7 +74,7 @@ function chooseLogo(event: Event) {
   logo.value = file
 }
 async function create() {
-  if (saving.value || !name.value.trim()) return
+  if (saving.value || !name.value.trim() || !locationReady.value) return
   saving.value = true
   error.value = ''
   try {
@@ -88,6 +91,7 @@ async function create() {
       description: '',
       slug: slug.value,
       team_size: teamSize.value,
+      location: location.value,
       ...(logoUrl.value ? { logo_url: logoUrl.value } : {}),
     })
     organizations.organizations.push(result)
@@ -292,11 +296,16 @@ watch(name, (value) => {
             :disabled="saving || !!createdId"
             @change="chooseLogo" /></span
       ></label>
+      <OrganizationLocationPicker
+        v-model="location"
+        :disabled="saving || !!createdId"
+        @ready="locationReady = $event"
+      />
       <p v-if="error" class="onboarding-error" role="alert">{{ error }}</p>
       <BaseButton
         type="submit"
         :label="saving ? 'Criando organização…' : 'Continuar'"
-        :disabled="saving || !name.trim()"
+        :disabled="saving || !name.trim() || !locationReady"
         class="onboarding-submit"
         ><template #after
           ><img

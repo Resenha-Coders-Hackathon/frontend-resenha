@@ -129,6 +129,45 @@
   margin-left: 7px;
   font-size: 12px;
 }
+.organization-nav {
+  overflow-x: auto;
+}
+.organization-nav a {
+  padding: 10px 0;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+}
+.organization-nav .router-link-active {
+  border-color: var(--workspace-ink);
+}
+.admin-stack {
+  display: grid;
+  gap: 20px;
+}
+.admin-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--workspace-border);
+}
+.admin-row > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.admin-row select {
+  background: var(--workspace-surface);
+  color: var(--workspace-ink);
+  border: 1px solid var(--workspace-border);
+  padding: 8px;
+  border-radius: 8px;
+}
+.admin-row button {
+  text-decoration: underline;
+  padding: 8px;
+}
 .workspace-card {
   border: 1px solid var(--workspace-border);
   border-radius: 14px;

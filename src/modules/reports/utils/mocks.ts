@@ -35,11 +35,11 @@ export const WEEKLY_DONE = {
 }
 
 export const LATE_BY_SECTOR = [
-  { label: 'Mkt', value: 6, color: '#f0541e' },
-  { label: 'Design', value: 2, color: '#7c4dff' },
-  { label: 'Dev', value: 10, color: '#2563eb' },
-  { label: 'Fin', value: 1, color: '#1e9e5a' },
-  { label: 'Com', value: 3, color: '#d97706' },
+  { label: 'Mkt', value: 6 },
+  { label: 'Design', value: 2 },
+  { label: 'Dev', value: 10 },
+  { label: 'Fin', value: 1 },
+  { label: 'Com', value: 3 },
 ]
 
 export const PEOPLE: PersonPerformance[] = [

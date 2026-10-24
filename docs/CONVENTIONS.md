@@ -97,7 +97,8 @@ src/modules/<module>/
 - Every service function declares its return type (`Promise<User>`, `Promise<void>`); request payloads have an interface.
 - Keep backend payload keys in `snake_case` in the API types; convert only at a deliberate boundary.
 - Backend messages come as `{ detail }` (or per-field errors); extract them with `getErrorMessage` and show with `vue3-toastify`.
-- Protected routes declare `meta: { requiresAuth: true }`.
+- Routes require authentication by default. Public routes must explicitly declare
+  `meta: { requiresAuth: false }`; account entry routes also set `guestOnly: true`.
 - Keep `types/` in sync with the backend serializers; the backend is the source of truth.
 
 ## Tooling
