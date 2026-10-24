@@ -30,6 +30,7 @@ export interface AiAnswer {
   actions: AiAction[]
   confirmation_token: UUID | null
   interrupted?: boolean
+  choices?: string[]
 }
 
 export interface AiAskRequest {
@@ -37,6 +38,7 @@ export interface AiAskRequest {
   conversation_id?: UUID
   request_id: UUID
   confirmation_token?: UUID
+  context?: { organization_id?: UUID }
 }
 
 export interface AiReport {
@@ -53,6 +55,7 @@ export interface AiMessage {
   error?: string
   actions?: AiAction[]
   confirmation_token?: UUID | null
+  choices?: string[]
   report?: AiReport
   files?: { name: string; size: number }[]
 }

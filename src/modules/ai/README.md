@@ -47,3 +47,7 @@ npm run build
 
 Run ESLint/Oxlint without `--fix` for a repository-wide audit when other modules
 contain work in progress; format or fix only files in this integration's scope.
+
+Each ask sends `context.organization_id` from the currently selected organization
+(membership is validated by the backend). When the answer has `choices`, the last
+assistant message shows them as buttons; picking one sends an ordinary message.

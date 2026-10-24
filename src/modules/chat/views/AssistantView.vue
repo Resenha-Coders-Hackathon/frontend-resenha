@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { BaseButton, TopbarComp } from '@/shared/components'
 import { useAuthStore } from '@/modules/auth'
+import { useOrganizationsStore } from '@/modules/organizations'
 import {
   aiActionDeleted,
   aiActionLabel,
@@ -25,6 +26,7 @@ import { formatSize, formatTime } from '../utils'
 
 const auth = useAuthStore()
 const ai = useAiStore()
+const organizations = useOrganizationsStore()
 const route = useRoute()
 const router = useRouter()
 const search = ref('')
@@ -54,7 +56,10 @@ function taskCommand(kind: 'complete' | 'edit' | 'delete', task: AiTask) {
     return
   }
   // Deletion still needs the server-issued confirmation before anything is removed.
-  void ai.ask(kind === 'complete' ? `Conclua ${ref}.` : `Exclua ${ref}.`)
+  void ai.ask(
+    kind === 'complete' ? `Conclua ${ref}.` : `Exclua ${ref}.`,
+    organizations.current?.id,
+  )
 }
 
 watch(
@@ -74,6 +79,9 @@ onMounted(async () => {
       await router.replace({ name: 'Login', query: { redirect: route.fullPath } })
     } else if (!user.is_subscriber) {
       await router.replace({ name: 'Plans' })
+    } else if (!organizations.organizations.length) {
+      // Only context for the assistant; it still works (and asks) without it.
+      await organizations.load().catch(() => undefined)
     }
   } catch {
     toast.error('Não foi possível verificar seu acesso à IA. Tente novamente.')
@@ -119,7 +127,7 @@ function openHistory(id: string) {
 }
 
 async function send() {
-  if (await ai.ask(draft.value)) draft.value = ''
+  if (await ai.ask(draft.value, organizations.current?.id)) draft.value = ''
 }
 
 async function retry() {
@@ -301,6 +309,22 @@ async function analyze() {
                       @command="taskCommand"
                     />
                   </template>
+                </div>
+
+                <div
+                  v-if="entry.choices?.length && entry.id === ai.messages.at(-1)?.id"
+                  class="flex flex-wrap gap-[6px]"
+                >
+                  <button
+                    v-for="choice in entry.choices"
+                    :key="choice"
+                    type="button"
+                    :disabled="composerDisabled"
+                    class="h-[30px] cursor-pointer rounded-full border border-(--chat-ai) px-[12px] text-[12.5px] text-(--chat-ai) transition-colors hover:bg-(--chat-ai) hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                    @click="ai.ask(choice, organizations.current?.id)"
+                  >
+                    {{ choice }}
+                  </button>
                 </div>
 
                 <div

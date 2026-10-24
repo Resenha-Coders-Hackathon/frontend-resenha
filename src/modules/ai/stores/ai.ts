@@ -108,6 +108,7 @@ export const useAiStore = defineStore('ai', () => {
         created_at: new Date().toISOString(),
         actions: result.actions,
         confirmation_token: result.confirmation_token,
+        choices: result.choices ?? [],
       })
       return true
     } catch (e) {
@@ -139,7 +140,7 @@ export const useAiStore = defineStore('ai', () => {
     }
   }
 
-  async function ask(prompt: string): Promise<boolean> {
+  async function ask(prompt: string, organizationId?: UUID | null): Promise<boolean> {
     const text = prompt.trim()
     if (!text || isBusy.value) return false
     const target = conversation()
@@ -150,6 +151,8 @@ export const useAiStore = defineStore('ai', () => {
     }
     const payload: AiAskRequest = { prompt: text, request_id: crypto.randomUUID() }
     if (target.server_id) payload.conversation_id = target.server_id
+    // The backend validates membership; the context only helps resolve targets.
+    if (organizationId) payload.context = { organization_id: organizationId }
     return execute(target, payload)
   }
 

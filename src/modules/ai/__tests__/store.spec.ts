@@ -257,3 +257,17 @@ test('analysis failures do not create a fake download and anonymous sending is b
   assert.equal(await ai.ask('Sem conta'), false)
   assert.equal(ai.conversations.length, 0)
 })
+
+test('sends the organization context and keeps backend choices on the answer', async () => {
+  api.askAi = async (payload) => {
+    calls.push(structuredClone(payload))
+    return answer({ choices: ['Revisar', 'Publicar'] })
+  }
+  const ai = useAiStore()
+  calls.length = 0
+  await ai.ask('Exclua a tarefa', 'org-1')
+  assert.deepEqual(calls[0]?.context, { organization_id: 'org-1' })
+  assert.deepEqual(ai.messages.at(-1)?.choices, ['Revisar', 'Publicar'])
+  await ai.ask('Revisar')
+  assert.equal(calls[1]?.context, undefined)
+})
