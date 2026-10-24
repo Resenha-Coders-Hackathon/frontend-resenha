@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { getErrorMessage } from '@/app/plugins/axios'
 import { BaseButton, TopbarComp } from '@/shared/components'
@@ -33,6 +34,7 @@ const CHIP: Record<CalendarState, string> = {
 }
 
 const organizations = useOrganizationsStore()
+const router = useRouter()
 const google = useGoogleStore()
 
 const today = todayIso()
@@ -89,6 +91,15 @@ async function connectGoogle() {
     toast.error(getErrorMessage(error, 'Não foi possível conectar o Google Agenda.'))
   }
 }
+
+const openItem = (item: CalendarItem) =>
+  router.push({
+    name: 'SectorBoard',
+    params: { sectorId: item.sector_id },
+    query: { task: item.id },
+  })
+// tarefas que já estão no Google Agenda ganham anel azul e o ícone de agenda
+const GOOGLE_RING = 'ring-2 ring-[#2563eb] ring-offset-1 dark:ring-[#8fb1ff]'
 
 const dayLabel = (date: string, count: number) =>
   `${new Date(`${date}T00:00:00Z`).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', timeZone: 'UTC' })}: ${
@@ -219,16 +230,25 @@ const dayLabel = (date: string, count: number) =>
                 />
               </div>
               <ul v-if="byDate.get(day.date)" class="hidden min-w-0 flex-col gap-[3px] sm:flex">
-                <li
-                  v-for="item in byDate.get(day.date)!.slice(0, MAX_CHIPS)"
-                  :key="item.id"
-                  :class="[
-                    'truncate rounded-[5px] px-[6px] py-[2px] text-[11.5px] leading-[16px]',
-                    CHIP[item.state],
-                  ]"
-                  :title="`${item.title} · ${item.sector_name} · ${stateLabels[item.state]}${item.assignee_name ? ` · ${item.assignee_name}` : ''}`"
-                >
-                  {{ item.title }}
+                <li v-for="item in byDate.get(day.date)!.slice(0, MAX_CHIPS)" :key="item.id">
+                  <button
+                    type="button"
+                    :class="[
+                      'flex w-full cursor-pointer items-center gap-[4px] rounded-[5px] px-[6px] py-[2px] text-left text-[11.5px] leading-[16px]',
+                      CHIP[item.state],
+                      item.in_google && GOOGLE_RING,
+                    ]"
+                    :title="`${item.title} · ${item.sector_name} · ${stateLabels[item.state]}${item.assignee_name ? ` · ${item.assignee_name}` : ''}${item.in_google ? ' · no Google Agenda' : ''}`"
+                    @click="openItem(item)"
+                  >
+                    <span
+                      v-if="item.in_google"
+                      class="material-symbols-outlined text-[13px]!"
+                      aria-label="No Google Agenda"
+                      >event_available</span
+                    >
+                    <span class="truncate">{{ item.title }}</span>
+                  </button>
                 </li>
                 <li
                   v-if="byDate.get(day.date)!.length > MAX_CHIPS"
@@ -252,14 +272,22 @@ const dayLabel = (date: string, count: number) =>
           <li
             v-for="item in agenda"
             :key="item.id"
-            class="flex items-center gap-[10px] border-b border-(--border-default) py-[12px] last:border-b-0 dark:border-(--border-inverse)"
+            class="flex cursor-pointer items-center gap-[10px] border-b border-(--border-default) py-[12px] last:border-b-0 dark:border-(--border-inverse)"
+            @click="openItem(item)"
           >
             <span
               :class="['size-[8px] shrink-0 rounded-full', DOT[item.state]]"
               aria-hidden="true"
             />
             <span class="flex min-w-0 flex-1 flex-col leading-normal">
-              <span class="truncate text-[14px] font-medium">{{ item.title }}</span>
+              <span class="truncate text-[14px] font-medium"
+                ><span
+                  v-if="item.in_google"
+                  class="material-symbols-outlined mr-[4px] align-middle text-[15px]! text-[#2563eb]"
+                  aria-label="No Google Agenda"
+                  >event_available</span
+                >{{ item.title }}</span
+              >
               <span class="truncate text-[12px] text-(--text-muted)"
                 >{{ agendaDate(item.due_date) }} · {{ item.sector_name }}</span
               >

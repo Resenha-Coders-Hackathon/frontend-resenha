@@ -31,7 +31,10 @@ const parts = computed(() => {
       <p
         class="rounded-[12px] rounded-tr-[4px] bg-(--text-primary) px-[12px] py-[8px] text-[13.5px] leading-[20px] text-white dark:bg-[#2e2c28] dark:text-(--text-inverse)"
       >
-        {{ message.content }}
+        <template v-for="(part, index) in parts" :key="index">
+          <span v-if="part.mention" class="font-semibold underline">{{ part.text }}</span>
+          <template v-else>{{ part.text }}</template>
+        </template>
       </p>
       <ChatAttachmentCard v-for="file in message.attachments" :key="file.id" :file="file" />
     </div>
