@@ -10,6 +10,7 @@ import type {
   CreateSectorRequest,
   CreateStatusRequest,
   CreateTaskRequest,
+  Dashboard,
   MoveTaskRequest,
   ResourceLink,
   Sector,
@@ -231,4 +232,9 @@ export async function createLink(
 
 export async function deleteLink(linkId: string): Promise<void> {
   await api.delete(`/links/${enc(linkId)}/`)
+}
+
+// ── Dashboard ──────────────────────────────────────────────────────────────
+export async function getDashboard(organizationId: string): Promise<Dashboard> {
+  return (await api.get<Dashboard>(`/organizations/${enc(organizationId)}/dashboard/`)).data
 }

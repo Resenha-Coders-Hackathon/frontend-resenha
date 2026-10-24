@@ -1,81 +1,68 @@
 import type { BadgeTone } from './ui'
+import type { Dashboard } from '../types'
 
-/* Dados de demonstração da home do usuário (não integrado ao backend). */
+const dayMs = 86_400_000
 
-export const HOME_KPIS = [
-  { title: 'Minhas tarefas abertas', data: '6', description: '2 vencem esta semana' },
-  { title: 'Concluídas na semana', data: '9', description: '+3 em relação à anterior' },
-  { title: 'Atrasadas', data: '1', description: 'Kit de identidade social' },
-  { title: 'Créditos de IA', data: '312/500', description: 'Renova em 01/11' },
-]
-
-export interface TodayItem {
-  id: string
-  icon: string
-  title: string
-  meta: string
-  badge: string
-  tone: BadgeTone
+export function kpis(d: Dashboard, unreadNotifications: number) {
+  const delta = d.done_this_week - d.done_last_week
+  return [
+    {
+      title: 'Minhas tarefas abertas',
+      data: String(d.open_tasks),
+      description: `${d.due_this_week} vencem esta semana`,
+    },
+    {
+      title: 'Concluídas na semana',
+      data: String(d.done_this_week),
+      description:
+        delta === 0
+          ? 'Igual à semana anterior'
+          : `${delta > 0 ? '+' : ''}${delta} em relação à anterior`,
+    },
+    {
+      title: 'Atrasadas',
+      data: String(d.overdue),
+      description: d.overdue_title ?? 'Nada atrasado',
+    },
+    {
+      title: 'Notificações não lidas',
+      data: String(unreadNotifications),
+      description: unreadNotifications ? 'Veja em Notificações' : 'Tudo em dia',
+    },
+  ]
 }
 
-export const TODAY: TodayItem[] = [
-  {
-    id: 'd1',
-    icon: 'view_kanban',
-    title: 'Revisar landing page com Beatriz',
-    meta: 'Marketing · FLX-142',
-    badge: 'Hoje',
-    tone: 'warning',
-  },
-  {
-    id: 'd2',
-    icon: 'view_kanban',
-    title: 'Aprovar verba de mídia',
-    meta: 'Marketing · FLX-155',
-    badge: 'Atrasada',
-    tone: 'danger',
-  },
-  {
-    id: 'd3',
-    icon: 'view_kanban',
-    title: 'Responder cliente sobre o evento',
-    meta: 'Comercial · FLX-160',
-    badge: 'Amanhã',
-    tone: 'neutral',
-  },
-  {
-    id: 'd4',
-    icon: 'calendar_today',
-    title: 'Reunião de revisão (Meet)',
-    meta: 'ter, 28 out · 15:00',
-    badge: 'Agendado',
-    tone: 'info',
-  },
-]
-
-export const ACTIVITY = [
-  { id: 'a1', person: 'Beatriz Costa', text: 'Beatriz comentou em FLX-142', when: 'há 12 min' },
-  {
-    id: 'a2',
-    person: 'Paulo Artur',
-    text: 'IA criou 3 tarefas a partir da ata',
-    when: 'há 40 min',
-  },
-  {
-    id: 'a3',
-    person: 'Gustavo Rocha',
-    text: 'Gustavo moveu FLX-140 para Concluído',
-    when: 'há 1 h',
-  },
-  { id: 'a4', person: 'Camila Alves', text: 'Camila pagou a fatura #0481', when: 'ontem' },
-]
-
-export const WEEKLY_DONE = {
-  labels: ['S1', 'S2', 'S3', 'S4', 'S5', 'S6'],
-  values: [5, 7, 6, 8, 9, 10],
+// `today` é a data local de referência (YYYY-MM-DD); due_date vem sem fuso.
+export function dueBadge(
+  dueDate: string,
+  isOverdue: boolean,
+  today: string,
+): { label: string; tone: BadgeTone } {
+  if (isOverdue) return { label: 'Atrasada', tone: 'danger' }
+  const days = Math.round((Date.parse(dueDate) - Date.parse(today)) / dayMs)
+  return days === 0 ? { label: 'Hoje', tone: 'warning' } : { label: 'Amanhã', tone: 'neutral' }
 }
 
-export const OPEN_BY_SECTOR = {
-  labels: ['Mkt', 'Design', 'Dev', 'Fin', 'Com'],
-  values: [14, 9, 21, 4, 6],
+export function relativeTime(iso: string, now = Date.now()): string {
+  const minutes = Math.round((now - Date.parse(iso)) / 60_000)
+  if (minutes < 1) return 'agora'
+  if (minutes < 60) return `há ${minutes} min`
+  const hours = Math.round(minutes / 60)
+  if (hours < 24) return `há ${hours} h`
+  const days = Math.round(hours / 24)
+  return days === 1 ? 'ontem' : `há ${days} dias`
+}
+
+export function activityText(a: Dashboard['activity'][number]): string {
+  const who = a.person ?? 'Alguém'
+  return a.kind === 'comment'
+    ? `${who} comentou em ${a.task_title}`
+    : `${who} concluiu ${a.task_title}`
+}
+
+export function weekLabel(weekStart: string): string {
+  return new Date(`${weekStart}T00:00:00`).toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+  })
 }
