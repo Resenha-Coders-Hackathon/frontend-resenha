@@ -11,6 +11,8 @@ import type {
   MoveTaskRequest,
   Sector,
   SectorMember,
+  SectorRole,
+  SectorTeam,
   SectorProgress,
   Status,
   Task,
@@ -39,8 +41,8 @@ export async function createSector(
   return (await api.post<Sector>(`/organizations/${enc(organizationId)}/sectors/`, payload)).data
 }
 
-export async function getSector(id: string): Promise<Sector> {
-  return (await api.get<Sector>(`/sectors/${enc(id)}/`)).data
+export async function getSector(id: string): Promise<Sector & { my_role: SectorRole }> {
+  return (await api.get<Sector & { my_role: SectorRole }>(`/sectors/${enc(id)}/`)).data
 }
 
 export async function updateSector(id: string, payload: UpdateSectorRequest): Promise<Sector> {
@@ -69,6 +71,38 @@ export async function addSectorMember(
 
 export async function removeSectorMember(id: string, memberId: number): Promise<void> {
   await api.delete(`/sectors/${enc(id)}/members/${memberId}/`)
+}
+
+export async function updateSectorMember(
+  id: string,
+  memberId: number,
+  role: SectorRole,
+): Promise<SectorMember> {
+  return (await api.patch<SectorMember>(`/sectors/${enc(id)}/members/${memberId}/`, { role })).data
+}
+
+export async function listSectorTeams(id: string, page = 1): Promise<Page<SectorTeam>> {
+  return (await api.get<Page<SectorTeam>>(`/sectors/${enc(id)}/teams/`, { params: { page } })).data
+}
+
+export async function addSectorTeam(
+  id: string,
+  teamId: string,
+  role: SectorRole,
+): Promise<SectorTeam> {
+  return (await api.post<SectorTeam>(`/sectors/${enc(id)}/teams/`, { team_id: teamId, role })).data
+}
+
+export async function updateSectorTeam(
+  id: string,
+  linkId: number,
+  role: SectorRole,
+): Promise<SectorTeam> {
+  return (await api.patch<SectorTeam>(`/sectors/${enc(id)}/teams/${linkId}/`, { role })).data
+}
+
+export async function removeSectorTeam(id: string, linkId: number): Promise<void> {
+  await api.delete(`/sectors/${enc(id)}/teams/${linkId}/`)
 }
 
 // ── Colunas (status) ───────────────────────────────────────────────────────

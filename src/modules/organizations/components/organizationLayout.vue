@@ -40,7 +40,27 @@ const organizations = useOrganizationsStore()
           <NotificationLink />
           <ThemeSwitcher />
         </header>
-        <div class="workspace-content"><slot /></div>
+        <div class="workspace-content">
+          <nav
+            v-if="organizationId"
+            class="workspace-tabs organization-nav"
+            aria-label="Administração da organização"
+          >
+            <RouterLink :to="{ name: 'OrganizationMembers', params: { organizationId } }"
+              >Membros e convites</RouterLink
+            >
+            <RouterLink :to="{ name: 'OrganizationTeams', params: { organizationId } }"
+              >Times</RouterLink
+            >
+            <RouterLink :to="{ name: 'OrganizationSectors', params: { organizationId } }"
+              >Setores</RouterLink
+            >
+            <RouterLink :to="{ name: 'OrganizationSettings', params: { organizationId } }"
+              >Configurações</RouterLink
+            >
+          </nav>
+          <slot />
+        </div>
       </section>
     </main>
     <FooterComp />
