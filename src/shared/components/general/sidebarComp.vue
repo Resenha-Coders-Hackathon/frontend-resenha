@@ -34,7 +34,7 @@ onClickOutside(switcher, () => (switcherOpen.value = false))
 const organizationItems = computed<MenuItem[]>(() => {
   const id = current.value?.id
   return [
-    { link: '/', icon: 'home', label: 'Visão geral' },
+    { link: '/home-usuario', icon: 'home', label: 'Visão geral' },
     { link: '/kanban', icon: 'view_kanban', label: 'Mural' },
     { link: '/minhas-tarefas', icon: 'task_alt', label: 'Minhas tarefas' },
     { link: '/chat', icon: 'chat', label: 'Mensagens' },
@@ -106,10 +106,8 @@ function chooseOrganization(id: string) {
   switcherOpen.value = false
   if (id === current.value?.id) return
   organizations.select(id)
-  // telas que levam o id da organização na URL acompanham a troca
-  if (route.params.organizationId && route.name) {
-    void router.push({ name: route.name, params: { ...route.params, organizationId: id } })
-  }
+  // trocar de organização leva ao dashboard dela
+  void router.push('/home-usuario')
 }
 
 const firstName = computed(() => auth.user?.name.split(' ')[0] ?? '')
