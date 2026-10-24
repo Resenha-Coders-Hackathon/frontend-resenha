@@ -177,7 +177,7 @@ const field =
         done ? 'text-(--chat-ai)' : 'text-(--text-muted)',
       ]"
       aria-hidden="true"
-      >{{ done ? 'task_alt' : 'radio_button_unchecked' }}</span
+      >{{ done ? 'task_alt' : 'radio_button_unchecked' }}</span>
     <div class="flex min-w-0 flex-1 flex-col gap-[8px] leading-normal">
       <p :class="['text-[13.5px] font-semibold', done ? 'line-through opacity-70' : '']">
         {{ current.title }}
