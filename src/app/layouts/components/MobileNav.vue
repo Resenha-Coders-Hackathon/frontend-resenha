@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/modules/auth'
+import { useChatStore } from '@/modules/chat'
 import { useNotificationsStore } from '@/modules/notifications'
 import { useOrganizationsStore } from '@/modules/organizations'
 
@@ -39,6 +40,7 @@ const router = useRouter()
 const auth = useAuthStore()
 const organizations = useOrganizationsStore()
 const notifications = useNotificationsStore()
+const chat = useChatStore()
 
 const open = ref(false)
 watch(
@@ -63,8 +65,10 @@ async function signOut() {
 }
 
 const tabClass = (active: boolean) => [
-  'flex flex-1 flex-col items-center gap-[2px] py-[8px] text-[11px] leading-none',
-  active ? 'font-semibold text-(--text-primary) dark:text-(--text-inverse)' : 'text-(--text-muted)',
+  'relative flex flex-1 flex-col items-center gap-[2px] py-[8px] text-[11px] leading-none',
+  active
+    ? 'font-semibold text-(--text-primary) dark:text-(--text-inverse) after:absolute after:bottom-[2px] after:left-1/2 after:h-[3px] after:w-6 after:-translate-x-1/2 after:rounded-full after:bg-(--bg-orange)'
+    : 'text-(--text-muted)',
 ]
 </script>
 
@@ -81,8 +85,21 @@ const tabClass = (active: boolean) => [
       :class="tabClass(isActive(item))"
       :aria-current="isActive(item) ? 'page' : undefined"
     >
-      <span class="material-symbols-outlined text-[22px]!" aria-hidden="true">{{ item.icon }}</span>
+      <span
+        :class="[
+          'material-symbols-outlined text-[22px]!',
+          isActive(item) ? 'text-(--bg-orange)' : '',
+        ]"
+        aria-hidden="true"
+        >{{ item.icon }}</span
+      >
       {{ item.label }}
+      <span
+        v-if="item.to === '/chat' && chat.unreadTotal"
+        class="absolute top-[4px] right-[calc(50%-20px)] grid min-w-[16px] place-items-center rounded-full bg-(--bg-orange) px-1 text-[10px] leading-4 font-semibold text-white"
+        :aria-label="`${chat.unreadTotal} mensagens não lidas`"
+        >{{ chat.unreadTotal > 99 ? '99+' : chat.unreadTotal }}</span
+      >
     </RouterLink>
     <button
       type="button"
@@ -91,7 +108,14 @@ const tabClass = (active: boolean) => [
       aria-haspopup="dialog"
       @click="open = !open"
     >
-      <span class="material-symbols-outlined text-[22px]!" aria-hidden="true">menu</span>
+      <span
+        :class="[
+          'material-symbols-outlined text-[22px]!',
+          moreActive() || open ? 'text-(--bg-orange)' : '',
+        ]"
+        aria-hidden="true"
+        >menu</span
+      >
       Mais
       <span
         v-if="notifications.unreadCount"

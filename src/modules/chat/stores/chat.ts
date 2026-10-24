@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { UUID } from '@/shared/types'
 import {
@@ -33,6 +33,9 @@ export const useChatStore = defineStore('chat', () => {
   const activeId = ref<UUID | null>(null)
   const typing = ref<Record<UUID, string>>({})
   const error = ref('')
+  // last message from someone else (the layout turns it into a pin / desktop alert)
+  const incoming = ref<{ id: UUID; channelId: UUID; title: string; body: string } | null>(null)
+  const unreadTotal = computed(() => channels.value.reduce((n, c) => n + c.unread_count, 0))
   // ids of the organization members online (refreshPresence)
   const online = ref<UUID[]>([])
   // next page of older messages per channel (absent: nothing more to load)
@@ -51,6 +54,7 @@ export const useChatStore = defineStore('chat', () => {
     typing.value = {}
     online.value = []
     olderPage.value = {}
+    incoming.value = null
     error.value = ''
   }
 
@@ -85,6 +89,13 @@ export const useChatStore = defineStore('chat', () => {
       const first = channels.value[0]
       if (first) await select(first.id)
     }
+  }
+
+  /** Keeps the channel list (and its unread counts) fresh without opening any conversation. */
+  async function watchChannels(orgId: UUID): Promise<void> {
+    if (organizationId.value !== orgId) reset()
+    organizationId.value = orgId
+    await refreshChannels()
   }
 
   async function loadMessages(channelId: UUID): Promise<void> {
@@ -250,6 +261,13 @@ export const useChatStore = defineStore('chat', () => {
     touchChannel(channelId, message, mine)
     const channel = channels.value.find((c) => c.id === channelId)
     if (!channel || mine) return
+    incoming.value = {
+      id: message.id,
+      channelId,
+      title: channel.kind === 'direct' ? message.author_name : `#${channel.name}`,
+      body:
+        channel.kind === 'direct' ? message.content : `${message.author_name}: ${message.content}`,
+    }
     if (channelId === activeId.value) void run(() => markRead(channelId))
     else channel.unread_count += 1
   }
@@ -262,6 +280,9 @@ export const useChatStore = defineStore('chat', () => {
     activeId,
     typing,
     error,
+    incoming,
+    unreadTotal,
+    watchChannels,
     load,
     select,
     send,

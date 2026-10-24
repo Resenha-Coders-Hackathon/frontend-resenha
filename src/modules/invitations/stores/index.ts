@@ -4,6 +4,8 @@ import { fetchAllPages } from '@/shared/utils'
 import { getErrorMessage } from '@/app/plugins/axios'
 import {
   acceptInvitation,
+  acceptMyInvitation,
+  declineMyInvitation,
   createInvitation,
   listInvitations,
   listMyInvitations,
@@ -65,5 +67,17 @@ export const useInvitationsStore = defineStore('invitations', () => {
     return organization_id
   }
 
-  return { invitations, mine, load, loadMine, inviteMany, revoke, accept }
+  // Aceita pela lista (sem o token do e-mail); devolve a organização em que a pessoa entrou.
+  async function acceptMine(id: string): Promise<string> {
+    const { organization_id } = await acceptMyInvitation(id)
+    mine.value = mine.value.filter((i) => i.id !== id)
+    return organization_id
+  }
+
+  async function decline(id: string): Promise<void> {
+    await declineMyInvitation(id)
+    mine.value = mine.value.filter((i) => i.id !== id)
+  }
+
+  return { invitations, mine, load, loadMine, inviteMany, revoke, accept, acceptMine, decline }
 })

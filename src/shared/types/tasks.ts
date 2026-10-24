@@ -16,6 +16,10 @@ export interface ITasks {
   assignee_id: UUID | null
   assignee_name: string | null
   position: number
+  created_by_name: string | null
   is_overdue: boolean
+  checklist_total: number
+  checklist_done: number
+  comment_count: number
   created_at: ISODateTime
 }

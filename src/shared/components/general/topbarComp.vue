@@ -45,7 +45,7 @@ const path = computed(() =>
     </nav>
 
     <label
-      class="hidden w-[300px] items-center gap-[8px] rounded-[10px] border border-(--border-default) bg-(--bg-subtle) px-[10px] py-[9px] focus-within:border-(--border-strong) md:flex dark:border-(--border-inverse) dark:bg-black/30"
+      class="hidden w-[300px] items-center gap-[8px] rounded-[10px] border border-(--border-default) bg-(--bg-subtle) px-[10px] py-[9px] focus-within:border-(--bg-orange) focus-within:ring-2 focus-within:ring-(--bg-orange)/15 md:flex dark:border-(--border-inverse) dark:bg-black/30"
     >
       <span class="material-symbols-outlined text-[17px]! text-(--text-muted)" aria-hidden="true"
         >search</span
@@ -71,7 +71,7 @@ const path = computed(() =>
 
     <RouterLink
       to="/notificacoes"
-      class="relative grid size-[38px] shrink-0 cursor-pointer place-items-center rounded-[10px] border border-(--border-default) bg-(--surface) transition-colors hover:bg-(--bg-subtle) dark:border-(--border-inverse) dark:bg-transparent"
+      class="relative grid size-[38px] shrink-0 cursor-pointer place-items-center rounded-[10px] border border-(--border-default) bg-(--surface) transition-colors hover:border-(--bg-orange)/40 hover:bg-(--bg-orange)/5 hover:text-(--bg-orange) dark:border-(--border-inverse) dark:bg-transparent"
       :aria-label="
         shell.unread.value ? `Notificações: ${shell.unread.value} não lidas` : 'Notificações'
       "

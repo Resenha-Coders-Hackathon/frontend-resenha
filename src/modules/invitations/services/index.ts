@@ -1,6 +1,6 @@
 import { api } from '@/app/plugins/axios'
 import type { Page } from '@/shared/types'
-import type { CreateInviteRequest, Invitation } from '../types'
+import type { CreateInviteRequest, Invitation, InvitePreview } from '../types'
 
 export async function listInvitations(id: string, page = 1): Promise<Page<Invitation>> {
   return (
@@ -28,4 +28,19 @@ export async function acceptInvitation(token: string): Promise<{ organization_id
 
 export async function listMyInvitations(page = 1): Promise<Page<Invitation>> {
   return (await api.get<Page<Invitation>>('/invitations/mine/', { params: { page } })).data
+}
+
+export async function acceptMyInvitation(id: string): Promise<{ organization_id: string }> {
+  return (
+    await api.post<{ organization_id: string }>(`/invitations/${encodeURIComponent(id)}/accept/`)
+  ).data
+}
+
+export async function declineMyInvitation(id: string): Promise<void> {
+  await api.post(`/invitations/${encodeURIComponent(id)}/decline/`)
+}
+
+/** O que o link do e-mail diz (organização, papel e se o e-mail já tem conta); não exige login. */
+export async function previewInvitation(token: string): Promise<InvitePreview> {
+  return (await api.post<InvitePreview>('/invitations/preview/', { token })).data
 }

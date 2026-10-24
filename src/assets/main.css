@@ -16,7 +16,8 @@
 
   --bg-subtle: #f4f4f4;
   --bg-muted: #e6e6e6;
-  --bg-orange: #ff6700;
+  --accent-orange: #ff6700;
+  --bg-orange: var(--accent-orange);
 
   --text-primary: #000000;
   --text-secondary: #525252;

@@ -4,6 +4,7 @@ import { toast } from 'vue-sonner'
 import { BaseButton, TopbarComp } from '@/shared/components'
 import { useNotificationsStore } from '../stores'
 import { useOpenNotification } from '../composables/useOpenNotification'
+import { showDesktopAlert } from '../composables/desktopAlerts'
 import { avatar } from '@/shared/utils/people'
 import { relativeTime } from '@/shared/utils/time'
 import {
@@ -40,8 +41,15 @@ onMounted(() => {
 async function togglePush(): Promise<void> {
   isChangingPush.value = true
   try {
-    if (notifications.pushEnabled) await notifications.disablePush()
-    else await notifications.enablePush()
+    if (notifications.pushEnabled || notifications.desktopEnabled) {
+      if (notifications.pushEnabled) await notifications.disablePush()
+      notifications.disableDesktop()
+    } else {
+      // os avisos do computador funcionam em qualquer navegador; o push do Firebase é um extra
+      await notifications.enableDesktop()
+      await notifications.enablePush()
+      toast.success('Avisos ativados neste computador.')
+    }
   } catch (error) {
     toast.error(error instanceof Error ? error.message : 'Não foi possível alterar o push.')
   } finally {
@@ -52,8 +60,14 @@ async function togglePush(): Promise<void> {
 async function sendTest(): Promise<void> {
   isSending.value = true
   try {
-    await notifications.sendTest()
-    toast.success('Push enviado. Confira a notificação neste navegador.')
+    if (notifications.pushEnabled) await notifications.sendTest()
+    else
+      showDesktopAlert({
+        title: 'ResenhaCoders',
+        body: 'Os avisos deste computador estão funcionando.',
+        tag: 'resenha-test',
+      })
+    toast.success('Aviso enviado. Confira a notificação do seu sistema.')
   } catch (error) {
     toast.error(error instanceof Error ? error.message : 'Não foi possível enviar o teste.')
   } finally {
@@ -207,15 +221,15 @@ async function sendTest(): Promise<void> {
           </h2>
           <p class="text-[13px] text-(--text-muted)">
             {{
-              notifications.pushEnabled
-                ? 'Você recebe atribuições e menções mesmo com a aba fechada.'
-                : 'Ative para receber atribuições e menções mesmo com a aba fechada.'
+              notifications.pushEnabled || notifications.desktopEnabled
+                ? 'Novas mensagens, atribuições e menções aparecem no seu computador quando você não está na aba.'
+                : 'Ative para ver novas mensagens, atribuições e menções no seu computador quando você não está na aba.'
             }}
           </p>
         </div>
         <div class="flex flex-wrap gap-[8px]">
           <BaseButton
-            v-if="notifications.pushEnabled"
+            v-if="notifications.pushEnabled || notifications.desktopEnabled"
             label="Enviar teste"
             variant="ghost"
             size="sm"
@@ -225,8 +239,14 @@ async function sendTest(): Promise<void> {
             @click="sendTest"
           />
           <BaseButton
-            :label="notifications.pushEnabled ? 'Desativar avisos' : 'Ativar avisos'"
-            :variant="notifications.pushEnabled ? 'secondary' : 'primary'"
+            :label="
+              notifications.pushEnabled || notifications.desktopEnabled
+                ? 'Desativar avisos'
+                : 'Ativar avisos'
+            "
+            :variant="
+              notifications.pushEnabled || notifications.desktopEnabled ? 'secondary' : 'primary'
+            "
             size="sm"
             :full-width="false"
             class="mt-0!"

@@ -2,134 +2,196 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/modules/auth'
-import { OrganizationLayout } from '@/modules/organizations'
+import { OrganizationLayout, roleLabels, useOrganizationsStore } from '@/modules/organizations'
 import { BaseButton } from '@/shared/components'
-import { acceptInvitation } from '../services'
+import { acceptInvitation, previewInvitation } from '../services'
+import type { InvitePreview } from '../types'
+import { inviteProblem, type InviteProblem } from '../utils/errors'
 
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
+const organizations = useOrganizationsStore()
 const loading = ref(true)
 const saving = ref(false)
-const acceptedOrganizationId = ref('')
-const error = ref('')
-const connectionError = ref(false)
+const preview = ref<InvitePreview | null>(null)
+const problem = ref<InviteProblem | null>(null)
 const token = computed(() => (typeof route.query.token === 'string' ? route.query.token : ''))
 const validToken = computed(() => !!token.value && token.value.length <= 128)
-const authTarget = (name: string) => ({ name, query: { redirect: route.fullPath } })
 
-async function loadSession() {
-  acceptedOrganizationId.value = ''
+// entrar/criar conta já com o e-mail do convite e voltar para esta página depois
+const authTarget = (name: 'Login' | 'Register') => ({
+  name,
+  query: { redirect: route.fullPath, ...(preview.value && { email: preview.value.email }) },
+})
+const sameAccount = computed(
+  () => !!auth.user && auth.user.email.toLowerCase() === preview.value?.email.toLowerCase(),
+)
+const expires = computed(() =>
+  preview.value
+    ? new Date(preview.value.expires_at).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: 'long',
+      })
+    : '',
+)
+
+async function load() {
   loading.value = true
-  error.value = ''
-  connectionError.value = false
+  problem.value = null
+  preview.value = null
   if (!validToken.value) {
     loading.value = false
     return
   }
   try {
-    await auth.loadUser()
-  } catch {
-    connectionError.value = true
-    error.value = 'Não foi possível verificar sua sessão. Confira a conexão e tente novamente.'
+    const [, info] = await Promise.all([
+      auth.loadUser().catch(() => undefined),
+      previewInvitation(token.value),
+    ])
+    preview.value = info
+  } catch (error) {
+    problem.value = inviteProblem(error)
   } finally {
     loading.value = false
   }
 }
+
 async function accept() {
-  if (saving.value || !validToken.value || !auth.user) return
+  if (saving.value || !auth.user) return
   saving.value = true
-  error.value = ''
+  problem.value = null
   try {
-    const result = await acceptInvitation(token.value)
-    acceptedOrganizationId.value = result.organization_id
-    await router.replace({
-      name: 'OrganizationMembers',
-      params: { organizationId: result.organization_id },
-    })
-  } catch {
-    error.value =
-      'Não foi possível aceitar. Confira a conexão e se está usando o e-mail convidado. O convite também pode ter expirado, sido revogado ou já utilizado.'
+    const { organization_id } = await acceptInvitation(token.value)
+    await organizations.load()
+    organizations.select(organization_id)
+    await router.replace('/home-usuario')
+  } catch (error) {
+    problem.value = inviteProblem(error)
   } finally {
     saving.value = false
   }
 }
-async function changeAccount() {
+
+// sai da conta atual e segue para entrar/criar a conta do e-mail convidado
+async function switchAccount(name: 'Login' | 'Register') {
   saving.value = true
-  error.value = ''
   try {
     await auth.signOut()
-    await router.replace(authTarget('Login'))
+    await router.replace(authTarget(name))
   } catch {
-    error.value = 'Não foi possível sair da conta. Confira a conexão e tente novamente.'
+    problem.value = { code: 'network', message: 'Não foi possível sair da conta. Tente novamente.' }
   } finally {
     saving.value = false
   }
 }
-watch(token, loadSession, { immediate: true })
+
+watch(token, load, { immediate: true })
 </script>
 
 <template>
   <OrganizationLayout title="Convite">
     <section class="workspace-card invitation-accept" aria-labelledby="accept-title">
-      <span class="workspace-eyebrow">Você recebeu um convite</span>
-      <h1 id="accept-title">Seu próximo espaço de trabalho</h1>
+      <h1 id="accept-title">
+        {{ preview ? `Entrar em ${preview.organization_name}` : 'Convite para uma organização' }}
+      </h1>
+
       <p v-if="!validToken">
         Este link está incompleto ou é inválido. Abra o link completo do e-mail de convite.
       </p>
-      <p v-else-if="loading" role="status">Verificando sua sessão…</p>
-      <template v-else-if="acceptedOrganizationId">
-        <p>Convite aceito! Você já participa da organização.</p>
-        <RouterLink
-          :to="{ name: 'OrganizationMembers', params: { organizationId: acceptedOrganizationId } }"
-          class="workspace-link-button"
-          >Abrir organização</RouterLink
-        >
-      </template>
-      <template v-else-if="!connectionError">
-        <template v-if="auth.user"
-          ><p>
+      <p v-else-if="loading" role="status">Abrindo o convite…</p>
+
+      <template v-else-if="preview">
+        <p>
+          Você foi convidado como <strong>{{ roleLabels[preview.role].toLowerCase() }}</strong> para
+          <strong>{{ preview.organization_name }}</strong
+          >, no e-mail <strong>{{ preview.email }}</strong
+          >. Válido até {{ expires }}.
+        </p>
+
+        <!-- sem sessão -->
+        <template v-if="!auth.user">
+          <template v-if="preview.has_account">
+            <p>Entre com a sua conta para aceitar.</p>
+            <div class="workspace-actions">
+              <RouterLink :to="authTarget('Login')" class="workspace-link-button"
+                >Entrar para aceitar</RouterLink
+              >
+            </div>
+          </template>
+          <template v-else>
+            <p role="status">
+              <strong>Ainda não existe uma conta para {{ preview.email }}.</strong> Crie a sua em um
+              minuto; depois você volta direto para este convite.
+            </p>
+            <div class="workspace-actions">
+              <RouterLink :to="authTarget('Register')" class="workspace-link-button"
+                >Criar minha conta</RouterLink
+              >
+            </div>
+            <p class="workspace-muted">
+              Já tem conta com outro e-mail? Ela não pode aceitar este convite.
+              <RouterLink :to="authTarget('Login')">Entrar mesmo assim</RouterLink>
+            </p>
+          </template>
+        </template>
+
+        <!-- conta certa -->
+        <div v-else-if="sameAccount" class="workspace-actions">
+          <BaseButton
+            label="Aceitar convite"
+            :loading="saving"
+            :full-width="false"
+            @click="accept"
+          />
+        </div>
+
+        <!-- conta errada -->
+        <template v-else>
+          <p role="alert" class="workspace-error">
             Você está usando <strong>{{ auth.user.email }}</strong
-            >. Para participar, esta conta precisa usar o mesmo e-mail que recebeu o convite.
+            >, mas o convite é para <strong>{{ preview.email }}</strong
+            >.
           </p>
           <div class="workspace-actions">
             <BaseButton
-              label="Aceitar convite"
+              v-if="preview.has_account"
+              :label="`Entrar com ${preview.email}`"
               :loading="saving"
               :full-width="false"
-              @click="accept"
-            /><BaseButton
-              label="Usar outra conta"
-              variant="secondary"
-              :disabled="saving"
+              @click="switchAccount('Login')"
+            />
+            <BaseButton
+              v-else
+              label="Criar conta para este e-mail"
+              :loading="saving"
               :full-width="false"
-              @click="changeAccount"
-            /></div
-        ></template>
-        <template v-else
-          ><p>
-            Entre ou crie sua conta com o e-mail que recebeu o convite. Depois, você poderá
-            confirmar sua participação na organização.
-          </p>
-          <div class="workspace-actions">
-            <RouterLink :to="authTarget('Login')" class="workspace-link-button"
-              >Já tenho conta</RouterLink
-            ><RouterLink :to="authTarget('Register')" class="workspace-link-button secondary"
-              >Criar minha conta</RouterLink
-            >
+              @click="switchAccount('Register')"
+            />
           </div>
-          <p class="workspace-muted">
-            Você também pode usar o Google nas telas de acesso.
-          </p></template
-        >
+        </template>
       </template>
-      <p v-if="error" role="alert" class="workspace-error">{{ error }}</p>
-      <BaseButton
-        v-if="connectionError"
-        label="Tentar novamente"
-        :full-width="false"
-        @click="loadSession"
-      />
+
+      <template v-if="problem">
+        <p role="alert" class="workspace-error">{{ problem.message }}</p>
+        <div class="workspace-actions">
+          <BaseButton
+            v-if="problem.code === 'network' || problem.code === 'unknown'"
+            label="Tentar novamente"
+            :full-width="false"
+            @click="preview ? accept() : load()"
+          />
+          <RouterLink
+            v-else-if="auth.user"
+            to="/home-usuario"
+            class="workspace-link-button secondary"
+            >Ir para o início</RouterLink
+          >
+          <RouterLink v-else :to="{ name: 'Login' }" class="workspace-link-button secondary"
+            >Entrar</RouterLink
+          >
+        </div>
+      </template>
     </section>
   </OrganizationLayout>
 </template>

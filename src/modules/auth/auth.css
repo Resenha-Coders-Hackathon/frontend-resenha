@@ -12,6 +12,11 @@
   color: var(--text-inverse);
 }
 
+.auth-link--accent,
+.dark .auth-link--accent {
+  color: var(--accent-orange);
+}
+
 .auth-link:hover {
   text-decoration-thickness: 2px;
 }

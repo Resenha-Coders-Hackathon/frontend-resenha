@@ -13,6 +13,13 @@ export const moduleRoutes: RouteRecordRaw[] = [
         component: () => import('../views/UserHomeView.vue'),
       },
       {
+        path: '/setores/:sectorId',
+        name: 'SectorBoard',
+        meta: { requiresAuth: true },
+        component: () => import('../views/SectorBoardView.vue'),
+        props: true,
+      },
+      {
         path: '/:pathMatch(.*)*',
         name: 'NotFound',
         component: () => import('../views/NotFoundView.vue'),

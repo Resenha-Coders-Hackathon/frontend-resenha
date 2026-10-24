@@ -27,3 +27,13 @@ export interface InviteAccepted extends OrganizationMember {
 }
 
 export type Invitation = OrganizationInvite
+
+export interface InvitePreview {
+  organization_name: string
+  role: InviteRole
+  email: string
+  expires_at: ISODateTime
+  has_account: boolean
+}
+export type InviteErrorCode =
+  'invite_invalid' | 'invite_used' | 'invite_expired' | 'invite_wrong_account'

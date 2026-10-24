@@ -5,7 +5,10 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/modules/auth'
 import { useSectorsStore } from '@/modules/module'
 import { useOrganizationsStore } from '@/modules/organizations'
+import { useChatStore } from '@/modules/chat'
+import { useInvitationsStore } from '@/modules/invitations'
 import { useNotificationsStore } from '@/modules/notifications'
+import { useTheme } from '@/app/composables/useTheme'
 
 interface MenuItem {
   link: string
@@ -23,6 +26,9 @@ const auth = useAuthStore()
 const organizations = useOrganizationsStore()
 const sectors = useSectorsStore()
 const notifications = useNotificationsStore()
+const { isDark } = useTheme()
+const chat = useChatStore()
+const invitations = useInvitationsStore()
 const isOpen = ref<boolean>(true)
 
 const current = computed(() => organizations.current)
@@ -40,7 +46,7 @@ const organizationItems = computed<MenuItem[]>(() => [
     icon: 'groups',
     label: 'Equipe',
     // a gestão de membros é uma tela à parte, aberta pela própria Equipe
-    also: ['/setores', ...(current.value ? [`/organizacoes/${current.value.id}/membros`] : [])],
+    also: [...(current.value ? [`/organizacoes/${current.value.id}/membros`] : [])],
   },
   { link: '/arquivos', icon: 'folder', label: 'Arquivos' },
   { link: '/relatorios', icon: 'bar_chart', label: 'Relatórios' },
@@ -49,7 +55,6 @@ const organizationItems = computed<MenuItem[]>(() => [
 ])
 
 const accountItems: MenuItem[] = [
-  { link: '/notificacoes', icon: 'notifications', label: 'Notificações' },
   {
     link: '/faturamento',
     icon: 'receipt_long',
@@ -73,8 +78,8 @@ function isActive(item: MenuItem): boolean {
 
 const itemClass = (active: boolean) => [
   active
-    ? 'bg-(--background-inverse) text-(--text-inverse) dark:bg-white/10'
-    : 'hover:bg-(--background-inverse)/30 dark:hover:bg-white/5',
+    ? 'border-l-[3px] border-(--bg-orange) bg-(--bg-orange)/10 dark:bg-(--bg-orange)/15'
+    : 'border-l-[3px] border-transparent hover:bg-(--background-inverse)/30 dark:hover:bg-white/5',
   'text-sm rounded-xl flex items-center gap-2 px-5 py-1.5 cursor-pointer font-medium transition-all duration-300',
 ]
 
@@ -127,7 +132,7 @@ async function signOut() {
     <nav class="py-4 flex flex-col justify-between min-h-full gap-6">
       <div class="grid gap-2">
         <RouterLink to="/" class="text-2xl font-bold mb-3">
-          Resenha<span class="shrink-0 whitespace-nowrap text-(--text-muted)">Coders</span>
+          <img :src="isDark ? '/wordmark-inverse.svg' : '/wordmark.svg'" alt="" class="mx-auto" />
         </RouterLink>
 
         <!-- Seletor de organização -->
@@ -157,6 +162,11 @@ async function signOut() {
             <span class="material-symbols-outlined text-(--text-muted)" aria-hidden="true"
               >unfold_more</span
             >
+            <span
+              v-if="invitations.mine.length"
+              class="absolute top-1.5 right-1.5 size-2.5 rounded-full bg-(--bg-orange)"
+              :aria-label="`${invitations.mine.length} convites pendentes`"
+            />
           </button>
 
           <ul
@@ -191,6 +201,16 @@ async function signOut() {
             </li>
             <li class="mt-1 border-t border-(--border-default) pt-1 dark:border-(--border-inverse)">
               <RouterLink
+                v-if="invitations.mine.length"
+                to="/home-usuario"
+                class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium transition-colors hover:bg-(--background-inverse)/10 dark:hover:bg-white/5"
+                @click="switcherOpen = false"
+              >
+                <span class="material-symbols-outlined text-[18px]!" aria-hidden="true">mail</span>
+                {{ invitations.mine.length }}
+                {{ invitations.mine.length === 1 ? 'convite pendente' : 'convites pendentes' }}
+              </RouterLink>
+              <RouterLink
                 to="/organizacoes/nova"
                 class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-(--background-inverse)/10 dark:hover:bg-white/5"
                 @click="switcherOpen = false"
@@ -220,8 +240,18 @@ async function signOut() {
                 :class="itemClass(isActive(item))"
                 :aria-current="isActive(item) ? 'page' : undefined"
               >
-                <span class="material-symbols-outlined" aria-hidden="true">{{ item.icon }}</span>
-                <span>{{ item.label }}</span>
+                <span
+                  :class="['material-symbols-outlined', isActive(item) ? 'text-(--bg-orange)' : '']"
+                  aria-hidden="true"
+                  >{{ item.icon }}</span
+                >
+                <span class="flex-1">{{ item.label }}</span>
+                <span
+                  v-if="item.link === '/chat' && chat.unreadTotal"
+                  class="rounded-full bg-(--bg-orange) px-2 text-xs font-semibold text-white"
+                  :aria-label="`${chat.unreadTotal} mensagens não lidas`"
+                  >{{ chat.unreadTotal > 99 ? '99+' : chat.unreadTotal }}</span
+                >
               </RouterLink>
             </li>
           </ul>
@@ -235,11 +265,16 @@ async function signOut() {
             <ul class="grid gap-1">
               <li v-for="sector in visibleSectors" :key="sector.id">
                 <RouterLink
-                  :to="`/setores/${sector.id}/editar`"
-                  :class="itemClass(route.path === `/setores/${sector.id}/editar`)"
+                  :to="`/setores/${sector.id}`"
+                  :class="itemClass(startsWith(route.path, `/setores/${sector.id}`))"
                 >
                   <span
-                    class="size-2.5 shrink-0 rounded-full bg-(--text-muted)"
+                    :class="[
+                      'size-2.5 shrink-0 rounded-full',
+                      !sector.color && startsWith(route.path, `/setores/${sector.id}`)
+                        ? 'bg-(--bg-orange)'
+                        : 'bg-(--text-muted)',
+                    ]"
                     :style="sector.color ? { backgroundColor: sector.color } : undefined"
                     aria-hidden="true"
                   />
@@ -252,7 +287,11 @@ async function signOut() {
         <ul v-else class="grid gap-1">
           <li v-for="item in authItems" :key="item.link">
             <RouterLink :to="item.link" :class="itemClass(isActive(item))">
-              <span class="material-symbols-outlined" aria-hidden="true">{{ item.icon }}</span>
+              <span
+                :class="['material-symbols-outlined', isActive(item) ? 'text-(--bg-orange)' : '']"
+                aria-hidden="true"
+                >{{ item.icon }}</span
+              >
               <span>{{ item.label }}</span>
             </RouterLink>
           </li>
