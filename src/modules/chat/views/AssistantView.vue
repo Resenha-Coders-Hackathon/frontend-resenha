@@ -4,9 +4,22 @@ import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { BaseButton, TopbarComp } from '@/shared/components'
 import { useAuthStore } from '@/modules/auth'
-import { aiErrorDetails, useAiStore } from '@/modules/ai'
+import { useOrganizationsStore } from '@/modules/organizations'
+import {
+  aiActionDeleted,
+  aiActionDraft,
+  aiActionLabel,
+  aiActionNotes,
+  aiActionTasks,
+  aiActionTone,
+  aiErrorDetails,
+  aiVisibleActions,
+  useAiStore,
+} from '@/modules/ai'
+import type { AiTask } from '@/modules/ai'
 import {
   AssistantTaskCard,
+  AssistantTaskDraft,
   ChatAvatar,
   ChatComposer,
   ChatPanelLayout,
@@ -17,6 +30,7 @@ import { formatSize, formatTime } from '../utils'
 
 const auth = useAuthStore()
 const ai = useAiStore()
+const organizations = useOrganizationsStore()
 const route = useRoute()
 const router = useRouter()
 const search = ref('')
@@ -33,18 +47,35 @@ const visibleHistory = computed(() =>
 const composerDisabled = computed(() => ai.isBusy || !!ai.active?.pending || !!ai.active?.expired)
 
 const PROMPTS = [
-  'Quais setores posso usar?',
   'Mostre minhas tarefas pendentes.',
+  'Crie uma tarefa de prioridade alta para amanhã.',
   'Quais tarefas tenho para amanhã?',
+  'Quais setores posso usar?',
 ]
-const ACTION_LABELS: Record<string, string> = {
-  criar_task: 'Tarefa criada',
-  editar_task: 'Tarefa atualizada',
-  concluir_task: 'Tarefa concluída',
-  listar_tasks: 'Tarefas encontradas',
-  buscar_task: 'Resultado da busca',
-  listar_contexto: 'Setores disponíveis',
-  excluir_task: 'Exclusão de tarefa',
+
+const DRAFTS = {
+  edit: 'Altere {ref}: ',
+  priority: 'Mude a prioridade d{ref} para ',
+  due: 'Defina o prazo d{ref} para ',
+  assignee: 'Atribua {ref} a ',
+  checklist: 'Adicione ao checklist d{ref}: ',
+} as const
+
+function taskCommand(
+  kind: 'complete' | 'delete' | keyof typeof DRAFTS,
+  task: AiTask,
+) {
+  const ref = `a tarefa "${task.title}" (id ${task.id})`
+  if (kind !== 'complete' && kind !== 'delete') {
+    // The user finishes the sentence; nothing is sent until they submit.
+    draft.value = DRAFTS[kind].replace('{ref}', ref)
+    return
+  }
+  // Deletion still needs the server-issued confirmation before anything is removed.
+  void ai.ask(
+    kind === 'complete' ? `Conclua ${ref}.` : `Exclua ${ref}.`,
+    organizations.current?.id,
+  )
 }
 
 watch(
@@ -64,6 +95,9 @@ onMounted(async () => {
       await router.replace({ name: 'Login', query: { redirect: route.fullPath } })
     } else if (!user.is_subscriber) {
       await router.replace({ name: 'Plans' })
+    } else if (!organizations.organizations.length) {
+      // Only context for the assistant; it still works (and asks) without it.
+      await organizations.load().catch(() => undefined)
     }
   } catch {
     toast.error('Não foi possível verificar seu acesso à IA. Tente novamente.')
@@ -109,7 +143,7 @@ function openHistory(id: string) {
 }
 
 async function send() {
-  if (await ai.ask(draft.value)) draft.value = ''
+  if (await ai.ask(draft.value, organizations.current?.id)) draft.value = ''
 }
 
 async function retry() {
@@ -253,37 +287,75 @@ async function analyze() {
                 </p>
 
                 <div
-                  v-for="(action, index) in entry.actions"
-                  :key="`${action.name}-${index}`"
+                  v-for="(action, index) in aiVisibleActions(entry.actions)"
+                  :key="`${action.action}-${index}`"
                   class="flex max-w-[640px] flex-col gap-[8px]"
                 >
-                  <template v-if="action.ok || action.confirmation_required">
+                  <AssistantTaskDraft
+                    v-if="aiActionDraft(action)"
+                    :draft="aiActionDraft(action)!"
+                    :state="ai.drafts[`${entry.id}:${index}`]"
+                    :disabled="ai.isBusy || !!ai.active?.expired"
+                    @confirm="(payload) => ai.confirmDraft(`${entry.id}:${index}`, payload)"
+                    @discard="ai.discardDraft(`${entry.id}:${index}`)"
+                  />
+                  <p
+                    v-else-if="aiActionTone(action) === 'error'"
+                    role="alert"
+                    class="text-[12px] text-(--destructive)"
+                  >
+                    {{ aiActionLabel(action) }} não realizada:
+                    {{
+                      aiErrorDetails(action.error) ||
+                      (action.status === 'uncertain'
+                        ? 'resultado incerto, confira antes de tentar de novo.'
+                        : 'tente novamente.')
+                    }}
+                  </p>
+                  <p
+                    v-else-if="aiActionTone(action) === 'pending'"
+                    class="text-[12px] font-medium text-(--destructive)"
+                  >
+                    Exclusão pendente: nada foi apagado ainda. Confirme abaixo.
+                  </p>
+                  <template v-else>
                     <p class="text-[12px] font-medium text-(--chat-ai)">
-                      {{ ACTION_LABELS[action.name] ?? 'Resultado da solicitação' }}
+                      {{ aiActionLabel(action) }}
                     </p>
-                    <AssistantTaskCard v-if="action.task" :task="action.task" />
-                    <AssistantTaskCard v-for="task in action.tasks" :key="task.id" :task="task" />
-                    <p v-if="action.deleted_task_id" class="text-[12px] text-(--text-muted)">
-                      Tarefa excluída: {{ action.deleted_task_id }}
+                    <p v-if="aiActionDeleted(action)" class="text-[12px] text-(--text-muted)">
+                      Removido com sucesso.
                     </p>
-                    <ul
-                      v-if="action.sectors?.length"
-                      class="space-y-[4px] text-[12px] text-(--text-secondary) dark:text-(--text-inverse-muted)"
+                    <AssistantTaskCard
+                      v-for="task in aiActionTasks(action)"
+                      :key="task.id"
+                      :task="task"
+                      :disabled="ai.isBusy || !!ai.active?.pending || !!ai.active?.expired"
+                      @command="taskCommand"
+                    />
+                    <p
+                      v-for="note in aiActionNotes(action)"
+                      :key="note"
+                      class="text-[12px] leading-[18px] text-(--text-muted)"
                     >
-                      <li v-for="sector in action.sectors" :key="sector.id">
-                        {{ sector.organization_name }} · {{ sector.name }}
-                      </li>
-                    </ul>
-                    <p v-if="action.ambiguous" class="text-[12px] text-(--text-muted)">
-                      Há mais de uma tarefa correspondente. Informe qual deseja alterar.
-                    </p>
-                    <p v-if="action.has_more" class="text-[12px] text-(--text-muted)">
-                      Há mais resultados. Refine sua busca.
+                      ℹ {{ note }}
                     </p>
                   </template>
-                  <p v-else role="alert" class="text-[12px] text-(--destructive)">
-                    {{ aiErrorDetails(action.error) || 'Esta operação não foi realizada.' }}
-                  </p>
+                </div>
+
+                <div
+                  v-if="entry.choices?.length && entry.id === ai.messages.at(-1)?.id"
+                  class="flex flex-wrap gap-[6px]"
+                >
+                  <button
+                    v-for="choice in entry.choices"
+                    :key="choice"
+                    type="button"
+                    :disabled="composerDisabled"
+                    class="h-[30px] cursor-pointer rounded-full border border-(--chat-ai) px-[12px] text-[12.5px] text-(--chat-ai) transition-colors hover:bg-(--chat-ai) hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                    @click="ai.ask(choice, organizations.current?.id)"
+                  >
+                    {{ choice }}
+                  </button>
                 </div>
 
                 <div
@@ -416,7 +488,7 @@ async function analyze() {
             <ChatComposer
               v-model="draft"
               accent="ai"
-              placeholder="Ex.: crie uma tarefa para estudar Django amanhã no setor Estudos…"
+              placeholder="Ex.: crie uma tarefa de prioridade alta para revisar o relatório sexta-feira…"
               submit-label="Enviar mensagem"
               submit-icon="send"
               @submit="send"

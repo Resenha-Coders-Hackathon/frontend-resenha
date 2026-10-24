@@ -1,10 +1,12 @@
 import axios from 'axios'
 import { api, getErrorMessage } from '@/app/plugins/axios'
-import type { AiAnswer, AiAskRequest } from '../types'
+import type { AiAnswer, AiAskRequest, AiPerson, AiTask, AiTaskConfirm } from '../types'
 import { aiErrorDetails } from '../utils'
 
 // Limite do AIAskSerializer no backend.
 export const AI_PROMPT_MAX_LENGTH = 10000
+// O assistente pode rodar até 180s no backend.
+const AI_TIMEOUT_MS = 200_000
 
 export class AiRequestError extends Error {
   readonly status?: number
@@ -34,7 +36,9 @@ export async function askAi(payload: AiAskRequest): Promise<AiAnswer> {
   }
 
   try {
-    return (await api.post<AiAnswer>('/ai/ask/', { ...payload, prompt: text })).data
+    return (
+      await api.post<AiAnswer>('/ai/ask/', { ...payload, prompt: text }, { timeout: AI_TIMEOUT_MS })
+    ).data
   } catch (error) {
     throw requestError(error, 'Não foi possível consultar a IA.')
   }
@@ -45,7 +49,10 @@ export async function analyzeAiFiles(files: File[]): Promise<Blob> {
   const body = new FormData()
   files.forEach((file) => body.append('files', file))
   try {
-    const response = await api.post<Blob>('/ai/analyze/', body, { responseType: 'blob' })
+    const response = await api.post<Blob>('/ai/analyze/', body, {
+      responseType: 'blob',
+      timeout: AI_TIMEOUT_MS,
+    })
     if (!response.data.type.toLowerCase().startsWith('application/pdf')) {
       throw new Error('A análise não retornou um relatório PDF.')
     }
@@ -62,5 +69,28 @@ export async function analyzeAiFiles(files: File[]): Promise<Blob> {
       }
     }
     throw requestError(error, 'Não foi possível analisar os arquivos.')
+  }
+}
+
+/** People who can be assigned in a sector (feeds the draft card selectors). */
+export async function fetchTaskOptions(sectorId: string): Promise<AiPerson[]> {
+  try {
+    const { data } = await api.get<{ people: AiPerson[] }>('/ai/tasks/options/', {
+      params: { sector_id: sectorId },
+    })
+    return data.people
+  } catch (error) {
+    throw requestError(error, 'Não foi possível carregar as pessoas do setor.')
+  }
+}
+
+/** Creates the confirmed draft. The same request_id never creates a second task. */
+export async function createTaskFromDraft(
+  payload: AiTaskConfirm,
+): Promise<AiTask & { notes: string[] }> {
+  try {
+    return (await api.post<AiTask & { notes: string[] }>('/ai/tasks/', payload)).data
+  } catch (error) {
+    throw requestError(error, 'Não foi possível criar a tarefa.')
   }
 }
