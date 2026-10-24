@@ -1,4 +1,4 @@
-import type { AiAction, AiTask } from '../types'
+import type { AiAction, AiPerson, AiTask, AiTaskDraft } from '../types'
 
 /** DRF field errors and tool failures can contain nested lists and dictionaries. */
 export function aiErrorDetails(value: unknown): string {
@@ -80,4 +80,34 @@ export function aiActionDeleted(action: AiAction): boolean {
 /** Failed reads are noise for the user; failed or uncertain writes must stay visible. */
 export function aiVisibleActions(actions: AiAction[] | undefined): AiAction[] {
   return (actions ?? []).filter((a) => a.writes || a.status !== 'failed')
+}
+
+/** Server-written notes (e.g. what the board could not store); never model text. */
+export function aiActionNotes(action: AiAction): string[] {
+  const result = action.result
+  if (action.status !== 'succeeded' || !isRecord(result) || !Array.isArray(result.notes)) return []
+  return result.notes.filter((note): note is string => typeof note === 'string')
+}
+
+/** The draft card payload of a successful `task_draft` receipt. */
+export function aiActionDraft(action: AiAction): AiTaskDraft | null {
+  if (action.action !== 'task_draft' || action.status !== 'succeeded') return null
+  const draft = action.result
+  return isRecord(draft) && draft.kind === 'task_draft' ? (draft as unknown as AiTaskDraft) : null
+}
+
+function fold(text: string): string {
+  return text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().trim()
+}
+
+/** People whose name starts with every word of the query ("nicole" -> "Nicole Souza"). */
+export function matchPeople(query: string, people: AiPerson[]): AiPerson[] {
+  const tokens = fold(query)
+    .split(/\s+/)
+    .filter((t) => t && !['usuario', 'user', 'o', 'a', 'do', 'da'].includes(t))
+  if (!tokens.length) return []
+  return people.filter((person) => {
+    const words = fold(person.name).split(/\s+/)
+    return tokens.every((token) => words.some((word) => word.startsWith(token)))
+  })
 }

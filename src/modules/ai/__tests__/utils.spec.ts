@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { aiVisibleActions, aiActionDeleted, aiActionLabel, aiActionTasks, aiActionTone } from '../utils/index.ts'
+import { aiActionNotes, aiVisibleActions, aiActionDeleted, aiActionLabel, aiActionTasks, aiActionTone } from '../utils/index.ts'
 import type { AiAction } from '../types/index.ts'
 
 const task = { id: 't1', title: 'Revisar', priority: 'high' }
@@ -36,4 +36,32 @@ test('hides failed reads but keeps failed writes visible', () => {
   const write = receipt({ status: 'failed' })
   assert.deepEqual(aiVisibleActions([read, write]), [write])
   assert.deepEqual(aiVisibleActions(undefined), [])
+})
+
+test('reads server notes only from successful receipts', () => {
+  const ok = receipt({ result: { ...task, notes: ['Horário registrado na descrição.', 3] } })
+  assert.deepEqual(aiActionNotes(ok), ['Horário registrado na descrição.'])
+  assert.deepEqual(aiActionNotes(receipt({ status: 'failed', result: { notes: ['x'] } })), [])
+  assert.deepEqual(aiActionNotes(receipt({ result: task })), [])
+})
+
+test('recognizes a task draft receipt only when it succeeded', async () => {
+  const { aiActionDraft } = await import('../utils/index.ts')
+  const draft = { kind: 'task_draft', title: 'Fix' }
+  assert.equal(aiActionDraft(receipt({ action: 'task_draft', writes: false, result: draft }))?.title, 'Fix')
+  assert.equal(aiActionDraft(receipt({ action: 'task_draft', status: 'failed', result: draft })), null)
+  assert.equal(aiActionDraft(receipt({ result: draft })), null)
+})
+
+test('matches people by name words, ignoring accents and "usuário"', async () => {
+  const { matchPeople } = await import('../utils/index.ts')
+  const people = [
+    { id: '1', name: 'Matheus Michalski' },
+    { id: '2', name: 'Nicole Souza' },
+    { id: '3', name: 'Matheus Silva' },
+  ]
+  assert.deepEqual(matchPeople('usuário NICOLÉ', people).map((p) => p.id), ['2'])
+  assert.deepEqual(matchPeople('matheus', people).map((p) => p.id), ['1', '3'])
+  assert.deepEqual(matchPeople('matheus silva', people).map((p) => p.id), ['3'])
+  assert.deepEqual(matchPeople('zeca', people), [])
 })

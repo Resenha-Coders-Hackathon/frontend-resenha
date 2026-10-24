@@ -26,6 +26,7 @@ const calls: AiAskRequest[] = []
 const api = {
   AiRequestError: RequestError,
   askAi: async (_payload: AiAskRequest): Promise<AiAnswer> => answer(),
+  createTaskFromDraft: async (_payload: unknown): Promise<Record<string, unknown>> => ({}),
   analyzeAiFiles: async (_files: File[]): Promise<Blob> =>
     new Blob(['%PDF-test'], { type: 'application/pdf' }),
 }
@@ -35,7 +36,8 @@ const hooks = registerHooks({
     if (context.parentURL?.endsWith('/ai/stores/ai.ts') && specifier === '../services') {
       const source = `export const AiRequestError = globalThis.aiStoreTestApi.AiRequestError;
         export const askAi = (...args) => globalThis.aiStoreTestApi.askAi(...args);
-        export const analyzeAiFiles = (...args) => globalThis.aiStoreTestApi.analyzeAiFiles(...args);`
+        export const analyzeAiFiles = (...args) => globalThis.aiStoreTestApi.analyzeAiFiles(...args);
+        export const createTaskFromDraft = (...args) => globalThis.aiStoreTestApi.createTaskFromDraft(...args);`
       return { url: `data:text/javascript,${encodeURIComponent(source)}`, shortCircuit: true }
     }
     return nextResolve(specifier, context)
@@ -277,4 +279,51 @@ test('keeps the backend unverified flag on the assistant message', async () => {
   const ai = useAiStore()
   await ai.ask('Crie uma tarefa')
   assert.equal(ai.messages.at(-1)?.unverified, true)
+})
+
+test('confirming a draft creates the task once and shows it in the chat', async () => {
+  const sent: unknown[] = []
+  api.askAi = async () => answer()
+  api.createTaskFromDraft = async (payload) => {
+    sent.push(payload)
+    return { id: 'task-1', title: 'Fix', notes: ['n'] }
+  }
+  const ai = useAiStore()
+  await ai.ask('Crie uma tarefa')
+  const payload = {
+    request_id: 'req-1',
+    sector_id: 's',
+    title: 'Fix',
+    description: '',
+    priority: 'high' as const,
+    due_date: null,
+    due_time: null,
+    assignee_ids: [],
+  }
+  assert.equal(await ai.confirmDraft('m:0', payload), true)
+  assert.equal(await ai.confirmDraft('m:0', payload), false)
+  assert.equal(sent.length, 1)
+  assert.equal(ai.drafts['m:0']?.status, 'created')
+  const last = ai.messages.at(-1)
+  assert.equal(last?.actions?.[0]?.status, 'succeeded')
+  assert.equal(last?.role, 'assistant')
+})
+
+test('a failed confirmation can be retried and a discarded draft stays discarded', async () => {
+  api.askAi = async () => answer()
+  api.createTaskFromDraft = async () => {
+    throw new RequestError('Falhou', 500)
+  }
+  const ai = useAiStore()
+  await ai.ask('Crie uma tarefa')
+  const payload = {
+    request_id: 'req-2', sector_id: 's', title: 'Fix', description: '',
+    priority: 'low' as const, due_date: null, due_time: null, assignee_ids: [],
+  }
+  assert.equal(await ai.confirmDraft('m:1', payload), false)
+  assert.equal(ai.drafts['m:1']?.status, 'failed')
+  api.createTaskFromDraft = async () => ({ id: 'task-2', title: 'Fix' })
+  assert.equal(await ai.confirmDraft('m:1', payload), true)
+  ai.discardDraft('m:9')
+  assert.equal(ai.drafts['m:9']?.status, 'discarded')
 })

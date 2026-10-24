@@ -77,3 +77,53 @@ export interface AiConversation {
   pending: AiPendingRequest | null
   expired: boolean
 }
+
+export interface AiPerson {
+  id: UUID
+  name: string
+}
+
+export interface AiSectorOption {
+  id: UUID
+  name: string
+  organization_name: string
+}
+
+/** Result of the backend `task_draft` tool: nothing is saved until the user confirms. */
+export interface AiTaskDraft {
+  kind: 'task_draft'
+  request_id: UUID
+  sector: { id: UUID; name: string } | null
+  sector_options: AiSectorOption[]
+  title: string
+  description: string
+  priority: 'low' | 'medium' | 'high' | 'urgent'
+  due_date: string | null
+  due_time: string | null
+  assignees: AiPerson[]
+  unresolved: {
+    query: string
+    reason: 'ambiguous' | 'no_access' | 'not_found' | 'sector_needed'
+    candidates: AiPerson[]
+  }[]
+  people_options: AiPerson[]
+  missing: string[]
+}
+
+/** What the user confirmed in the draft card; people are the IDs they picked. */
+export interface AiTaskConfirm {
+  request_id: UUID
+  sector_id: UUID
+  title: string
+  description: string
+  priority: AiTaskDraft['priority']
+  due_date: string | null
+  due_time: string | null
+  assignee_ids: UUID[]
+}
+
+export interface AiDraftState {
+  status: 'creating' | 'created' | 'discarded' | 'failed'
+  error?: string
+  task?: AiTask
+}

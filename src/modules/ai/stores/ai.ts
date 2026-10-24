@@ -1,8 +1,14 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { UUID } from '@/shared/types'
-import { AiRequestError, analyzeAiFiles, askAi } from '../services'
-import type { AiAskRequest, AiConversation, AiMessage } from '../types'
+import { AiRequestError, analyzeAiFiles, askAi, createTaskFromDraft } from '../services'
+import type {
+  AiAskRequest,
+  AiConversation,
+  AiDraftState,
+  AiMessage,
+  AiTaskConfirm,
+} from '../types'
 
 export const useAiStore = defineStore('ai', () => {
   const conversations = ref<AiConversation[]>([])
@@ -11,6 +17,8 @@ export const useAiStore = defineStore('ai', () => {
   const isAnalyzing = ref(false)
   const error = ref('')
   const ownerId = ref<UUID | null>(null)
+  // Draft cards by `<message id>:<action index>`; the draft itself lives in the receipt.
+  const drafts = ref<Record<string, AiDraftState>>({})
   const active = computed(() => conversations.value.find((item) => item.id === activeId.value))
   const messages = computed(() => active.value?.messages ?? [])
   const isBusy = computed(() => isAsking.value || isAnalyzing.value)
@@ -24,6 +32,7 @@ export const useAiStore = defineStore('ai', () => {
       }
     }
     conversations.value = []
+    drafts.value = {}
     activeId.value = null
     error.value = ''
     isAsking.value = false
@@ -175,6 +184,41 @@ export const useAiStore = defineStore('ai', () => {
     })
   }
 
+  async function confirmDraft(key: string, payload: AiTaskConfirm): Promise<boolean> {
+    const target = active.value
+    const state = drafts.value[key]
+    if (!target || state?.status === 'creating' || state?.status === 'created') return false
+    const current = generation
+    drafts.value[key] = { status: 'creating' }
+    try {
+      // Same request_id on retry: the backend returns the first task, never a second.
+      const task = await createTaskFromDraft(payload)
+      if (generation !== current) return false
+      drafts.value[key] = { status: 'created', task }
+      target.messages.push({
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: 'Tarefa criada.',
+        created_at: new Date().toISOString(),
+        actions: [{ action: 'task_create', writes: true, status: 'succeeded', result: task }],
+        choices: ['Adicionar checklist', 'Criar outra tarefa', 'Nada mais'],
+      })
+      return true
+    } catch (e) {
+      if (generation !== current) return false
+      drafts.value[key] = {
+        status: 'failed',
+        error: e instanceof Error ? e.message : 'Não foi possível criar a tarefa.',
+      }
+      return false
+    }
+  }
+
+  function discardDraft(key: string): void {
+    if (drafts.value[key]?.status === 'creating') return
+    drafts.value[key] = { status: 'discarded' }
+  }
+
   async function analyze(files: File[]): Promise<boolean> {
     if (!files.length || isBusy.value) return false
     const target = conversation()
@@ -221,6 +265,7 @@ export const useAiStore = defineStore('ai', () => {
     isAsking,
     isAnalyzing,
     isBusy,
+    drafts,
     error,
     setOwner,
     newConversation,
@@ -228,6 +273,8 @@ export const useAiStore = defineStore('ai', () => {
     ask,
     retry,
     confirmDeletion,
+    confirmDraft,
+    discardDraft,
     analyze,
     clear,
   }

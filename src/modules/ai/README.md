@@ -51,3 +51,9 @@ contain work in progress; format or fix only files in this integration's scope.
 Each ask sends `context.organization_id` from the currently selected organization
 (membership is validated by the backend). When the answer has `choices`, the last
 assistant message shows them as buttons; picking one sends an ordinary message.
+
+Task creation goes through a **draft card**: the assistant's `task_draft` receipt renders
+`AssistantTaskDraft` (title, sector, priority, date/time, people selectors). Nothing is
+saved until "Criar tarefa", which calls `POST /ai/tasks/` directly (no model) with the
+draft's `request_id`, so a retry or double click never duplicates the task. Changing the
+sector reloads assignable people through `GET /ai/tasks/options/`.

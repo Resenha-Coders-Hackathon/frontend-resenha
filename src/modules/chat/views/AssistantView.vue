@@ -7,7 +7,9 @@ import { useAuthStore } from '@/modules/auth'
 import { useOrganizationsStore } from '@/modules/organizations'
 import {
   aiActionDeleted,
+  aiActionDraft,
   aiActionLabel,
+  aiActionNotes,
   aiActionTasks,
   aiActionTone,
   aiErrorDetails,
@@ -17,6 +19,7 @@ import {
 import type { AiTask } from '@/modules/ai'
 import {
   AssistantTaskCard,
+  AssistantTaskDraft,
   ChatAvatar,
   ChatComposer,
   ChatPanelLayout,
@@ -288,8 +291,16 @@ async function analyze() {
                   :key="`${action.action}-${index}`"
                   class="flex max-w-[640px] flex-col gap-[8px]"
                 >
+                  <AssistantTaskDraft
+                    v-if="aiActionDraft(action)"
+                    :draft="aiActionDraft(action)!"
+                    :state="ai.drafts[`${entry.id}:${index}`]"
+                    :disabled="ai.isBusy || !!ai.active?.expired"
+                    @confirm="(payload) => ai.confirmDraft(`${entry.id}:${index}`, payload)"
+                    @discard="ai.discardDraft(`${entry.id}:${index}`)"
+                  />
                   <p
-                    v-if="aiActionTone(action) === 'error'"
+                    v-else-if="aiActionTone(action) === 'error'"
                     role="alert"
                     class="text-[12px] text-(--destructive)"
                   >
@@ -321,6 +332,13 @@ async function analyze() {
                       :disabled="ai.isBusy || !!ai.active?.pending || !!ai.active?.expired"
                       @command="taskCommand"
                     />
+                    <p
+                      v-for="note in aiActionNotes(action)"
+                      :key="note"
+                      class="text-[12px] leading-[18px] text-(--text-muted)"
+                    >
+                      ℹ {{ note }}
+                    </p>
                   </template>
                 </div>
 
