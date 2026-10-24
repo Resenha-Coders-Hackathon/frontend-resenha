@@ -6,6 +6,7 @@ import { useAuthStore } from '@/modules/auth'
 import { useSectorsStore } from '@/modules/module'
 import { useOrganizationsStore } from '@/modules/organizations'
 import { useNotificationsStore } from '@/modules/notifications'
+import { useTheme } from '@/app/composables/useTheme'
 
 interface MenuItem {
   link: string
@@ -23,6 +24,7 @@ const auth = useAuthStore()
 const organizations = useOrganizationsStore()
 const sectors = useSectorsStore()
 const notifications = useNotificationsStore()
+const { isDark } = useTheme()
 const isOpen = ref<boolean>(true)
 
 const current = computed(() => organizations.current)
@@ -126,7 +128,7 @@ async function signOut() {
     <nav class="py-4 flex flex-col justify-between min-h-full gap-6">
       <div class="grid gap-2">
         <RouterLink to="/" class="text-2xl font-bold mb-3">
-          <img src="/wordmark.svg" alt="" class="mx-auto" />
+          <img :src="[isDark ? '/wordmark-inverse.svg' : '/wordmark.svg']" alt="" class="mx-auto" />
         </RouterLink>
 
         <!-- Seletor de organização -->
