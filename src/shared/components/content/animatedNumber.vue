@@ -15,7 +15,7 @@ function parseNumber(value: string | number): ParsedNumber | null {
   const match = /^(.*?)(-?[\d.,]+)(.*)$/.exec(text)
   if (!match) return null
 
-  const raw = match[2]
+  const raw = match[2] ?? ''
   const number =
     typeof value === 'number' ? value : Number(raw.replaceAll('.', '').replace(',', '.'))
   if (!Number.isFinite(number)) return null
@@ -25,8 +25,8 @@ function parseNumber(value: string | number): ParsedNumber | null {
 
   return {
     value: number,
-    prefix: match[1],
-    suffix: match[3],
+    prefix: match[1] ?? '',
+    suffix: match[3] ?? '',
     fractionDigits: Math.min(fractionDigits, 6),
   }
 }
