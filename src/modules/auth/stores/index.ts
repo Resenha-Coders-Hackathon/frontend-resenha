@@ -50,7 +50,14 @@ export const useAuthFlowStore = defineStore('authFlow', () => {
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const sessions = ref<UserSession[]>([])
+  const isSigningOut = ref(false)
+  const signOutStartedAt = ref(0)
   const isAuthenticated = computed(() => user.value !== null)
+
+  function finishSignOut(): void {
+    isSigningOut.value = false
+    signOutStartedAt.value = 0
+  }
 
   function clearSession(): void {
     user.value = null
@@ -79,13 +86,23 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function signOut(): Promise<void> {
-    await useNotificationsStore().disablePush()
+    if (isSigningOut.value) return
+
+    isSigningOut.value = true
+    signOutStartedAt.value = Date.now()
+
     try {
-      await logout()
+      await useNotificationsStore().disablePush()
+      try {
+        await logout()
+      } catch (error) {
+        if (!isAxiosError(error) || error.response?.status !== 401) throw error
+      }
+      clearSession()
     } catch (error) {
-      if (!isAxiosError(error) || error.response?.status !== 401) throw error
+      finishSignOut()
+      throw error
     }
-    clearSession()
   }
 
   async function updateProfile(payload: UpdateUserRequest): Promise<User> {
@@ -121,6 +138,9 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     user,
     sessions,
+    isSigningOut,
+    signOutStartedAt,
+    finishSignOut,
     isAuthenticated,
     clearSession,
     loadUser,
