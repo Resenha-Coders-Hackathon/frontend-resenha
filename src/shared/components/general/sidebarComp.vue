@@ -1,14 +1,22 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRoute } from 'vue-router'
-import type { IMenuItems } from '@/shared/types'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/modules/auth'
 
+interface MenuItem {
+  link: string
+  label: string
+  icon: string
+  // outras rotas que pertencem a esta seção (para marcar o item como ativo)
+  also?: string[]
+}
+
 const route = useRoute()
-const authStore = useAuthStore()
+const router = useRouter()
+const auth = useAuthStore()
 const isOpen = ref<boolean>(true)
 
-const menuItems: IMenuItems[] = [
+const groups: { title: string; items: MenuItem[] }[] = [
   {
     title: 'Trabalho',
     items: [
@@ -42,18 +50,11 @@ const menuItems: IMenuItems[] = [
       { link: '/configuracoes', icon: 'settings', label: 'Configurações' },
     ],
   },
-  {
-    link: '/mapbox',
-    label: 'Mapbox',
-  },
-  {
-    link: '/notificacoes',
-    label: 'Notificações',
-  },
-  {
-    link: '/pagamento',
-    label: 'Pagamento',
-  },
+]
+
+const authItems: MenuItem[] = [
+  { link: '/entrar', icon: 'login', label: 'Entrar' },
+  { link: '/registrar', icon: 'person_add', label: 'Criar conta' },
 ]
 
 const startsWith = (path: string, base: string) => path === base || path.startsWith(`${base}/`)
@@ -118,12 +119,28 @@ async function signOut() {
         </template>
       </div>
 
-      <div class="grid gap-2">
-        <div></div>
-        <div>
-          <h4 class="font-semibold">{{ authStore.user?.name }}</h4>
-          <p class="text-(--text-muted) text-sm">Admin - Produto</p>
-        </div>
+      <div class="grid gap-1">
+        <template v-if="auth.user">
+          <p class="truncate px-5 pb-1 text-xs text-(--text-muted)" :title="auth.user.email">
+            {{ firstName }} · {{ auth.user.email }}
+          </p>
+          <button
+            type="button"
+            class="text-sm rounded-xl flex items-center gap-2 px-5 py-1.5 cursor-pointer font-medium transition-all duration-300 hover:bg-(--background-inverse)/30 dark:hover:bg-white/5"
+            @click="signOut"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">logout</span>
+            <span>Sair</span>
+          </button>
+        </template>
+        <ul v-else class="grid gap-1">
+          <li v-for="item in authItems" :key="item.link">
+            <RouterLink :to="item.link" :class="itemClass(item)">
+              <span class="material-symbols-outlined" aria-hidden="true">{{ item.icon }}</span>
+              <span>{{ item.label }}</span>
+            </RouterLink>
+          </li>
+        </ul>
       </div>
     </nav>
   </aside>
