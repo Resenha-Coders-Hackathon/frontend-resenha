@@ -119,7 +119,8 @@ const goNewSector = () =>
     name: 'OrganizationOnboardingSectors',
     params: { organizationId: organization.value.id },
   })
-const editSector = (id: string) => router.push({ name: 'SectorEdit', params: { id } })
+const openSector = (sectorId: string) =>
+  router.push({ name: 'SectorBoard', params: { sectorId } })
 </script>
 
 <template>
@@ -216,8 +217,8 @@ const editSector = (id: string) => router.push({ name: 'SectorEdit', params: { i
           :key="sector.id"
           type="button"
           class="flex cursor-pointer flex-col gap-[12px] rounded-[16px] border border-(--border-default) bg-(--surface) p-[14px] text-left transition-colors hover:border-(--text-muted) dark:border-(--border-inverse) dark:bg-(--surface-inverse)"
-          :aria-label="`Editar setor ${sector.name}`"
-          @click="editSector(sector.id)"
+          :aria-label="`Abrir o Kanban de ${sector.name}`"
+          @click="openSector(sector.id)"
         >
           <span class="flex items-center gap-[10px]">
             <span

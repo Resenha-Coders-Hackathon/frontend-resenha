@@ -8,6 +8,7 @@ import {
   deleteSector,
   deleteStatus,
   deleteTask,
+  getTask,
   getSectorProgress,
   listSectors,
   listStatuses,
@@ -128,6 +129,11 @@ export const useKanbanStore = defineStore('kanban', () => {
     return replace(await updateTask(id, payload))
   }
 
+  // traz de novo uma tarefa (contadores de checklist/comentários mudam fora do quadro)
+  async function reload(id: string): Promise<Task> {
+    return replace(await getTask(id))
+  }
+
   async function removeTask(id: string): Promise<void> {
     await deleteTask(id)
     tasks.value = tasks.value.filter((t) => t.id !== id)
@@ -189,6 +195,7 @@ export const useKanbanStore = defineStore('kanban', () => {
     addTask,
     editTask,
     removeTask,
+    reload,
     move,
   }
 })

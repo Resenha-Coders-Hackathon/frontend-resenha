@@ -1,6 +1,7 @@
 import { onUnmounted, watch } from 'vue'
 import { toast } from 'vue-sonner'
 import { useNotificationsStore } from '../stores'
+import { desktopAlertsOn, showDesktopAlert, userAway } from './desktopAlerts'
 
 export function useNotificationSession(userId: () => string | undefined): void {
   const notifications = useNotificationsStore()
@@ -19,6 +20,15 @@ export function useNotificationSession(userId: () => string | undefined): void {
       let delay = 1000
 
       function showToast(title: string, body: string, notificationId?: string): void {
+        if (userAway() && desktopAlertsOn()) {
+          showDesktopAlert({
+            title,
+            body,
+            tag: `notification-${notificationId ?? title}`,
+            onClick: () => window.location.assign('/notificacoes'),
+          })
+          return
+        }
         toast(title, {
           id: notificationId ? `notification-${notificationId}` : undefined,
           description: body,

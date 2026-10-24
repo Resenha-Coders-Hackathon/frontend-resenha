@@ -18,6 +18,10 @@ const task = (id: string, status_id = 'todo', position = 0): Task => ({
   assignee_name: null,
   position,
   is_overdue: true,
+  created_by_name: null,
+  checklist_total: 0,
+  checklist_done: 0,
+  comment_count: 0,
   created_at: '',
 })
 const status = (id: string, category: Status['category'] = 'todo'): Status => ({
@@ -49,6 +53,7 @@ const hooks = registerHooks({
         'deleteSector',
         'deleteStatus',
         'deleteTask',
+        'getTask',
         'getSectorProgress',
         'listSectors',
         'listStatuses',

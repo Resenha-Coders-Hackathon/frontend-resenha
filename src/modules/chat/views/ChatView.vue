@@ -31,9 +31,8 @@ const scroller = useTemplateRef<HTMLElement>('scroller')
 
 const me = computed(() => auth.user?.id)
 const organization = computed(() => organizations.current)
-const { sendTyping } = useChatSocket((event) => {
-  if (me.value) void chat.handleEvent(event, me.value)
-})
+// os eventos são tratados pelo layout (useChatAlerts); aqui só enviamos "digitando"
+const { sendTyping } = useChatSocket()
 
 const EMPTY_CHANNEL: ChatChannel = {
   id: '',

@@ -101,7 +101,7 @@ async function save() {
       await board.editStatus(inProgress.value.id, { wip_limit: wip })
     }
     toast.success('Setor salvo.')
-    await router.push({ name: 'Team' })
+    await router.push({ name: 'SectorBoard', params: { sectorId: props.id } })
   } catch (error) {
     fail(error, 'Não foi possível salvar o setor.')
   } finally {
@@ -188,7 +188,7 @@ const field =
             label="Cancelar"
             :full-width="false"
             :class="TOOLBAR_BUTTON"
-            @click="router.push({ name: 'Team' })"
+            @click="router.push({ name: 'SectorBoard', params: { sectorId: props.id } })"
           />
           <BaseButton
             label="Salvar setor"

@@ -3,11 +3,13 @@ import { computed, provide } from 'vue'
 import { SidebarComp, FooterComp } from '@/shared/components'
 import MobileNav from './components/MobileNav.vue'
 import { ShellKey } from '@/shared/composables/shell'
+import { useChatAlerts } from '@/modules/chat'
 import { useNotificationsStore } from '@/modules/notifications'
 import { useOrganizationsStore } from '@/modules/organizations'
 
 const notifications = useNotificationsStore()
 const organizations = useOrganizationsStore()
+useChatAlerts()
 
 provide(ShellKey, {
   organization: computed(() => organizations.current?.name ?? ''),

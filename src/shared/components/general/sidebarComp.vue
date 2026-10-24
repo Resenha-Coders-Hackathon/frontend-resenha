@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/modules/auth'
 import { useSectorsStore } from '@/modules/module'
 import { useOrganizationsStore } from '@/modules/organizations'
+import { useChatStore } from '@/modules/chat'
 import { useNotificationsStore } from '@/modules/notifications'
 import { useTheme } from '@/app/composables/useTheme'
 
@@ -25,6 +26,7 @@ const organizations = useOrganizationsStore()
 const sectors = useSectorsStore()
 const notifications = useNotificationsStore()
 const { isDark } = useTheme()
+const chat = useChatStore()
 const isOpen = ref<boolean>(true)
 
 const current = computed(() => organizations.current)
@@ -42,7 +44,7 @@ const organizationItems = computed<MenuItem[]>(() => [
     icon: 'groups',
     label: 'Equipe',
     // a gestão de membros é uma tela à parte, aberta pela própria Equipe
-    also: ['/setores', ...(current.value ? [`/organizacoes/${current.value.id}/membros`] : [])],
+    also: [...(current.value ? [`/organizacoes/${current.value.id}/membros`] : [])],
   },
   { link: '/arquivos', icon: 'folder', label: 'Arquivos' },
   { link: '/relatorios', icon: 'bar_chart', label: 'Relatórios' },
@@ -222,7 +224,13 @@ async function signOut() {
                 :aria-current="isActive(item) ? 'page' : undefined"
               >
                 <span class="material-symbols-outlined" aria-hidden="true">{{ item.icon }}</span>
-                <span>{{ item.label }}</span>
+                <span class="flex-1">{{ item.label }}</span>
+                <span
+                  v-if="item.link === '/chat' && chat.unreadTotal"
+                  class="rounded-full bg-(--bg-orange) px-2 text-xs font-semibold text-white"
+                  :aria-label="`${chat.unreadTotal} mensagens não lidas`"
+                  >{{ chat.unreadTotal > 99 ? '99+' : chat.unreadTotal }}</span
+                >
               </RouterLink>
             </li>
           </ul>
@@ -236,8 +244,8 @@ async function signOut() {
             <ul class="grid gap-1">
               <li v-for="sector in visibleSectors" :key="sector.id">
                 <RouterLink
-                  :to="`/setores/${sector.id}/editar`"
-                  :class="itemClass(route.path === `/setores/${sector.id}/editar`)"
+                  :to="`/setores/${sector.id}`"
+                  :class="itemClass(startsWith(route.path, `/setores/${sector.id}`))"
                 >
                   <span
                     class="size-2.5 shrink-0 rounded-full bg-(--text-muted)"
