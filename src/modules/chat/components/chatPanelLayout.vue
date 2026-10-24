@@ -18,7 +18,7 @@ withDefaults(defineProps<{ tinted?: boolean }>(), { tinted: false })
     <section class="flex min-w-0 flex-1 flex-col">
       <header
         :class="[
-          'relative flex items-center gap-[12px] border-b border-(--border-default) px-[20px] py-[14px] after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-(--bg-orange)/35 dark:border-(--border-inverse)',
+          'relative flex flex-wrap items-center gap-[10px] border-b border-(--border-default) px-[12px] py-[12px] after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-(--bg-orange)/35 sm:gap-[12px] sm:px-[20px] sm:py-[14px] md:flex-nowrap dark:border-(--border-inverse)',
           tinted
             ? 'bg-linear-to-r from-(--bg-orange)/[0.06] to-transparent after:bg-(--bg-orange)/35'
             : 'bg-linear-to-r from-(--bg-orange)/[0.06] to-transparent',
@@ -27,11 +27,11 @@ withDefaults(defineProps<{ tinted?: boolean }>(), { tinted: false })
         <slot name="header" />
       </header>
 
-      <div class="min-h-0 flex-1 overflow-y-auto px-[20px] py-[18px]">
+      <div class="min-h-0 flex-1 overflow-y-auto px-[12px] py-[14px] sm:px-[20px] sm:py-[18px]">
         <slot />
       </div>
 
-      <footer class="px-[20px] pb-[20px]">
+      <footer class="px-[12px] pb-[12px] sm:px-[20px] sm:pb-[20px]">
         <slot name="footer" />
       </footer>
     </section>

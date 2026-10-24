@@ -185,7 +185,7 @@ const openSector = (sectorId: string) => router.push({ name: 'SectorBoard', para
       </div>
 
       <template v-if="tab === 'members'">
-        <div class="grid grid-cols-2 gap-[12px] xl:grid-cols-4">
+        <div class="grid grid-cols-1 gap-[12px] sm:grid-cols-2 xl:grid-cols-4">
           <CardComp
             title="Membros"
             :data="organizations.members.length"
@@ -212,7 +212,10 @@ const openSector = (sectorId: string) => router.push({ name: 'SectorBoard', para
         </div>
       </template>
 
-      <div v-if="tab !== 'invites'" class="grid grid-cols-2 gap-[12px] xl:grid-cols-4">
+      <div
+        v-if="tab !== 'invites'"
+        class="grid grid-cols-1 gap-[12px] sm:grid-cols-2 xl:grid-cols-4"
+      >
         <button
           v-for="sector in sectors.sectors"
           :key="sector.id"

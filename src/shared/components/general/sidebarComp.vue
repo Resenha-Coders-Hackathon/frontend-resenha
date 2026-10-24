@@ -41,7 +41,7 @@ onClickOutside(switcher, () => (switcherOpen.value = false))
 
 // Tudo daqui para baixo é da organização selecionada (como no GitHub).
 const organizationItems = computed<MenuItem[]>(() => [
-  { link: '/home-usuario', icon: 'home', label: 'Visão geral' },
+  { link: '/', icon: 'home', label: 'Visão geral' },
   { link: '/calendario', icon: 'calendar_month', label: 'Calendário' },
   { link: '/chat', icon: 'chat', label: 'Mensagens' },
   {
@@ -121,7 +121,7 @@ function chooseOrganization(id: string) {
   if (id === current.value?.id) return
   organizations.select(id)
   // trocar de organização leva ao dashboard dela
-  void router.push('/home-usuario')
+  void router.push('/')
 }
 
 const firstName = computed(() => auth.user?.name.split(' ')[0] ?? '')
@@ -271,7 +271,7 @@ async function signOut() {
             <li class="mt-1 border-t border-(--border-default) pt-1 dark:border-(--border-inverse)">
               <RouterLink
                 v-if="invitations.mine.length"
-                to="/home-usuario"
+                to="/"
                 class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium transition-colors hover:bg-(--background-inverse)/10 dark:hover:bg-white/5"
                 @click="switcherOpen = false"
               >

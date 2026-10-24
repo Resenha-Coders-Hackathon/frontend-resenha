@@ -17,6 +17,7 @@ async function requireAssistantAccess() {
 export const chatRoutes: RouteRecordRaw[] = [
   {
     path: '/mensagens',
+    meta: { transitionGroup: 'default' },
     component: () => import('@/app/layouts/DefaultLayout.vue'),
     children: [
       {
@@ -28,7 +29,7 @@ export const chatRoutes: RouteRecordRaw[] = [
   },
   {
     path: '/assistente',
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, transitionGroup: 'default' },
     beforeEnter: requireAssistantAccess,
     component: () => import('@/app/layouts/DefaultLayout.vue'),
     children: [

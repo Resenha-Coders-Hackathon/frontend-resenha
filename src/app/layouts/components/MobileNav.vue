@@ -15,7 +15,7 @@ interface Item {
 
 // As quatro telas do dia a dia ficam na barra; o resto abre em "Mais".
 const tabs: Item[] = [
-  { to: '/home-usuario', label: 'Início', icon: 'home' },
+  { to: '/', label: 'Início', icon: 'home' },
   { to: '/calendario', label: 'Calendário', icon: 'calendar_month' },
   { to: '/chat', label: 'Mensagens', icon: 'chat' },
   { to: '/equipe', label: 'Equipe', icon: 'groups', also: ['/setores', '/organizacoes'] },
@@ -55,7 +55,7 @@ const moreActive = () => more.some(isActive)
 
 function chooseOrganization(id: string) {
   organizations.select(id)
-  void router.push('/home-usuario')
+  void router.push('/')
 }
 
 async function signOut() {

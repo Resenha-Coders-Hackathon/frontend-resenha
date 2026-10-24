@@ -23,13 +23,14 @@ const WEEKDAYS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
 const DOT: Record<CalendarState, string> = {
   done: 'bg-[#15924a]',
   late: 'bg-[#dc2626]',
-  in_progress: 'bg-[#d97706]',
+  in_progress: 'bg-(--bg-orange)',
   todo: 'bg-(--text-muted)',
 }
 const CHIP: Record<CalendarState, string> = {
   done: 'bg-[#e4f4ea] text-[#127a3e] dark:bg-[#127a3e]/25 dark:text-[#7ed9a2]',
   late: 'bg-[#fde8e8] text-[#c42b2b] dark:bg-[#dc2626]/20 dark:text-[#ff8a8a]',
-  in_progress: 'bg-[#fdf1dc] text-[#a35a00] dark:bg-[#d97706]/20 dark:text-[#f5b14c]',
+  in_progress:
+    'bg-(--bg-orange)/10 text-(--bg-orange) dark:bg-(--bg-orange)/20 dark:text-(--bg-orange)',
   todo: 'bg-(--bg-muted) text-(--text-secondary) dark:bg-white/10 dark:text-(--text-inverse-muted)',
 }
 

@@ -3,7 +3,7 @@ import { useRoute } from 'vue-router'
 import { safeRedirect } from '../utils'
 
 // Sem um redirect pedido (ex.: convite), quem entra cai no dashboard do usuário.
-export const USER_HOME = '/home-usuario'
+export const USER_HOME = '/'
 
 export function useAuthNavigation() {
   const route = useRoute()

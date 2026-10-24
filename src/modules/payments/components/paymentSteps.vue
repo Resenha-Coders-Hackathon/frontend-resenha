@@ -12,6 +12,7 @@ const steps = ['Dados', 'Pagamento', 'Confirmação']
 
 const isDone = (index: number) => index + 1 < props.current || props.completed
 const isActive = (index: number) => index + 1 === props.current && !props.completed
+const isCurrentLabel = (index: number) => isActive(index) || (props.completed && index === 2)
 
 const circleClasses = (index: number) => {
   if (isDone(index) || isActive(index)) {
@@ -32,7 +33,7 @@ const lineClasses = (index: number) =>
       :class="['flex items-center', index < steps.length - 1 ? 'flex-1' : '']"
       :aria-current="isActive(index) ? 'step' : undefined"
     >
-      <span class="flex items-center gap-[8px]">
+      <span class="flex min-w-0 items-center gap-[6px] sm:gap-[8px]">
         <span
           :class="[
             'flex size-[26px] shrink-0 items-center justify-center rounded-full text-[12px] leading-none font-semibold transition-all duration-300',
@@ -45,8 +46,13 @@ const lineClasses = (index: number) =>
 
         <span
           :class="[
-            'whitespace-nowrap text-[13px] leading-normal font-medium',
-            isActive(index) ? 'text-(--bg-orange)' : isDone(index) ? '' : 'text-(--text-muted)',
+            'whitespace-nowrap text-[12px] leading-normal font-medium sm:text-[13px]',
+            isCurrentLabel(index)
+              ? 'text-(--bg-orange)'
+              : isDone(index)
+                ? ''
+                : 'text-(--text-muted)',
+            !isCurrentLabel(index) ? 'max-sm:sr-only' : '',
           ]"
         >
           {{ step }}
@@ -55,7 +61,10 @@ const lineClasses = (index: number) =>
 
       <span
         v-if="index < steps.length - 1"
-        :class="['mx-[12px] h-px flex-1 transition-all duration-300', lineClasses(index)]"
+        :class="[
+          'mx-[6px] h-px min-w-[8px] flex-1 transition-all duration-300 sm:mx-[12px]',
+          lineClasses(index),
+        ]"
       />
     </li>
   </ol>

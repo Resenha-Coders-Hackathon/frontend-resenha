@@ -3,6 +3,7 @@ import type { RouteRecordRaw } from 'vue-router'
 export const geolocationRoutes: RouteRecordRaw[] = [
   {
     path: '/localizacao',
+    meta: { transitionGroup: 'default' },
     component: () => import('@/app/layouts/DefaultLayout.vue'),
     children: [
       {

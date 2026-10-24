@@ -26,6 +26,10 @@ finishGoogleConnect()
 </script>
 
 <template>
-  <RouterView />
+  <RouterView v-slot="{ Component, route }">
+    <Transition name="page" mode="out-in" appear>
+      <component :is="Component" :key="route.meta.transitionGroup ?? route.path" />
+    </Transition>
+  </RouterView>
   <Toaster :theme="isDark ? 'dark' : 'light'" />
 </template>

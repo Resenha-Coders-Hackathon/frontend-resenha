@@ -61,7 +61,7 @@ const progress = computed(() =>
     >
       <span class="h-1 flex-1 overflow-hidden rounded-full bg-(--bg-muted) dark:bg-white/10">
         <span
-          class="block h-full bg-(--text-primary) dark:bg-(--text-inverse)"
+          class="block h-full bg-(--bg-orange) transition-[width] duration-700 ease-out"
           :style="{ width: `${progress}%` }"
         />
       </span>

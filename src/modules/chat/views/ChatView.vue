@@ -91,6 +91,12 @@ function select(channel: ChatChannel) {
   void chat.select(channel.id)
 }
 
+function selectFromPicker(event: Event) {
+  const id = (event.currentTarget as HTMLSelectElement).value
+  const channel = chat.channels.find((item) => item.id === id)
+  if (channel) select(channel)
+}
+
 // @menção: sugere membros da organização enquanto você digita "@nome"
 const mentioned = ref(new Map<string, string>()) // id -> nome
 const mentionQuery = computed(() => /(?:^|\s)@([^\s@]*)$/.exec(draft.value)?.[1] ?? null)
@@ -278,6 +284,24 @@ watch(() => [chat.activeId, items.value.length], scrollToEnd, { immediate: true 
               >more_horiz</span
             >
           </button>
+          <select
+            :value="activeId"
+            aria-label="Selecionar canal ou mensagem direta"
+            class="h-[36px] w-full basis-full min-w-0 rounded-[9px] border border-(--border-default) bg-(--surface) px-[10px] text-[13px] text-(--text-primary) outline-none focus:border-(--bg-orange) md:hidden dark:border-(--border-inverse) dark:bg-(--surface-inverse) dark:text-(--text-inverse)"
+            @change="selectFromPicker"
+          >
+            <option value="" disabled>Selecionar conversa</option>
+            <optgroup v-if="sectors.length" label="Canais por setor">
+              <option v-for="channel in sectors" :key="channel.id" :value="channel.id">
+                # {{ channel.name }}
+              </option>
+            </optgroup>
+            <optgroup v-if="directs.length" label="Mensagens diretas">
+              <option v-for="channel in directs" :key="channel.id" :value="channel.id">
+                {{ channel.name }}
+              </option>
+            </optgroup>
+          </select>
         </template>
 
         <div ref="scroller" aria-live="polite">
@@ -360,15 +384,16 @@ watch(() => [chat.activeId, items.value.length], scrollToEnd, { immediate: true 
               />
               <button
                 type="button"
-                class="ml-[4px] flex h-[30px] cursor-pointer items-center gap-[6px] rounded-[8px] border border-(--border-default) px-[10px] text-[12.5px] font-medium transition-all duration-200 hover:border-(--bg-orange)/35 hover:bg-(--bg-orange)/5 hover:text-(--bg-orange) dark:border-(--border-inverse) dark:hover:bg-(--bg-orange)/10"
+                class="grid size-[30px] cursor-pointer place-items-center rounded-[8px] text-(--text-muted) transition-all duration-200 hover:bg-(--bg-orange)/10 hover:text-(--bg-orange)"
+                aria-label="Criar tarefas com IA"
+                title="Criar tarefas com IA"
                 @click="router.hasRoute('Assistant') && router.push({ name: 'Assistant' })"
               >
                 <span
-                  class="material-symbols-outlined text-[16px]! text-(--chat-ai)"
+                  class="material-symbols-outlined text-[18px]! text-(--chat-ai)"
                   aria-hidden="true"
                   >auto_awesome</span
                 >
-                Criar tarefas com IA
               </button>
             </template>
           </ChatComposer>

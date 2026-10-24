@@ -136,6 +136,11 @@ function openHistory(id: string) {
   clearFiles()
 }
 
+function selectHistoryFromPicker(event: Event) {
+  const id = (event.currentTarget as HTMLSelectElement).value
+  if (id) openHistory(id)
+}
+
 async function send() {
   if (await ai.ask(draft.value, organizations.current?.id)) draft.value = ''
 }
@@ -222,6 +227,18 @@ async function analyze() {
             class="mt-0! h-[34px]! gap-[6px]! rounded-[10px]! px-[12px]! py-0! text-[13px]! [&_.material-symbols-outlined]:text-[17px]!"
             @click="newConversation"
           />
+          <select
+            :value="ai.activeId ?? ''"
+            aria-label="Selecionar conversa do assistente"
+            :disabled="ai.isBusy || !ai.conversations.length"
+            class="h-[36px] w-full basis-full min-w-0 rounded-[9px] border border-(--border-default) bg-(--surface) px-[10px] text-[13px] text-(--text-primary) outline-none focus:border-(--bg-orange) disabled:opacity-60 md:hidden dark:border-(--border-inverse) dark:bg-(--surface-inverse) dark:text-(--text-inverse)"
+            @change="selectHistoryFromPicker"
+          >
+            <option value="" disabled>Selecionar conversa</option>
+            <option v-for="item in ai.conversations" :key="item.id" :value="item.id">
+              {{ item.title }}
+            </option>
+          </select>
         </template>
 
         <div

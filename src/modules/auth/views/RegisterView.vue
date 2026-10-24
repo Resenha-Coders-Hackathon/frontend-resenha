@@ -74,7 +74,7 @@ async function handleGoogleCredential(credential: string) {
 </script>
 
 <template>
-  <section class="grid lg:grid-cols-[minmax(0,1fr)_64vw]">
+  <section class="grid min-w-0 lg:grid-cols-[36vw_minmax(0,1fr)]">
     <AuthAside side="left" />
     <AuthSplitLayout compact>
       <h1 class="text-[38px]! leading-11.5! tracking-[-0.03em]!">

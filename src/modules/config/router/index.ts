@@ -3,7 +3,7 @@ import type { RouteRecordRaw } from 'vue-router'
 export const configRoutes: RouteRecordRaw[] = [
   {
     path: '/configuracoes',
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, transitionGroup: 'default' },
     component: () => import('@/app/layouts/DefaultLayout.vue'),
     children: [
       {
