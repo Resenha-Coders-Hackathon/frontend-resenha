@@ -15,6 +15,16 @@ export {
   addSectorTeam,
   updateSectorTeam,
   removeSectorTeam,
+  listStatuses,
+  updateTask,
+  moveTask,
+  listChecklist,
+  createChecklistItem,
+  updateChecklistItem,
+  deleteChecklistItem,
+  listComments,
+  createComment,
+  deleteComment,
 } from './services'
 export { useSectorAccessStore } from './stores/access'
 export { useLinksStore } from './stores/links'
