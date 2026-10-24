@@ -161,6 +161,74 @@
   font-size: 12px;
   overflow-wrap: anywhere;
 }
+.organization-location {
+  color: var(--onboarding-ink);
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+.organization-location legend {
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.organization-location-options label {
+  cursor: pointer;
+  min-height: 36px;
+}
+.organization-location-options label.selected {
+  color: var(--onboarding-ink);
+  outline: 1px solid var(--onboarding-border);
+}
+.organization-location-hint {
+  font-size: 12px;
+  color: var(--onboarding-muted);
+  overflow-wrap: anywhere;
+}
+.organization-location-search-area {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.organization-location-search .mapboxgl-ctrl-geocoder {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid var(--onboarding-border);
+  border-radius: 8px;
+  background: var(--onboarding-surface);
+  color: var(--onboarding-ink);
+  font: inherit;
+  font-size: 13px;
+  box-shadow: none;
+}
+.organization-location-search .mapboxgl-ctrl-geocoder input {
+  color: inherit;
+  height: 52px;
+  font-size: 16px;
+}
+.organization-location-search .mapboxgl-ctrl-geocoder input:focus {
+  outline: 2px solid var(--onboarding-ink);
+  outline-offset: 2px;
+}
+.organization-location-search .mapboxgl-ctrl-geocoder--icon-search {
+  top: 16px;
+}
+.organization-location-search .mapboxgl-ctrl-geocoder--pin-right > * {
+  top: 16px;
+}
+.organization-location-search .mapboxgl-ctrl-geocoder .suggestions,
+.organization-location-search .mapboxgl-ctrl-geocoder button {
+  background: var(--onboarding-surface);
+  color: var(--onboarding-ink);
+}
+.organization-location-search .mapboxgl-ctrl-geocoder .suggestions > .active > a,
+.organization-location-search .mapboxgl-ctrl-geocoder .suggestions > li > a:hover {
+  background: var(--onboarding-subtle);
+}
 .onboarding-optional {
   font-size: 12px;
   color: var(--onboarding-muted);

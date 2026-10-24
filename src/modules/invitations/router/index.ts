@@ -4,6 +4,7 @@ export const invitationRoutes: RouteRecordRaw[] = [
   {
     path: '/invitations/accept',
     name: 'InvitationAccept',
+    meta: { requiresAuth: false },
     component: () => import('../views/InvitationAcceptView.vue'),
   },
 ]
