@@ -4,6 +4,7 @@ import { toast } from 'vue-sonner'
 import { getErrorMessage } from '@/app/plugins/axios'
 import { BaseButton } from '@/shared/components'
 import { useAuthStore } from '@/modules/auth'
+import { TaskCharges } from '@/modules/payments'
 import { uploadFile } from '@/modules/uploads'
 import { fetchAllPages } from '@/shared/utils'
 import { avatar } from '@/shared/utils/people'
@@ -517,6 +518,7 @@ const field =
               :can-edit="canEdit"
               @attached="onAttached"
             />
+            <TaskCharges v-if="task" :task-id="task.id" :can-edit="canEdit" />
             <div v-if="canEdit" class="grid grid-cols-3 gap-2">
               <button
                 v-for="origin in ['drive', 'docs', 'meet'] as const"
