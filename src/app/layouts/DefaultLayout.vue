@@ -38,6 +38,6 @@ provide(ShellKey, {
       <slot><RouterView /></slot>
     </div>
   </main>
-  <FooterComp />
+  <!-- <FooterComp /> -->
   <MobileNav />
 </template>
