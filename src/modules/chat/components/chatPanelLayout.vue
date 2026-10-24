@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import '../chat.css'
 
-// "tinted" pinta o cabeçalho com o roxo suave do assistente
+// "tinted" aplica o destaque laranja do cabeçalho do assistente
 withDefaults(defineProps<{ tinted?: boolean }>(), { tinted: false })
 </script>
 
@@ -18,8 +18,10 @@ withDefaults(defineProps<{ tinted?: boolean }>(), { tinted: false })
     <section class="flex min-w-0 flex-1 flex-col">
       <header
         :class="[
-          'flex items-center gap-[12px] border-b border-(--border-default) px-[20px] py-[14px] dark:border-(--border-inverse)',
-          tinted ? 'bg-linear-to-r from-(--chat-ai-soft) to-transparent' : '',
+          'relative flex items-center gap-[12px] border-b border-(--border-default) px-[20px] py-[14px] after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-(--bg-orange)/35 dark:border-(--border-inverse)',
+          tinted
+            ? 'bg-linear-to-r from-(--bg-orange)/[0.06] to-transparent after:bg-(--bg-orange)/35'
+            : 'bg-linear-to-r from-(--bg-orange)/[0.06] to-transparent',
         ]"
       >
         <slot name="header" />

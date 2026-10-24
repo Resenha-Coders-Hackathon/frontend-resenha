@@ -79,12 +79,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 0 28px;
+  padding: 0 36px;
   color: var(--workspace-muted);
   font-size: 12px;
 }
 .workspace-content {
-  padding: 28px;
+  padding: 28px 36px;
   max-width: 1500px;
   margin: auto;
 }
@@ -392,11 +392,11 @@
 }
 @media (max-width: 900px) {
   .workspace-topbar {
-    padding: 0 16px;
+    padding: 0 20px;
     height: 58px;
   }
   .workspace-content {
-    padding: 20px 16px;
+    padding: 24px 20px;
   }
   .workspace-heading {
     align-items: flex-start;
@@ -431,6 +431,18 @@
   .invitation-accept {
     padding: 24px;
     margin: 12px auto;
+  }
+}
+
+@media (min-width: 1280px) {
+  .workspace-topbar {
+    padding-right: 44px;
+    padding-left: 44px;
+  }
+
+  .workspace-content {
+    padding-right: 44px;
+    padding-left: 44px;
   }
 }
 @media (max-width: 420px) {

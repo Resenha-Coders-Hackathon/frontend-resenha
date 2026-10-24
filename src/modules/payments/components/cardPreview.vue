@@ -20,6 +20,10 @@ const masked = computed(() => {
     class="relative flex aspect-[1.586] w-full max-w-[340px] flex-col justify-between overflow-hidden rounded-[16px] bg-linear-to-br from-[#2a2925] via-[#191917] to-[#0e0e0d] p-[18px] text-white shadow-[0_18px_40px_-20px_rgb(0_0_0/0.6)]"
     aria-hidden="true"
   >
+    <span
+      class="absolute top-0 left-[18px] h-[3px] w-10 rounded-b-full bg-(--bg-orange)"
+      aria-hidden="true"
+    ></span>
     <span class="absolute -top-[40%] -right-[25%] size-[80%] rounded-full bg-white/6"></span>
     <div class="relative flex items-center justify-between">
       <span

@@ -18,8 +18,8 @@ const METHODS: { value: PaymentMethod; label: string; icon: string; note: string
       :class="[
         'flex cursor-pointer items-center gap-[12px] rounded-[12px] border p-[12px] transition-colors has-focus-visible:outline-2 has-focus-visible:outline-offset-2',
         method === item.value
-          ? 'border-(--border-strong) bg-(--surface) dark:border-(--text-inverse-muted) dark:bg-white/5'
-          : 'border-(--border-default) hover:border-(--text-muted) dark:border-(--border-inverse)',
+          ? 'border-(--bg-orange)/55 bg-(--bg-orange)/[0.04] dark:border-(--bg-orange)/55 dark:bg-(--bg-orange)/[0.08]'
+          : 'border-(--border-default) hover:border-(--bg-orange)/35 dark:border-(--border-inverse)',
       ]"
     >
       <input
@@ -30,7 +30,12 @@ const METHODS: { value: PaymentMethod; label: string; icon: string; note: string
         class="sr-only"
       />
       <span
-        class="grid size-[36px] shrink-0 place-items-center rounded-[10px] bg-(--bg-subtle) dark:bg-black/30"
+        :class="[
+          'grid size-[36px] shrink-0 place-items-center rounded-[10px] transition-colors',
+          method === item.value
+            ? 'bg-(--bg-orange)/10 text-(--bg-orange) dark:bg-(--bg-orange)/15'
+            : 'bg-(--bg-subtle) dark:bg-black/30',
+        ]"
         aria-hidden="true"
       >
         <span class="material-symbols-outlined text-[20px]!">{{ item.icon }}</span>
@@ -43,15 +48,12 @@ const METHODS: { value: PaymentMethod; label: string; icon: string; note: string
         :class="[
           'grid size-[18px] shrink-0 place-items-center rounded-full border-2',
           method === item.value
-            ? 'border-(--text-primary) dark:border-(--text-inverse)'
+            ? 'border-(--bg-orange)'
             : 'border-(--border-default) dark:border-(--border-inverse)',
         ]"
         aria-hidden="true"
       >
-        <span
-          v-if="method === item.value"
-          class="size-[8px] rounded-full bg-(--text-primary) dark:bg-(--text-inverse)"
-        ></span>
+        <span v-if="method === item.value" class="size-[8px] rounded-full bg-(--bg-orange)"></span>
       </span>
     </label>
   </fieldset>

@@ -28,7 +28,7 @@ const style = computed(() => ({
       variant === 'self'
         ? 'bg-(--text-primary) dark:bg-(--text-inverse) dark:text-(--text-primary)'
         : '',
-      variant === 'ai' ? 'rounded-[10px]! bg-linear-to-br from-[#8b6bff] to-(--chat-ai)' : '',
+      variant === 'ai' ? 'rounded-[10px]! bg-linear-to-br from-[#ff9a55] to-(--bg-orange)' : '',
     ]"
     :style="style"
     aria-hidden="true"

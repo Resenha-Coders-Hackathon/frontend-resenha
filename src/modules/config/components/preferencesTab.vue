@@ -36,8 +36,8 @@ const WEEK_STARTS: SelectOption[] = [
             :class="[
               'flex cursor-pointer items-center gap-[10px] rounded-[10px] border px-[12px] py-[12px] text-[14px] leading-5 transition-colors has-focus-visible:outline-2 has-focus-visible:outline-offset-2',
               settings.theme === theme.value
-                ? 'border-(--border-strong) dark:border-(--text-inverse-muted)'
-                : 'border-(--border-default) hover:border-(--text-muted) dark:border-(--border-inverse)',
+                ? 'border-(--bg-orange)/60 bg-(--bg-orange)/[0.05] text-(--bg-orange) dark:border-(--bg-orange)/60 dark:bg-(--bg-orange)/10'
+                : 'border-(--border-default) hover:border-(--bg-orange)/40 dark:border-(--border-inverse)',
             ]"
           >
             <input

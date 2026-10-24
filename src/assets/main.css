@@ -16,7 +16,8 @@
 
   --bg-subtle: #f4f4f4;
   --bg-muted: #e6e6e6;
-  --bg-orange: #ff6700;
+  --accent-orange: #ff6700;
+  --bg-orange: var(--accent-orange);
 
   --text-primary: #000000;
   --text-secondary: #525252;
@@ -89,4 +90,34 @@ h2 {
   /* font-size: 36px;
   line-height: 44px;
   letter-spacing: -0.02em; */
+}
+
+/* Mantém o mesmo movimento do botão de login nos botões do site. */
+button:not(:disabled):not([aria-disabled='true']):not([class*='fixed']):not(
+    [class~='no-site-hover']
+  ) {
+  transition:
+    translate 300ms ease-out,
+    scale 300ms ease-out,
+    filter 300ms ease-out,
+    background-color 300ms ease-out,
+    border-color 300ms ease-out,
+    color 300ms ease-out,
+    box-shadow 300ms ease-out;
+}
+
+@media (hover: hover) {
+  button:not(:disabled):not([aria-disabled='true']):not([class*='fixed']):not(
+      [class~='no-site-hover']
+    ):hover {
+    translate: 0 -2px;
+    filter: brightness(1.05);
+  }
+}
+
+button:not(:disabled):not([aria-disabled='true']):not([class*='fixed']):not(
+    [class~='no-site-hover']
+  ):active {
+  translate: 0 0;
+  scale: 0.98;
 }

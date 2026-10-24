@@ -82,7 +82,9 @@ async function sendTest(): Promise<void> {
   >
     <TopbarComp :crumbs="['Notificações']" />
 
-    <section class="flex flex-1 flex-col gap-[16px] px-[16px] pt-[24px] pb-[32px] sm:px-[28px]">
+    <section
+      class="flex flex-1 flex-col gap-[16px] px-[20px] pt-[24px] pb-[32px] sm:px-[36px] xl:px-[44px]"
+    >
       <header class="flex flex-wrap items-end justify-between gap-[12px]">
         <div>
           <h1 class="text-[26px]! leading-tight! font-semibold! tracking-[-0.02em]!">

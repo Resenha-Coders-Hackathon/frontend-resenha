@@ -18,7 +18,7 @@ withDefaults(
 const model = defineModel<string>({ default: '' })
 
 const control =
-  'w-full rounded-[10px] border border-(--border-default) bg-(--surface) px-[12px] text-[14px] leading-5 text-(--text-primary) outline-none transition-[border-color,box-shadow] placeholder:text-(--text-muted) focus:border-(--border-strong) focus:shadow-[0_0_0_3px_rgb(0_0_0/0.06)] disabled:opacity-60 dark:border-(--border-inverse) dark:bg-black/30 dark:text-(--text-inverse) dark:focus:border-(--text-inverse-muted)'
+  'w-full rounded-[10px] border border-(--border-default) bg-(--surface) px-[12px] text-[14px] leading-5 text-(--text-primary) outline-none transition-[border-color,box-shadow] placeholder:text-(--text-muted) focus:border-(--bg-orange) focus:shadow-[0_0_0_3px_rgb(255_103_0/0.12)] disabled:opacity-60 dark:border-(--border-inverse) dark:bg-black/30 dark:text-(--text-inverse) dark:focus:border-(--bg-orange)'
 </script>
 
 <template>
@@ -33,7 +33,7 @@ const control =
       :class="[control, 'h-[96px] resize-none py-[12px]']"
     ></textarea>
 
-    <div v-else-if="as === 'select'" class="relative">
+    <div v-else-if="as === 'select'" class="group relative">
       <select
         :id="id"
         v-model="model"
@@ -45,7 +45,7 @@ const control =
         </option>
       </select>
       <span
-        class="material-symbols-outlined pointer-events-none absolute top-1/2 right-[10px] -translate-y-1/2 text-[18px]! text-(--text-muted)"
+        class="material-symbols-outlined pointer-events-none absolute top-1/2 right-[10px] -translate-y-1/2 text-[18px]! text-(--text-muted) transition-colors group-focus-within:text-(--bg-orange)"
         aria-hidden="true"
         >unfold_more</span
       >

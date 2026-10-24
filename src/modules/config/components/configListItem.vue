@@ -19,12 +19,10 @@ defineEmits<{ action: [] }>()
     class="flex items-center gap-[12px] border-b border-(--border-default) py-[10px] last:border-b-0 dark:border-(--border-inverse)"
   >
     <span
-      class="grid size-[32px] shrink-0 place-items-center rounded-[9px] bg-(--bg-muted) dark:bg-black/30"
+      class="grid size-[32px] shrink-0 place-items-center rounded-[9px] bg-(--bg-orange)/10 text-(--bg-orange) dark:bg-(--bg-orange)/15"
       aria-hidden="true"
     >
-      <span
-        class="material-symbols-outlined text-[16px]! text-(--text-secondary) dark:text-(--text-inverse-muted)"
-      >
+      <span class="material-symbols-outlined text-[16px]!">
         {{ icon }}
       </span>
     </span>
@@ -44,7 +42,7 @@ defineEmits<{ action: [] }>()
       <button
         v-else-if="action"
         type="button"
-        class="cursor-pointer rounded-full bg-(--bg-muted) px-[9px] py-[3px] text-[11.5px] leading-normal font-medium text-(--text-secondary) transition-colors hover:bg-(--border-default) hover:text-(--text-primary) focus-visible:outline-2 focus-visible:outline-offset-2 dark:bg-black/30 dark:text-(--text-inverse-muted) dark:hover:text-(--text-inverse)"
+        class="cursor-pointer rounded-full bg-(--bg-muted) px-[9px] py-[3px] text-[11.5px] leading-normal font-medium text-(--text-secondary) transition-colors hover:bg-(--bg-orange)/10 hover:text-(--bg-orange) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--bg-orange) dark:bg-black/30 dark:text-(--text-inverse-muted) dark:hover:bg-(--bg-orange)/15"
         @click="$emit('action')"
       >
         {{ action }}

@@ -2,6 +2,7 @@
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
+import { SubheaderComp } from '@/shared/components'
 import { PaymentPage, PlanCard } from '../components'
 import type { Plan } from '../types'
 import { PLANS } from '../utils/plans'
@@ -16,15 +17,12 @@ const plans = computed(() =>
     ...plan,
     monthlyPrice: plan.id === 'pro' ? Number(store.price ?? 0) : 0,
     priceNote: plan.id === 'pro' ? 'pagamento único' : plan.priceNote,
-    cta: plan.id === currentPlan.value ? 'Plano atual' : 'Liberar acesso à IA',
-    features:
-      plan.id === 'pro'
-        ? [
-            { label: 'Chat com IA para gerenciar tarefas', icon: 'ai' as const },
-            { label: 'Análise de PDF e imagens', icon: 'ai' as const },
-            { label: 'Relatórios em PDF', icon: 'check' as const },
-          ]
-        : plan.features,
+    cta:
+      plan.id === currentPlan.value
+        ? 'Plano atual'
+        : plan.id === 'pro'
+          ? 'Ativar Pro'
+          : 'Plano gratuito',
   })),
 )
 onMounted(async () => {
@@ -46,23 +44,13 @@ function choose(plan: Plan) {
 
 <template>
   <PaymentPage :crumbs="['Conta', 'Planos']">
-    <header class="flex flex-col items-center gap-[10px] pt-[16px] text-center">
-      <p
-        class="font-mono text-[11px] leading-normal tracking-[0.16em] text-(--bg-orange) uppercase"
-      >
-        Planos e faturamento
-      </p>
-      <h1 class="text-[30px]! leading-tight! font-semibold! tracking-[-0.03em]! sm:text-[36px]!">
-        O Kanban é grátis. A IA trabalha no Pro.
-      </h1>
-      <p
-        class="max-w-[600px] text-[14px] leading-[22px] text-(--text-secondary) dark:text-(--text-inverse-muted)"
-      >
-        Comece com o time inteiro sem pagar nada e ative o assistente quando a demanda crescer.
-      </p>
-    </header>
+    <SubheaderComp
+      title="Planos"
+      description="Use o Kanban grátis e ative o Pro para liberar recursos de IA."
+      class="mb-0!"
+    />
 
-    <div class="mt-[12px] grid items-start gap-[18px] lg:grid-cols-3">
+    <div class="mx-auto grid w-full max-w-[900px] items-stretch gap-[14px] md:grid-cols-2">
       <PlanCard
         v-for="plan in plans"
         :key="plan.id"
@@ -73,8 +61,8 @@ function choose(plan: Plan) {
       />
     </div>
 
-    <p class="text-center text-[12px] leading-normal text-(--text-muted)">
-      Acesso individual à IA após confirmação do pagamento. Sem renovação automática.
+    <p class="mx-auto w-full max-w-[900px] text-[12px] leading-normal text-(--text-muted)">
+      Acesso individual à IA após a confirmação do pagamento. Sem renovação automática.
     </p>
   </PaymentPage>
 </template>

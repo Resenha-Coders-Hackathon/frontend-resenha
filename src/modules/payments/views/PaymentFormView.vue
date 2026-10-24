@@ -271,7 +271,7 @@ async function handleSubmit(): Promise<void> {
                 <select
                   id="card-installments"
                   v-model.number="installments"
-                  class="h-[44px] w-full appearance-none rounded-[10px] border border-(--border-default) bg-(--surface) pr-[36px] pl-[12px] text-[14px] outline-none focus:border-(--border-strong) dark:border-(--border-inverse) dark:bg-black/30 dark:focus:border-(--text-inverse-muted)"
+                  class="h-[44px] w-full appearance-none rounded-[10px] border border-(--border-default) bg-(--surface) pr-[36px] pl-[12px] text-[14px] outline-none focus:border-(--bg-orange) focus:ring-2 focus:ring-(--bg-orange)/15 dark:border-(--border-inverse) dark:bg-black/30"
                 >
                   <option
                     v-for="option in installmentOptions"
@@ -341,7 +341,9 @@ async function handleSubmit(): Promise<void> {
           <p
             class="flex items-center justify-center gap-[4px] text-[12px] leading-normal text-(--text-muted)"
           >
-            <span class="material-symbols-outlined text-[15px]!" aria-hidden="true"
+            <span
+              class="material-symbols-outlined text-[15px]! text-(--bg-orange)"
+              aria-hidden="true"
               >verified_user</span
             >
             {{

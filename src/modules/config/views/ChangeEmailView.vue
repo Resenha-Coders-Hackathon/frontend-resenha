@@ -66,7 +66,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section class="mx-auto w-full max-w-xl px-4 py-10">
+  <section class="mx-auto w-full max-w-xl px-5 py-10 sm:px-8">
     <AuthCardLayout icon="mail" title="Alterar e-mail">
       <template #description>
         Confirme o código enviado ao novo endereço e sua senha atual. Contas sem senha devem definir

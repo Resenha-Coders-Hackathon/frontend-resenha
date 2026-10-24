@@ -119,8 +119,7 @@ const goNewSector = () =>
     name: 'OrganizationOnboardingSectors',
     params: { organizationId: organization.value.id },
   })
-const openSector = (sectorId: string) =>
-  router.push({ name: 'SectorBoard', params: { sectorId } })
+const openSector = (sectorId: string) => router.push({ name: 'SectorBoard', params: { sectorId } })
 </script>
 
 <template>
@@ -129,7 +128,9 @@ const openSector = (sectorId: string) =>
   >
     <TopbarComp :crumbs="['Equipe e setores']" />
 
-    <section class="flex flex-1 flex-col gap-[16px] px-[16px] pt-[24px] pb-[32px] sm:px-[28px]">
+    <section
+      class="flex flex-1 flex-col gap-[16px] px-[20px] pt-[24px] pb-[32px] sm:px-[36px] xl:px-[44px]"
+    >
       <SubheaderComp
         title="Equipe e setores"
         :description="`${organization?.name ?? ''} · quem participa de cada setor e o que pode fazer`"

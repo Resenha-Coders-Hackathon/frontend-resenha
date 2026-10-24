@@ -5,7 +5,7 @@ defineProps<{ icon: string; label: string }>()
 <template>
   <button
     type="button"
-    class="grid size-[28px] cursor-pointer place-items-center rounded-[7px] text-(--text-muted) transition-colors hover:bg-(--bg-subtle) hover:text-(--text-primary) dark:hover:bg-white/10 dark:hover:text-(--text-inverse)"
+    class="grid size-[28px] cursor-pointer place-items-center rounded-[7px] text-(--text-muted) transition-colors hover:bg-(--bg-orange)/10 hover:text-(--bg-orange) dark:hover:bg-(--bg-orange)/15"
     :aria-label="label"
     :title="label"
   >

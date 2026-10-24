@@ -12,6 +12,11 @@
   color: var(--text-inverse);
 }
 
+.auth-link--accent,
+.dark .auth-link--accent {
+  color: var(--accent-orange);
+}
+
 .auth-link:hover {
   text-decoration-thickness: 2px;
 }
@@ -33,6 +38,12 @@
   padding-block: 0;
   font-size: 16px;
   font-weight: 500;
+}
+
+.auth-primary-submit {
+  background-color: var(--accent-orange);
+  border: 1px solid var(--accent-orange);
+  color: #fff;
 }
 
 /* Em formulários com gap entre campos, o gap já faz parte do respiro. */

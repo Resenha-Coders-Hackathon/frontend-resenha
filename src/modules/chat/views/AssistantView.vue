@@ -33,17 +33,11 @@ const ai = useAiStore()
 const organizations = useOrganizationsStore()
 const route = useRoute()
 const router = useRouter()
-const search = ref('')
 const draft = ref('')
 const files = ref<File[]>([])
 const scroller = useTemplateRef<HTMLElement>('scroller')
 const fileInput = useTemplateRef<HTMLInputElement>('file-input')
 const historyTitle = computed(() => ai.active?.title ?? 'Nova conversa')
-const visibleHistory = computed(() =>
-  ai.conversations.filter((item) =>
-    item.title.toLocaleLowerCase('pt-BR').includes(search.value.trim().toLocaleLowerCase('pt-BR')),
-  ),
-)
 const composerDisabled = computed(() => ai.isBusy || !!ai.active?.pending || !!ai.active?.expired)
 
 const PROMPTS = [
@@ -159,9 +153,11 @@ async function analyze() {
   <div
     class="flex h-[calc(100dvh-3.75rem)] md:h-dvh w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
   >
-    <TopbarComp v-model:search="search" :crumbs="['Assistente IA', historyTitle]" />
+    <TopbarComp :crumbs="['Assistente IA', historyTitle]" />
 
-    <div class="flex min-h-0 flex-1 flex-col p-[12px] sm:p-[20px] lg:p-[28px]">
+    <div
+      class="flex min-h-0 flex-1 flex-col px-[20px] py-[12px] sm:px-[32px] sm:py-[20px] lg:px-[40px] lg:py-[28px]"
+    >
       <ChatPanelLayout tinted>
         <template #aside>
           <div class="flex items-center gap-[10px] px-[18px] pt-[18px]">
@@ -189,7 +185,7 @@ async function analyze() {
           <ChatSectionTitle>Conversas desta sessão</ChatSectionTitle>
           <nav aria-label="Histórico de conversas" class="flex flex-col gap-[2px] pb-[12px]">
             <button
-              v-for="item in visibleHistory"
+              v-for="item in ai.conversations"
               :key="item.id"
               type="button"
               :disabled="ai.isBusy"
@@ -389,7 +385,7 @@ async function analyze() {
                   v-if="entry.report"
                   :href="entry.report.url"
                   :download="entry.report.file_name"
-                  class="flex w-fit items-center gap-[6px] rounded-[9px] bg-(--chat-ai) px-[12px] py-[8px] text-[13px] font-medium text-white hover:opacity-90 dark:text-white"
+                  class="flex w-fit items-center gap-[6px] rounded-[9px] bg-(--bg-orange) px-[12px] py-[8px] text-[13px] font-medium text-white transition-colors hover:bg-[#e85d00] dark:text-white"
                 >
                   <span class="material-symbols-outlined text-[17px]!" aria-hidden="true"
                     >download</span
@@ -433,7 +429,7 @@ async function analyze() {
               :key="prompt"
               type="button"
               :disabled="composerDisabled"
-              class="h-[30px] cursor-pointer rounded-full border border-(--border-default) bg-(--surface) px-[12px] text-[12.5px] transition-colors hover:border-(--chat-ai) hover:text-(--chat-ai) disabled:cursor-not-allowed disabled:opacity-50 dark:border-(--border-inverse) dark:bg-transparent"
+              class="h-[30px] cursor-pointer rounded-full border border-(--border-default) bg-(--surface) px-[12px] text-[12.5px] transition-colors hover:border-(--bg-orange) hover:bg-(--bg-orange)/5 hover:text-(--bg-orange) disabled:cursor-not-allowed disabled:opacity-50 dark:border-(--border-inverse) dark:bg-transparent dark:hover:bg-(--bg-orange)/10"
               @click="draft = prompt"
             >
               {{ prompt }}

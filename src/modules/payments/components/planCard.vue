@@ -16,7 +16,7 @@ const priceLabel = computed(() =>
 
 const FEATURE_ICONS: Record<PlanFeature['icon'], { icon: string; class: string }> = {
   check: { icon: 'check', class: 'text-[#1e9e5a]' },
-  ai: { icon: 'auto_awesome', class: 'text-(--plan-pro)' },
+  ai: { icon: 'check', class: 'text-(--bg-orange)' },
   shield: { icon: 'verified_user', class: 'text-[#1e9e5a]' },
   locked: { icon: 'lock', class: 'text-(--text-muted)' },
 }
@@ -25,31 +25,41 @@ const FEATURE_ICONS: Record<PlanFeature['icon'], { icon: string; class: string }
 <template>
   <article
     :class="[
-      'relative flex flex-col gap-[18px] rounded-[16px] border bg-(--surface) p-[22px] dark:bg-(--surface-inverse)',
+      'relative flex h-full flex-col gap-[16px] overflow-hidden rounded-[14px] border bg-(--surface) px-5 py-4 before:absolute before:top-0 before:left-5 before:h-[2px] before:w-8 before:rounded-full before:bg-(--bg-orange)/55 dark:bg-(--surface-inverse)',
       plan.highlighted
-        ? 'border-(--plan-pro) shadow-[0_18px_40px_-18px_rgb(107_78_255/0.45)] lg:-mt-[12px] lg:pb-[30px]'
+        ? 'border-(--bg-orange)/45 dark:border-(--bg-orange)/45'
         : 'border-(--border-default) dark:border-(--border-inverse)',
     ]"
   >
     <span
       v-if="plan.highlighted"
-      class="flex w-fit items-center gap-[4px] rounded-full bg-(--plan-pro) px-[8px] py-[2px] text-[11.5px] leading-normal font-medium text-white"
+      class="absolute top-4 right-4 rounded-full bg-(--bg-orange)/10 px-2 py-0.5 text-[11px] leading-normal font-medium text-(--bg-orange) dark:bg-(--bg-orange)/15"
     >
-      <span class="material-symbols-outlined text-[13px]!" aria-hidden="true">auto_awesome</span>
-      Mais escolhido
+      Recomendado
     </span>
 
     <header class="flex flex-col gap-[2px] leading-normal">
-      <h2 class="text-[17px]! leading-normal! font-semibold! tracking-normal!">{{ plan.name }}</h2>
+      <h2
+        :class="[
+          'text-[18px]! leading-normal! font-semibold! tracking-normal!',
+          plan.highlighted ? 'text-(--bg-orange)' : '',
+        ]"
+      >
+        {{ plan.name }}
+      </h2>
       <p class="text-[13px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
         {{ plan.description }}
       </p>
     </header>
 
-    <p class="flex items-baseline gap-[8px]">
-      <span class="text-[38px] leading-none font-semibold tracking-[-0.03em]">{{
-        priceLabel
-      }}</span>
+    <p class="flex flex-wrap items-baseline gap-x-[8px] gap-y-[2px]">
+      <span
+        :class="[
+          'text-[38px] leading-none font-semibold tracking-[-0.04em]',
+          plan.highlighted ? 'text-(--bg-orange)' : '',
+        ]"
+        >{{ priceLabel }}</span
+      >
       <span class="text-[13px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
         {{ plan.priceNote }}
       </span>
@@ -63,27 +73,23 @@ const FEATURE_ICONS: Record<PlanFeature['icon'], { icon: string; class: string }
 
     <button
       type="button"
-      :disabled="current"
+      :disabled="current || plan.id === 'free'"
       :class="[
-        'flex h-[42px] w-full cursor-pointer items-center justify-center gap-[6px] rounded-[10px] text-[14px] font-medium transition-[opacity,background-color] disabled:cursor-default',
+        'no-site-hover flex h-[42px] w-full cursor-pointer items-center justify-center gap-[6px] rounded-[10px] text-[14px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--bg-orange) disabled:cursor-default disabled:opacity-60',
         plan.highlighted
-          ? 'bg-(--plan-pro) text-white hover:opacity-90'
-          : current
-            ? 'border border-(--border-default) text-(--text-secondary) dark:border-(--border-inverse) dark:text-(--text-inverse-muted)'
-            : 'bg-(--text-primary) text-white hover:opacity-90 dark:bg-(--text-inverse) dark:text-(--text-primary)',
+          ? 'bg-(--bg-orange) text-white hover:bg-[#e85d00]'
+          : current || plan.id === 'free'
+            ? 'border border-(--border-default) bg-(--bg-subtle) text-(--text-secondary) dark:border-(--border-inverse) dark:bg-white/5 dark:text-(--text-inverse-muted)'
+            : 'bg-(--bg-orange) text-white',
       ]"
       @click="$emit('select')"
     >
-      <span
-        v-if="plan.highlighted"
-        class="material-symbols-outlined text-[17px]!"
-        aria-hidden="true"
-        >auto_awesome</span
-      >
       {{ plan.cta }}
     </button>
 
-    <ul class="flex flex-col gap-[10px]">
+    <ul
+      class="flex flex-col gap-[10px] border-t border-(--border-default) pt-[14px] dark:border-(--border-inverse)"
+    >
       <li
         v-for="feature in plan.features"
         :key="feature.label"

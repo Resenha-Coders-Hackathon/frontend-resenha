@@ -39,24 +39,22 @@ const buttonClasses = computed(() => [
   // VARIANTS
   {
     /* PRIMARY */
-    'bg-(--surface-inverse) text-(--text-inverse) dark:bg-(--text-inverse) dark:text-(--text-primary) hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]':
-      props.variant === 'primary',
+    'bg-(--bg-orange) text-white hover:brightness-105': props.variant === 'primary',
 
     /* SECONDARY */
-    'dark:bg-(--surface-inverse) dark:text-(--text-inverse) bg-(--surface) text-(--text-primary) border border-(--border-default) dark:border-(--border-inverse) hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]':
+    'dark:bg-(--surface-inverse) dark:text-(--text-inverse) bg-(--surface) text-(--text-primary) border border-(--border-default) dark:border-(--border-inverse) hover:border-(--bg-orange)/35 hover:bg-(--bg-orange)/5':
       props.variant === 'secondary',
 
     /* GHOST */
-    'bg-transparent text-(--text-primary) dark:text-(--text-inverse) hover:bg-(--bg-subtle) dark:hover:bg-(--bg-subtle)/20 active:scale-[0.98]':
+    'bg-transparent text-(--text-primary) dark:text-(--text-inverse) hover:bg-(--bg-orange)/5 hover:text-(--bg-orange) dark:hover:bg-(--bg-orange)/10':
       props.variant === 'ghost',
 
     /* DESTRUCTIVE */
-    'bg-(--destructive) text-(--text-inverse) hover:brightness-110 active:scale-[0.98]':
+    'bg-(--destructive) text-(--text-inverse) hover:brightness-105':
       props.variant === 'destructive',
 
     /* SUCCESS */
-    'bg-(--sucess) text-(--text-inverse) hover:brightness-110 active:scale-[0.98]':
-      props.variant === 'success',
+    'bg-(--sucess) text-(--text-inverse) hover:brightness-105': props.variant === 'success',
 
     /* DISABLED */
     'cursor-not-allowed opacity-50 shadow-none hover:translate-y-0 hover:shadow-none':
@@ -66,7 +64,8 @@ const buttonClasses = computed(() => [
     'cursor-wait': props.loading,
 
     /* ENABLED */
-    'cursor-pointer': !props.disabled && !props.loading,
+    'cursor-pointer hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]':
+      !props.disabled && !props.loading,
   },
 ])
 </script>

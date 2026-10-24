@@ -77,11 +77,11 @@ async function handleGoogleCredential(credential: string) {
   <section class="grid lg:grid-cols-[minmax(0,1fr)_64vw]">
     <AuthAside side="left" />
     <AuthSplitLayout compact>
-      <h1 class="text-[34px]! leading-10! tracking-[-0.03em]!">Crie sua conta</h1>
-      <p
-        class="mt-1 text-[15px] leading-5.5 text-(--text-secondary) dark:text-(--text-inverse-muted)"
-      >
-        Comece grátis. Leva menos de um minuto.
+      <h1 class="text-[38px]! leading-11.5! tracking-[-0.03em]!">
+        Crie sua <span class="text-(--accent-orange)">conta</span>
+      </h1>
+      <p class="mt-2 text-[16px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
+        Organize seus projetos e avance junto com seu time.
       </p>
 
       <form class="mt-4 flex flex-col gap-3" @submit.prevent="handleSubmit">
@@ -136,7 +136,7 @@ async function handleGoogleCredential(credential: string) {
           label="Criar conta"
           :loading="isSubmitting"
           :disabled="isGoogleSubmitting"
-          class="auth-submit"
+          class="auth-submit auth-primary-submit"
         />
       </form>
 
@@ -155,12 +155,12 @@ async function handleGoogleCredential(credential: string) {
       </p>
 
       <p
-        class="mt-4 text-[14px] leading-5 text-(--text-secondary) dark:text-(--text-inverse-muted)"
+        class="mt-4 text-center text-[15px] text-(--text-secondary) dark:text-(--text-inverse-muted)"
       >
         Já tem uma conta?
         <a
           :href="router.resolve(navigation.to('Login')).href"
-          class="auth-link"
+          class="auth-link auth-link--accent"
           @click.prevent="swapTo(navigation.to('Login'))"
           >Entrar</a
         >

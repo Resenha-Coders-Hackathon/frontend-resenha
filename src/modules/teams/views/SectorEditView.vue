@@ -176,7 +176,9 @@ const field =
   >
     <TopbarComp :crumbs="['Equipe e setores', sector?.name ?? 'Setor', 'Editar']" />
 
-    <section class="flex flex-1 flex-col gap-[16px] px-[16px] pt-[24px] pb-[32px] sm:px-[28px]">
+    <section
+      class="flex flex-1 flex-col gap-[16px] px-[20px] pt-[24px] pb-[32px] sm:px-[36px] xl:px-[44px]"
+    >
       <SubheaderComp
         title="Editar setor"
         :description="missing ? 'Setor não encontrado' : `${sector?.name ?? ''} · ${description}`"

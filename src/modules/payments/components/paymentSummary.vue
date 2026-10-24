@@ -44,7 +44,7 @@ const rows = computed(() =>
       class="mt-[16px] flex items-baseline justify-between border-t border-(--border-default) pt-[16px] dark:border-(--border-inverse)"
     >
       <span class="text-[13px] font-semibold">Total</span>
-      <span class="text-[24px] leading-none font-semibold tracking-[-0.02em]">{{
+      <span class="text-[24px] leading-none font-semibold tracking-[-0.02em] text-(--bg-orange)">{{
         formatCurrency(amount)
       }}</span>
     </div>

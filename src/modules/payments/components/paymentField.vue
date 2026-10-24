@@ -13,7 +13,7 @@ const model = defineModel<string>({ default: '' })
   <div class="flex min-w-0 flex-1 flex-col gap-[6px]">
     <label :for="id" class="text-[13px] leading-normal font-medium">{{ label }}</label>
     <div
-      class="flex h-[44px] items-center gap-[8px] rounded-[10px] border border-(--border-default) bg-(--surface) px-[12px] text-(--text-muted) transition-[border-color,box-shadow] focus-within:border-(--border-strong) focus-within:shadow-[0_0_0_3px_rgb(0_0_0/0.06)] dark:border-(--border-inverse) dark:bg-black/30 dark:focus-within:border-(--text-inverse-muted)"
+      class="flex h-[44px] items-center gap-[8px] rounded-[10px] border border-(--border-default) bg-(--surface) px-[12px] text-(--text-muted) transition-[border-color,box-shadow,color] focus-within:border-(--bg-orange) focus-within:text-(--bg-orange) focus-within:shadow-[0_0_0_3px_rgb(255_103_0/0.12)] dark:border-(--border-inverse) dark:bg-black/30"
     >
       <span v-if="icon" class="material-symbols-outlined text-[18px]!" aria-hidden="true">{{
         icon
