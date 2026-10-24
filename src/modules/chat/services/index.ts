@@ -52,7 +52,7 @@ export async function sendMessage(
       if (fields.reply_to) body.append('reply_to', fields.reply_to)
       if (fields.task) body.append('task', fields.task)
       fields.mentions?.forEach((id) => body.append('mentions', id))
-      files.forEach((file) => body.append('files', file))
+      files.forEach((file) => body.append('1files', file))
       return (await api.post<ChatMessage>(url, body)).data
     }
     return (await api.post<ChatMessage>(url, { content, ...fields })).data
