@@ -9,6 +9,7 @@ import type {
   RegistrationConfirmation,
   RegistrationRequest,
   UpdateUserRequest,
+  UpdatedUserProfile,
   User,
   UserSession,
 } from '../types'
@@ -94,8 +95,8 @@ export const verifyPasswordReset = (payload: PasswordResetVerification) =>
 export const confirmPasswordReset = (payload: PasswordResetConfirmation) =>
   post(API_PATHS.passwordResetConfirm, payload)
 
-export async function updateMe(payload: UpdateUserRequest): Promise<User> {
-  return (await api.patch<User>(API_PATHS.updateMe, payload)).data
+export async function updateMe(payload: UpdateUserRequest): Promise<UpdatedUserProfile> {
+  return (await api.patch<UpdatedUserProfile>(API_PATHS.updateMe, payload)).data
 }
 
 export async function listSessions(): Promise<UserSession[]> {

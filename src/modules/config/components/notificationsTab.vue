@@ -9,48 +9,22 @@ const settings = defineModel<NotificationSettings>({ required: true })
 <template>
   <div class="grid items-start gap-[16px] xl:grid-cols-2">
     <ConfigCard title="Por e-mail" class="gap-[6px]!">
-      <div>
-        <ConfigToggle
-          v-model="settings.emailAssigned"
-          label="Tarefas atribuídas a mim"
-          description="Quando alguém colocar você como responsável"
-        />
-        <ConfigToggle
-          v-model="settings.emailMentions"
-          label="Menções no chat"
-          description="Quando citarem você com @"
-        />
-        <ConfigToggle
-          v-model="settings.emailDeadlines"
-          label="Prazos próximos"
-          description="Um dia antes do vencimento da tarefa"
-        />
-        <ConfigToggle
-          v-model="settings.emailDigest"
-          label="Resumo semanal"
-          description="Toda segunda, com o andamento dos seus boards"
-        />
-      </div>
+      <ConfigToggle v-model="settings.email_product" label="E-mails de produto" />
+      <ConfigToggle v-model="settings.email_weekly_digest" label="Resumo semanal" />
+      <ConfigToggle v-model="settings.email_security" label="E-mails de segurança" />
+      <ConfigToggle v-model="settings.email_assigned" label="Tarefas atribuídas a mim" />
+      <ConfigToggle v-model="settings.email_mentions" label="Menções no chat" />
+      <ConfigToggle v-model="settings.email_deadlines" label="Prazos próximos" />
     </ConfigCard>
-
     <ConfigCard title="No aplicativo" class="gap-[6px]!">
-      <div>
-        <ConfigToggle
-          v-model="settings.appComments"
-          label="Comentários em tarefas"
-          description="Em tarefas que você criou ou segue"
-        />
-        <ConfigToggle
-          v-model="settings.appStatus"
-          label="Mudanças de status"
-          description="Quando uma tarefa sua mudar de coluna"
-        />
-        <ConfigToggle
-          v-model="settings.appAi"
-          label="Sugestões do assistente de IA"
-          description="Tarefas criadas a partir de atas e arquivos"
-        />
-      </div>
+      <ConfigToggle v-model="settings.app_comments" label="Comentários em tarefas" />
+      <ConfigToggle v-model="settings.app_status" label="Mudanças de status" />
+      <ConfigToggle v-model="settings.app_ai" label="Sugestões do assistente de IA" />
+      <ConfigToggle
+        v-model="settings.push_enabled"
+        label="Permitir notificações push"
+        description="O envio depende também da permissão do navegador e do dispositivo."
+      />
     </ConfigCard>
   </div>
 </template>

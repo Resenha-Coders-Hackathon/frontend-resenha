@@ -1,35 +1,48 @@
-import { ref, onMounted, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
-const isDark = ref<boolean>(false)
+type Theme = 'light' | 'dark' | 'system'
+const theme = ref<Theme>('system')
+const systemDark = ref(false)
+let initialized = false
 
-const toggleTheme = () => {
-  isDark.value = !isDark.value
+function applyTheme(): void {
+  document.documentElement.classList.toggle(
+    'dark',
+    theme.value === 'dark' || (theme.value === 'system' && systemDark.value),
+  )
 }
 
-const initializeTheme = () => {
-  const savedTheme = localStorage.getItem('theme') // verifica se o usuário já escolheu um tema
-  if (savedTheme) {
-    isDark.value = savedTheme === 'dark'
-  } else {
-    isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches // usa a preferência do sistema operacional
-  }
+function setTheme(value: Theme): void {
+  theme.value = value
+  localStorage.setItem('theme', value)
+  applyTheme()
 }
 
-watch(isDark, (newVal) => {
-  if (newVal) {
-    document.documentElement.classList.add('dark') // add class dark no html
-    localStorage.setItem('theme', 'dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-    localStorage.setItem('theme', 'light')
-  }
+const isDark = computed({
+  get: () => theme.value === 'dark' || (theme.value === 'system' && systemDark.value),
+  set: (value: boolean) => setTheme(value ? 'dark' : 'light'),
 })
 
 export function useTheme() {
-  onMounted(initializeTheme)
-
+  onMounted(() => {
+    if (initialized) return
+    initialized = true
+    const media = window.matchMedia('(prefers-color-scheme: dark)')
+    systemDark.value = media.matches
+    const saved = localStorage.getItem('theme')
+    if (saved === 'light' || saved === 'dark' || saved === 'system') theme.value = saved
+    media.addEventListener('change', (event) => {
+      systemDark.value = event.matches
+      applyTheme()
+    })
+    applyTheme()
+  })
   return {
     isDark,
-    toggleTheme,
+    theme,
+    setTheme,
+    toggleTheme: () => {
+      isDark.value = !isDark.value
+    },
   }
 }
