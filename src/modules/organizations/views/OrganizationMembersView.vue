@@ -14,6 +14,7 @@ import {
 import { BaseButton } from '@/shared/components'
 import type { Page } from '@/shared/types'
 import OrganizationLayout from '../components/organizationLayout.vue'
+import MemberActions from '../components/memberActions.vue'
 import { getOrganization, listMembers } from '../services'
 import { useOrganizationsStore } from '../stores'
 import type { Organization, OrganizationMember } from '../types'
@@ -99,6 +100,10 @@ function changeTab(value: 'members' | 'invitations') {
 }
 function changePage(offset: number) {
   page.value += offset
+  void loadRows()
+}
+function reloadMembers() {
+  page.value = 1
   void loadRows()
 }
 function openInvite() {
@@ -218,6 +223,7 @@ watch(id, load, { immediate: true })
                 ></strong
               >
               <p>{{ member.email }}</p>
+              <MemberActions :organization="organization" :member="member" @changed="reloadMembers" />
             </div>
           </div>
           <span

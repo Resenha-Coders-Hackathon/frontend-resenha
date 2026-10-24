@@ -1,6 +1,10 @@
 import type { UUID, ISODateTime } from '@/shared/types'
 
 export type OrganizationRole = 'owner' | 'admin' | 'member' | 'viewer'
+export interface OrganizationLocation {
+  latitude: number
+  longitude: number
+}
 export interface Organization {
   id: UUID
   name: string
@@ -9,6 +13,7 @@ export interface Organization {
   current_role: OrganizationRole
   description: string
   logo_url: string
+  location: OrganizationLocation | null
   is_personal: boolean
   created_at: ISODateTime
 }
@@ -18,6 +23,7 @@ export interface CreateOrganizationRequest {
   team_size?: Organization['team_size']
   description?: string
   logo_url?: string
+  location?: OrganizationLocation | null
 }
 export type UpdateOrganizationRequest = Partial<CreateOrganizationRequest>
 export interface OrganizationMember {

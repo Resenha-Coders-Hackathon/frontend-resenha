@@ -52,13 +52,18 @@ export const useAuthStore = defineStore('auth', () => {
   const sessions = ref<UserSession[]>([])
   const isAuthenticated = computed(() => user.value !== null)
 
+  function clearSession(): void {
+    user.value = null
+    sessions.value = []
+  }
+
   // Os cookies são HttpOnly: só o backend sabe se há sessão.
   async function loadUser(): Promise<User | null> {
     try {
       user.value = await fetchMe()
     } catch (error) {
       if (!isAxiosError(error) || error.response?.status !== 401) throw error
-      user.value = null
+      clearSession()
     }
     return user.value
   }
@@ -80,8 +85,7 @@ export const useAuthStore = defineStore('auth', () => {
     } catch (error) {
       if (!isAxiosError(error) || error.response?.status !== 401) throw error
     }
-    user.value = null
-    sessions.value = []
+    clearSession()
   }
 
   async function updateProfile(payload: UpdateUserRequest): Promise<User> {
@@ -105,21 +109,20 @@ export const useAuthStore = defineStore('auth', () => {
   async function endAllSessions(): Promise<void> {
     await useNotificationsStore().disablePush()
     await revokeAllSessions()
-    user.value = null
-    sessions.value = []
+    clearSession()
   }
 
   async function deactivateAccount(): Promise<void> {
     await useNotificationsStore().disablePush()
     await deactivateMe()
-    user.value = null
-    sessions.value = []
+    clearSession()
   }
 
   return {
     user,
     sessions,
     isAuthenticated,
+    clearSession,
     loadUser,
     signIn,
     signInWithGoogle,
