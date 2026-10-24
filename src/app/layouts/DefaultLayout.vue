@@ -32,20 +32,12 @@ provide(ShellKey, {
 </script>
 
 <template>
-  <div class="min-h-dvh">
-    <main class="flex items-start">
-      <SidebarComp />
-      <div class="min-w-0 flex-1 pb-[calc(3.75rem+env(safe-area-inset-bottom))] md:pb-0">
-        <slot>
-          <RouterView v-slot="{ Component, route }">
-            <Transition name="page" mode="out-in" appear>
-              <component :is="Component" :key="route.path" />
-            </Transition>
-          </RouterView>
-        </slot>
-      </div>
-    </main>
-    <FooterComp />
-    <MobileNav />
-  </div>
+  <main class="flex items-start">
+    <SidebarComp />
+    <div class="min-w-0 flex-1 pb-[calc(3.75rem+env(safe-area-inset-bottom))] md:pb-0">
+      <slot><RouterView /></slot>
+    </div>
+  </main>
+  <!-- <FooterComp /> -->
+  <MobileNav />
 </template>
