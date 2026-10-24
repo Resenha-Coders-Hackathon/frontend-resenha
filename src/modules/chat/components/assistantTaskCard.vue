@@ -45,7 +45,7 @@ const PRIORITY: Record<TaskPriority, { label: string; bars: number; color: strin
           {{ task.assignee }}
         </span>
         <span aria-hidden="true">·</span>
-        <span class="font-mono text-[11px]">Entrega {{ task.due }}</span>
+        <span class="text-[11px]">Entrega {{ task.due }}</span>
         <span :class="['flex items-center gap-[4px] font-medium', PRIORITY[task.priority].color]">
           <span class="flex items-end gap-px" aria-hidden="true">
             <span

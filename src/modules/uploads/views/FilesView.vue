@@ -40,7 +40,7 @@ function addFiles(event: Event) {
 
 <template>
   <div
-    class="flex min-h-[calc(100dvh-3.5rem)] w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
+    class="flex min-h-[calc(100dvh-6rem)] w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
   >
     <TopbarComp :crumbs="['Norte Studio', 'Arquivos']" has-notifications />
 
@@ -125,7 +125,7 @@ function addFiles(event: Event) {
                   FILE_ORIGINS[file.origin].label
                 }}</span>
               </td>
-              <td class="px-[18px] py-[12px] font-mono text-[12px]">{{ file.task }}</td>
+              <td class="px-[18px] py-[12px] text-[12px]">{{ file.task }}</td>
               <td
                 class="px-[18px] py-[12px] text-(--text-secondary) dark:text-(--text-inverse-muted)"
               >

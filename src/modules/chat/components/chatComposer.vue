@@ -27,7 +27,7 @@ function handleKeydown(event: KeyboardEvent) {
     :class="[
       'flex flex-col gap-[10px] rounded-[12px] border bg-(--surface) px-[12px] pt-[12px] pb-[10px] transition-[border-color,box-shadow] dark:bg-black/20',
       accent === 'ai'
-        ? 'border-(--chat-ai)/40 focus-within:border-(--chat-ai) focus-within:shadow-[0_0_0_3px_rgb(107_78_255/0.12)]'
+        ? 'border-(--chat-ai)/40 focus-within:border-(--chat-ai)'
         : 'border-(--border-default) focus-within:border-(--border-strong) dark:border-(--border-inverse) dark:focus-within:border-(--text-inverse-muted)',
     ]"
     @submit.prevent="emit('submit')"

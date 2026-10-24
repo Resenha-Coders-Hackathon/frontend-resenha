@@ -23,15 +23,22 @@ const weeklyData = computed(() => ({
   ],
 }))
 
-const lateData = {
+const lateData = computed(() => ({
   labels: LATE_BY_SECTOR.map((sector) => sector.label),
   datasets: [
     {
       data: LATE_BY_SECTOR.map((sector) => sector.value),
-      backgroundColor: LATE_BY_SECTOR.map((sector) => sector.color),
+      // só o setor mais atrasado ganha cor; o resto segue a tinta do tema
+      backgroundColor: LATE_BY_SECTOR.map((sector) =>
+        sector.value === Math.max(...LATE_BY_SECTOR.map((s) => s.value))
+          ? '#f0541e'
+          : isDark.value
+            ? '#edece8'
+            : '#141412',
+      ),
     },
   ],
-}
+}))
 
 const COLUMNS = ['Pessoa', 'Concluídas', 'No prazo', 'Abertas', 'Atrasadas']
 
@@ -51,7 +58,7 @@ function exportCsv() {
 
 <template>
   <div
-    class="flex min-h-[calc(100dvh-3.5rem)] w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
+    class="flex min-h-[calc(100dvh-6rem)] w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
   >
     <TopbarComp :crumbs="['Norte Studio', 'Relatórios']" has-notifications />
 
