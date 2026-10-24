@@ -36,7 +36,7 @@ export function useAuthSwap() {
     const overlay = document.createElement('div')
     overlay.setAttribute('aria-hidden', 'true')
     overlay.style.cssText =
-      'position:fixed;inset:0;z-index:9999;background:var(--background-inverse);'
+      'position:fixed;inset:0;z-index:9999;background:#000;'
     document.body.append(overlay)
 
     try {
@@ -47,7 +47,7 @@ export function useAuthSwap() {
           { clipPath: clipFor(from), opacity: 1, offset: 0.15 },
           { clipPath: FULL, opacity: 1 },
         ],
-        { duration: 560, easing: EASE, fill: 'forwards' },
+        { duration: 180, easing: EASE, fill: 'forwards' },
       ).finished
 
       await router.push(to)
@@ -56,7 +56,7 @@ export function useAuthSwap() {
       const target = asideRect()
       if (target) {
         await overlay.animate([{ clipPath: FULL }, { clipPath: clipFor(target) }], {
-          duration: 620,
+          duration: 200,
           easing: EASE,
           fill: 'forwards',
         }).finished
@@ -64,7 +64,7 @@ export function useAuthSwap() {
 
       // revela o texto do novo painel por baixo
       await overlay.animate([{ opacity: 1 }, { opacity: 0 }], {
-        duration: 180,
+        duration: 80,
         easing: 'ease-out',
         fill: 'forwards',
       }).finished
