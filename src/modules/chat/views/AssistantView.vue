@@ -4,7 +4,15 @@ import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { BaseButton, TopbarComp } from '@/shared/components'
 import { useAuthStore } from '@/modules/auth'
-import { aiErrorDetails, useAiStore } from '@/modules/ai'
+import {
+  aiActionDeleted,
+  aiActionLabel,
+  aiActionTasks,
+  aiActionTone,
+  aiErrorDetails,
+  useAiStore,
+} from '@/modules/ai'
+import type { AiTask } from '@/modules/ai'
 import {
   AssistantTaskCard,
   ChatAvatar,
@@ -33,18 +41,20 @@ const visibleHistory = computed(() =>
 const composerDisabled = computed(() => ai.isBusy || !!ai.active?.pending || !!ai.active?.expired)
 
 const PROMPTS = [
-  'Quais setores posso usar?',
   'Mostre minhas tarefas pendentes.',
+  'Crie uma tarefa de prioridade alta para amanhã.',
   'Quais tarefas tenho para amanhã?',
+  'Quais setores posso usar?',
 ]
-const ACTION_LABELS: Record<string, string> = {
-  criar_task: 'Tarefa criada',
-  editar_task: 'Tarefa atualizada',
-  concluir_task: 'Tarefa concluída',
-  listar_tasks: 'Tarefas encontradas',
-  buscar_task: 'Resultado da busca',
-  listar_contexto: 'Setores disponíveis',
-  excluir_task: 'Exclusão de tarefa',
+
+function taskCommand(kind: 'complete' | 'edit' | 'delete', task: AiTask) {
+  const ref = `a tarefa "${task.title}" (id ${task.id})`
+  if (kind === 'edit') {
+    draft.value = `Altere ${ref}: `
+    return
+  }
+  // Deletion still needs the server-issued confirmation before anything is removed.
+  void ai.ask(kind === 'complete' ? `Conclua ${ref}.` : `Exclua ${ref}.`)
 }
 
 watch(
@@ -254,36 +264,43 @@ async function analyze() {
 
                 <div
                   v-for="(action, index) in entry.actions"
-                  :key="`${action.name}-${index}`"
+                  :key="`${action.action}-${index}`"
                   class="flex max-w-[640px] flex-col gap-[8px]"
                 >
-                  <template v-if="action.ok || action.confirmation_required">
-                    <p class="text-[12px] font-medium text-(--chat-ai)">
-                      {{ ACTION_LABELS[action.name] ?? 'Resultado da solicitação' }}
-                    </p>
-                    <AssistantTaskCard v-if="action.task" :task="action.task" />
-                    <AssistantTaskCard v-for="task in action.tasks" :key="task.id" :task="task" />
-                    <p v-if="action.deleted_task_id" class="text-[12px] text-(--text-muted)">
-                      Tarefa excluída: {{ action.deleted_task_id }}
-                    </p>
-                    <ul
-                      v-if="action.sectors?.length"
-                      class="space-y-[4px] text-[12px] text-(--text-secondary) dark:text-(--text-inverse-muted)"
-                    >
-                      <li v-for="sector in action.sectors" :key="sector.id">
-                        {{ sector.organization_name }} · {{ sector.name }}
-                      </li>
-                    </ul>
-                    <p v-if="action.ambiguous" class="text-[12px] text-(--text-muted)">
-                      Há mais de uma tarefa correspondente. Informe qual deseja alterar.
-                    </p>
-                    <p v-if="action.has_more" class="text-[12px] text-(--text-muted)">
-                      Há mais resultados. Refine sua busca.
-                    </p>
-                  </template>
-                  <p v-else role="alert" class="text-[12px] text-(--destructive)">
-                    {{ aiErrorDetails(action.error) || 'Esta operação não foi realizada.' }}
+                  <p
+                    v-if="aiActionTone(action) === 'error'"
+                    role="alert"
+                    class="text-[12px] text-(--destructive)"
+                  >
+                    {{ aiActionLabel(action) }} não realizada:
+                    {{
+                      aiErrorDetails(action.error) ||
+                      (action.status === 'uncertain'
+                        ? 'resultado incerto, confira antes de tentar de novo.'
+                        : 'tente novamente.')
+                    }}
                   </p>
+                  <p
+                    v-else-if="aiActionTone(action) === 'pending'"
+                    class="text-[12px] font-medium text-(--destructive)"
+                  >
+                    {{ aiActionLabel(action) }}: nada foi apagado ainda. Confirme abaixo.
+                  </p>
+                  <template v-else>
+                    <p class="text-[12px] font-medium text-(--chat-ai)">
+                      {{ aiActionLabel(action) }}
+                    </p>
+                    <p v-if="aiActionDeleted(action)" class="text-[12px] text-(--text-muted)">
+                      Removido com sucesso.
+                    </p>
+                    <AssistantTaskCard
+                      v-for="task in aiActionTasks(action)"
+                      :key="task.id"
+                      :task="task"
+                      :disabled="ai.isBusy || !!ai.active?.pending || !!ai.active?.expired"
+                      @command="taskCommand"
+                    />
+                  </template>
                 </div>
 
                 <div

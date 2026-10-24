@@ -4,7 +4,8 @@ import type { AiTask } from '@/modules/ai'
 import type { TaskPriority } from '@/shared/types'
 import ChatAvatar from './chatAvatar.vue'
 
-const props = defineProps<{ task: AiTask }>()
+const props = defineProps<{ task: AiTask; disabled?: boolean }>()
+const emit = defineEmits<{ command: [kind: 'complete' | 'edit' | 'delete', task: AiTask] }>()
 
 const due = computed(() =>
   props.task.due_date
@@ -57,6 +58,33 @@ const PRIORITY: Record<TaskPriority, { label: string; bars: number; color: strin
       <p class="break-all font-mono text-[10px] text-(--text-muted)" :title="task.id">
         ID: {{ task.id }}
       </p>
+      <div class="flex flex-wrap gap-[6px]">
+        <button
+          v-if="!task.completed_at"
+          type="button"
+          :disabled="disabled"
+          class="h-[26px] cursor-pointer rounded-full border border-(--border-default) px-[10px] text-[12px] transition-colors hover:border-(--chat-ai) hover:text-(--chat-ai) disabled:cursor-not-allowed disabled:opacity-50 dark:border-(--border-inverse)"
+          @click="emit('command', 'complete', task)"
+        >
+          Concluir
+        </button>
+        <button
+          type="button"
+          :disabled="disabled"
+          class="h-[26px] cursor-pointer rounded-full border border-(--border-default) px-[10px] text-[12px] transition-colors hover:border-(--chat-ai) hover:text-(--chat-ai) disabled:cursor-not-allowed disabled:opacity-50 dark:border-(--border-inverse)"
+          @click="emit('command', 'edit', task)"
+        >
+          Editar
+        </button>
+        <button
+          type="button"
+          :disabled="disabled"
+          class="h-[26px] cursor-pointer rounded-full border border-(--border-default) px-[10px] text-[12px] text-(--destructive) transition-colors hover:border-(--destructive) disabled:cursor-not-allowed disabled:opacity-50 dark:border-(--border-inverse)"
+          @click="emit('command', 'delete', task)"
+        >
+          Excluir
+        </button>
+      </div>
     </div>
   </div>
 </template>

@@ -147,14 +147,14 @@ test('deletion confirmation sends only the server token on a new request', async
   await ai.ask('Exclua ela')
   api.askAi = async (payload) => {
     calls.push(payload)
-    return answer({ actions: [{ name: 'excluir_task', ok: true, deleted_task_id: 'task-one' }] })
+    return answer({ actions: [{ action: 'task_delete', writes: true, status: 'succeeded' }] })
   }
   assert.equal(await ai.confirmDeletion(), true)
   assert.equal(calls[1]?.confirmation_token, 'delete-token')
   assert.equal(calls[1]?.conversation_id, 'server-conversation')
   assert.notEqual(calls[0]?.request_id, calls[1]?.request_id)
   assert.equal(ai.active?.confirmation_token, null)
-  assert.equal(ai.messages.at(-1)?.actions?.[0]?.deleted_task_id, 'task-one')
+  assert.equal(ai.messages.at(-1)?.actions?.[0]?.status, 'succeeded')
   assert.equal(await ai.confirmDeletion(), false)
 })
 

@@ -12,18 +12,16 @@ export interface AiSector {
   statuses: { id: UUID; name: string; category: 'todo' | 'in_progress' | 'done' }[]
 }
 
-/** Results returned by the backend tool registry, not task proposals. */
+/** Receipt of one tool call, built by the backend from the real outcome. */
 export interface AiAction {
-  name: string
-  ok: boolean
-  task?: AiTask
-  tasks?: AiTask[]
-  sectors?: AiSector[]
-  deleted_task_id?: UUID
-  confirmation_required?: boolean
-  ambiguous?: boolean
-  has_more?: boolean
+  action: string
+  writes: boolean
+  targets?: Record<string, unknown>
+  status: 'succeeded' | 'failed' | 'uncertain' | 'confirmation_required'
+  result?: unknown
   error?: unknown
+  detail?: string
+  replayed?: boolean
 }
 
 export interface AiAnswer {
@@ -31,6 +29,7 @@ export interface AiAnswer {
   conversation_id: UUID
   actions: AiAction[]
   confirmation_token: UUID | null
+  interrupted?: boolean
 }
 
 export interface AiAskRequest {

@@ -1,3 +1,5 @@
+import type { AiAction, AiTask } from '../types'
+
 /** DRF field errors and tool failures can contain nested lists and dictionaries. */
 export function aiErrorDetails(value: unknown): string {
   if (typeof value === 'string') return value
@@ -15,4 +17,62 @@ export function aiErrorDetails(value: unknown): string {
       .join(' ')
   }
   return ''
+}
+
+const VERBS: Record<string, string> = {
+  create: 'criada',
+  update: 'atualizada',
+  delete: 'excluída',
+  move: 'movida',
+  get: 'consultada',
+  list: 'listadas',
+}
+const NOUNS: Record<string, string> = {
+  task: 'Tarefa',
+  sector: 'Setor',
+  status: 'Coluna',
+  team: 'Equipe',
+  checklist: 'Item do checklist',
+  comment: 'Comentário',
+  organization: 'Organização',
+  invitation: 'Convite',
+  link: 'Link',
+  event: 'Evento',
+  calendar: 'Calendário',
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object' && !Array.isArray(value)
+}
+
+/** Human title for a receipt, e.g. `task_create` -> "Tarefa criada". */
+export function aiActionLabel(action: AiAction): string {
+  const [domain = '', verb = ''] = action.action.split('_')
+  const noun = NOUNS[domain]
+  const done = VERBS[verb]
+  if (noun && done) return verb === 'list' ? `${noun}s ${done}` : `${noun} ${done}`
+  return action.action.replaceAll('_', ' ')
+}
+
+export function aiActionTone(action: AiAction): 'ok' | 'pending' | 'error' {
+  if (action.status === 'succeeded') return 'ok'
+  return action.status === 'confirmation_required' ? 'pending' : 'error'
+}
+
+function looksLikeTask(value: unknown): value is AiTask {
+  return isRecord(value) && typeof value.id === 'string' && typeof value.title === 'string'
+    && 'priority' in value
+}
+
+/** Tasks in a successful receipt: a single result or a paginated `results` list. */
+export function aiActionTasks(action: AiAction): AiTask[] {
+  if (action.status !== 'succeeded' || !action.action.startsWith('task_')) return []
+  const result = action.result
+  if (looksLikeTask(result)) return [result]
+  if (isRecord(result) && Array.isArray(result.results)) return result.results.filter(looksLikeTask)
+  return []
+}
+
+export function aiActionDeleted(action: AiAction): boolean {
+  return action.status === 'succeeded' && action.action.endsWith('_delete')
 }
