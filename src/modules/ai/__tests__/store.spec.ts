@@ -26,6 +26,7 @@ const calls: AiAskRequest[] = []
 const api = {
   AiRequestError: RequestError,
   askAi: async (_payload: AiAskRequest): Promise<AiAnswer> => answer(),
+  createTaskFromDraft: async (_payload: unknown): Promise<Record<string, unknown>> => ({}),
   analyzeAiFiles: async (_files: File[]): Promise<Blob> =>
     new Blob(['%PDF-test'], { type: 'application/pdf' }),
 }
@@ -35,7 +36,8 @@ const hooks = registerHooks({
     if (context.parentURL?.endsWith('/ai/stores/ai.ts') && specifier === '../services') {
       const source = `export const AiRequestError = globalThis.aiStoreTestApi.AiRequestError;
         export const askAi = (...args) => globalThis.aiStoreTestApi.askAi(...args);
-        export const analyzeAiFiles = (...args) => globalThis.aiStoreTestApi.analyzeAiFiles(...args);`
+        export const analyzeAiFiles = (...args) => globalThis.aiStoreTestApi.analyzeAiFiles(...args);
+        export const createTaskFromDraft = (...args) => globalThis.aiStoreTestApi.createTaskFromDraft(...args);`
       return { url: `data:text/javascript,${encodeURIComponent(source)}`, shortCircuit: true }
     }
     return nextResolve(specifier, context)
@@ -147,14 +149,14 @@ test('deletion confirmation sends only the server token on a new request', async
   await ai.ask('Exclua ela')
   api.askAi = async (payload) => {
     calls.push(payload)
-    return answer({ actions: [{ name: 'excluir_task', ok: true, deleted_task_id: 'task-one' }] })
+    return answer({ actions: [{ action: 'task_delete', writes: true, status: 'succeeded' }] })
   }
   assert.equal(await ai.confirmDeletion(), true)
   assert.equal(calls[1]?.confirmation_token, 'delete-token')
   assert.equal(calls[1]?.conversation_id, 'server-conversation')
   assert.notEqual(calls[0]?.request_id, calls[1]?.request_id)
   assert.equal(ai.active?.confirmation_token, null)
-  assert.equal(ai.messages.at(-1)?.actions?.[0]?.deleted_task_id, 'task-one')
+  assert.equal(ai.messages.at(-1)?.actions?.[0]?.status, 'succeeded')
   assert.equal(await ai.confirmDeletion(), false)
 })
 
@@ -256,4 +258,72 @@ test('analysis failures do not create a fake download and anonymous sending is b
   ai.setOwner(null)
   assert.equal(await ai.ask('Sem conta'), false)
   assert.equal(ai.conversations.length, 0)
+})
+
+test('sends the organization context and keeps backend choices on the answer', async () => {
+  api.askAi = async (payload) => {
+    calls.push(structuredClone(payload))
+    return answer({ choices: ['Revisar', 'Publicar'] })
+  }
+  const ai = useAiStore()
+  calls.length = 0
+  await ai.ask('Exclua a tarefa', 'org-1')
+  assert.deepEqual(calls[0]?.context, { organization_id: 'org-1' })
+  assert.deepEqual(ai.messages.at(-1)?.choices, ['Revisar', 'Publicar'])
+  await ai.ask('Revisar')
+  assert.equal(calls[1]?.context, undefined)
+})
+
+test('keeps the backend unverified flag on the assistant message', async () => {
+  api.askAi = async () => answer({ unverified: true })
+  const ai = useAiStore()
+  await ai.ask('Crie uma tarefa')
+  assert.equal(ai.messages.at(-1)?.unverified, true)
+})
+
+test('confirming a draft creates the task once and shows it in the chat', async () => {
+  const sent: unknown[] = []
+  api.askAi = async () => answer()
+  api.createTaskFromDraft = async (payload) => {
+    sent.push(payload)
+    return { id: 'task-1', title: 'Fix', notes: ['n'] }
+  }
+  const ai = useAiStore()
+  await ai.ask('Crie uma tarefa')
+  const payload = {
+    request_id: 'req-1',
+    sector_id: 's',
+    title: 'Fix',
+    description: '',
+    priority: 'high' as const,
+    due_date: null,
+    due_time: null,
+    assignee_ids: [],
+  }
+  assert.equal(await ai.confirmDraft('m:0', payload), true)
+  assert.equal(await ai.confirmDraft('m:0', payload), false)
+  assert.equal(sent.length, 1)
+  assert.equal(ai.drafts['m:0']?.status, 'created')
+  const last = ai.messages.at(-1)
+  assert.equal(last?.actions?.[0]?.status, 'succeeded')
+  assert.equal(last?.role, 'assistant')
+})
+
+test('a failed confirmation can be retried and a discarded draft stays discarded', async () => {
+  api.askAi = async () => answer()
+  api.createTaskFromDraft = async () => {
+    throw new RequestError('Falhou', 500)
+  }
+  const ai = useAiStore()
+  await ai.ask('Crie uma tarefa')
+  const payload = {
+    request_id: 'req-2', sector_id: 's', title: 'Fix', description: '',
+    priority: 'low' as const, due_date: null, due_time: null, assignee_ids: [],
+  }
+  assert.equal(await ai.confirmDraft('m:1', payload), false)
+  assert.equal(ai.drafts['m:1']?.status, 'failed')
+  api.createTaskFromDraft = async () => ({ id: 'task-2', title: 'Fix' })
+  assert.equal(await ai.confirmDraft('m:1', payload), true)
+  ai.discardDraft('m:9')
+  assert.equal(ai.drafts['m:9']?.status, 'discarded')
 })

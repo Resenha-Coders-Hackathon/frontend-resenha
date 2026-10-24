@@ -13,6 +13,8 @@ export const api = axios.create({
   xsrfCookieName: 'csrftoken',
   xsrfHeaderName: 'X-CSRFToken',
   withXSRFToken: true,
+  // Sem timeout a UI ficaria em "carregando" para sempre; chamadas de IA passam um valor maior.
+  timeout: 60_000,
 })
 
 // Várias requisições podem expirar juntas: todas esperam o mesmo refresh.
@@ -79,6 +81,12 @@ export function getErrorMessage(error: unknown, fallback: string): string {
   if (!data || typeof data !== 'object') return fallback
 
   const record = data as Record<string, unknown>
+  if (error.response?.status === 429) {
+    const wait = Number(error.response.headers?.['retry-after'])
+    return Number.isFinite(wait) && wait > 0
+      ? `Muitas requisições. Tente novamente em ${Math.ceil(wait)} segundos.`
+      : 'Muitas requisições. Aguarde um instante e tente novamente.'
+  }
   if (typeof record.detail === 'string') return record.detail
 
   const first = Object.values(record).flat()[0]
