@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/modules/auth'
 import { useSectorsStore } from '@/modules/module'
 import { useOrganizationsStore } from '@/modules/organizations'
+import { useChatStore } from '@/modules/chat'
 import { useNotificationsStore } from '@/modules/notifications'
 
 interface MenuItem {
@@ -23,6 +24,7 @@ const auth = useAuthStore()
 const organizations = useOrganizationsStore()
 const sectors = useSectorsStore()
 const notifications = useNotificationsStore()
+const chat = useChatStore()
 const isOpen = ref<boolean>(true)
 
 const current = computed(() => organizations.current)
@@ -220,7 +222,13 @@ async function signOut() {
                 :aria-current="isActive(item) ? 'page' : undefined"
               >
                 <span class="material-symbols-outlined" aria-hidden="true">{{ item.icon }}</span>
-                <span>{{ item.label }}</span>
+                <span class="flex-1">{{ item.label }}</span>
+                <span
+                  v-if="item.link === '/chat' && chat.unreadTotal"
+                  class="rounded-full bg-(--bg-orange) px-2 text-xs font-semibold text-white"
+                  :aria-label="`${chat.unreadTotal} mensagens não lidas`"
+                  >{{ chat.unreadTotal > 99 ? '99+' : chat.unreadTotal }}</span
+                >
               </RouterLink>
             </li>
           </ul>

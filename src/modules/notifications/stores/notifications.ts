@@ -2,6 +2,11 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { listenForForegroundMessages, requestDeviceFcmToken } from '../composables'
 import {
+  desktopAlertsOn,
+  disableDesktopAlerts,
+  enableDesktopAlerts,
+} from '../composables/desktopAlerts'
+import {
   listNotifications,
   markAllNotificationsAsRead,
   markNotificationAsRead,
@@ -23,6 +28,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
   const pushEnabled = computed(() => !!pushToken.value)
   const lastPush = ref<PushMessage | null>(null)
   const unreadOnly = ref(false)
+  const desktopEnabled = ref(desktopAlertsOn())
   let page = 1
   let generation = 0
   let reloadRequested = false
@@ -156,6 +162,16 @@ export const useNotificationsStore = defineStore('notifications', () => {
     }
   }
 
+  /** Liga os avisos do sistema operacional; lança erro se a permissão for negada. */
+  async function enableDesktop(): Promise<void> {
+    desktopEnabled.value = await enableDesktopAlerts()
+  }
+
+  function disableDesktop(): void {
+    disableDesktopAlerts()
+    desktopEnabled.value = false
+  }
+
   async function disablePush(): Promise<void> {
     const token = pushToken.value || localStorage.getItem(TOKEN_KEY)
     // Unregister before clearing local state so a failed logout can be retried.
@@ -198,6 +214,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
     isLoading,
     error,
     pushEnabled,
+    desktopEnabled,
     lastPush,
     unreadOnly,
     load,
@@ -206,6 +223,8 @@ export const useNotificationsStore = defineStore('notifications', () => {
     markAsRead,
     markAllAsRead,
     enablePush,
+    enableDesktop,
+    disableDesktop,
     restorePush,
     disablePush,
     sendTest,

@@ -25,6 +25,11 @@ Object.assign(globalThis, { notificationTestApi: api, notificationTestPush: push
 const hooks = registerHooks({
   resolve(specifier, context, nextResolve) {
     if (context.parentURL?.endsWith('/notifications/stores/notifications.ts')) {
+      if (specifier === '../composables/desktopAlerts')
+        return {
+          url: new URL('../composables/desktopAlerts.ts', import.meta.url).href,
+          shortCircuit: true,
+        }
       const source =
         specifier === '../services'
           ? 'notificationTestApi'

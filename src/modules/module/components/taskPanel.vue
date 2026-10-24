@@ -7,6 +7,7 @@ import { useAuthStore } from '@/modules/auth'
 import { fetchAllPages } from '@/shared/utils'
 import { avatar } from '@/shared/utils/people'
 import { relativeTime } from '@/shared/utils/time'
+import type { DriveTaskLink } from '@/modules/calendar_sync'
 import { useLinksStore } from '../stores/links'
 import { LINK_ORIGINS, dueLabel, linkOrigin, type LinkOrigin } from '../utils/board'
 import type { TaskPriority } from '@/shared/types'
@@ -29,6 +30,7 @@ import type {
 } from '../types'
 import { PRIORITIES } from './priority'
 import PriorityBars from './priorityBars.vue'
+import TaskGoogle from './taskGoogle.vue'
 
 /* Painel lateral: sem `task` cria uma tarefa; com `task` mostra e edita os detalhes. */
 const props = defineProps<{
@@ -188,6 +190,12 @@ const addLink = () =>
     linkUrl.value = linkTitle.value = ''
     linkHint.value = null
   }, 'Não foi possível anexar o link. Confira se o endereço começa com https://.')
+
+function onAttached(link: DriveTaskLink) {
+  if (!props.task) return
+  linksStore.put('task', props.task.id, link)
+  emit('changed', props.task.id)
+}
 
 const removeLink = (id: string) =>
   run(async () => {
@@ -486,6 +494,13 @@ const field =
                 >· {{ links.length }}</span
               >
             </h3>
+            <TaskGoogle
+              v-if="task"
+              :task-id="task.id"
+              :due-date="dueDate"
+              :can-edit="canEdit"
+              @attached="onAttached"
+            />
             <div v-if="canEdit" class="grid grid-cols-3 gap-2">
               <button
                 v-for="origin in ['drive', 'docs', 'meet'] as const"
