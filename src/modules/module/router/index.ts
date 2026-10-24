@@ -11,6 +11,11 @@ export const moduleRoutes: RouteRecordRaw[] = [
         component: () => import('../views/HomeView.vue'),
       },
       {
+        path: '/home-usuario',
+        name: 'UserHome',
+        component: () => import('../views/UserHomeView.vue'),
+      },
+      {
         path: '/minhas-tarefas',
         name: 'MyTasks',
         component: () => import('../views/MyTasksView.vue'),
