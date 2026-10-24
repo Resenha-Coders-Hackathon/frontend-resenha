@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, provide } from 'vue'
 import { SidebarComp, FooterComp } from '@/shared/components'
+import MobileNav from './components/MobileNav.vue'
 import { ShellKey } from '@/shared/composables/shell'
 import { useNotificationsStore } from '@/modules/notifications'
 import { useOrganizationsStore } from '@/modules/organizations'
@@ -17,9 +18,10 @@ provide(ShellKey, {
 <template>
   <main class="flex items-start">
     <SidebarComp />
-    <div class="min-w-0 flex-1">
+    <div class="min-w-0 flex-1 pb-[calc(3.75rem+env(safe-area-inset-bottom))] md:pb-0">
       <RouterView />
     </div>
   </main>
   <FooterComp />
+  <MobileNav />
 </template>

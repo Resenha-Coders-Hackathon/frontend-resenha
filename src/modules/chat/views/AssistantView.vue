@@ -122,11 +122,10 @@ async function analyze() {
 </script>
 
 <template>
-  <div class="flex h-dvh w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)">
-    <TopbarComp
-      v-model:search="search"
-      :crumbs="['Assistente IA', historyTitle]"
-    />
+  <div
+    class="flex h-[calc(100dvh-3.75rem)] md:h-dvh w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
+  >
+    <TopbarComp v-model:search="search" :crumbs="['Assistente IA', historyTitle]" />
 
     <div class="flex min-h-0 flex-1 flex-col p-[12px] sm:p-[20px] lg:p-[28px]">
       <ChatPanelLayout tinted>

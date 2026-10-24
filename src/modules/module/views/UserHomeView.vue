@@ -100,7 +100,7 @@ const sectorData = computed(() => {
     <section class="flex flex-1 flex-col gap-[16px] px-[16px] pt-[24px] pb-[32px] sm:px-[28px]">
       <SubheaderComp :title="greeting" :description="description" class="mb-0!"> </SubheaderComp>
 
-      <div class="grid gap-[12px] sm:grid-cols-2 xl:grid-cols-4">
+      <div class="grid grid-cols-2 gap-[12px] xl:grid-cols-4">
         <CardComp
           v-for="kpi in cards"
           :key="kpi.title"

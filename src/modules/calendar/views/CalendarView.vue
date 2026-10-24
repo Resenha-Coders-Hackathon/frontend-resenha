@@ -19,6 +19,12 @@ import {
 
 const MAX_CHIPS = 3
 const WEEKDAYS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
+const DOT: Record<CalendarState, string> = {
+  done: 'bg-[#15924a]',
+  late: 'bg-[#dc2626]',
+  in_progress: 'bg-[#d97706]',
+  todo: 'bg-(--text-muted)',
+}
 const CHIP: Record<CalendarState, string> = {
   done: 'bg-[#e4f4ea] text-[#127a3e] dark:bg-[#127a3e]/25 dark:text-[#7ed9a2]',
   late: 'bg-[#fde8e8] text-[#c42b2b] dark:bg-[#dc2626]/20 dark:text-[#ff8a8a]',
@@ -37,6 +43,18 @@ const loading = ref(false)
 
 const weeks = computed(() => monthGrid(view.value.year, view.value.month))
 const byDate = computed(() => groupByDate(items.value))
+// agenda do celular: só o mês aberto, em ordem de data
+const agenda = computed(() => {
+  const prefix = `${view.value.year}-${String(view.value.month + 1).padStart(2, '0')}`
+  return items.value.filter((item) => item.due_date.startsWith(prefix))
+})
+const agendaDate = (date: string) =>
+  new Date(`${date}T00:00:00Z`).toLocaleDateString('pt-BR', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  })
 const title = computed(() => monthTitle(view.value.year, view.value.month))
 
 let request = 0
@@ -189,7 +207,18 @@ const dayLabel = (date: string, count: number) =>
                 ]"
                 >{{ day.day }}</span
               >
-              <ul v-if="byDate.get(day.date)" class="flex min-w-0 flex-col gap-[3px]">
+              <div
+                v-if="byDate.get(day.date)"
+                class="flex flex-wrap gap-[3px] sm:hidden"
+                aria-hidden="true"
+              >
+                <span
+                  v-for="item in byDate.get(day.date)!.slice(0, MAX_CHIPS)"
+                  :key="item.id"
+                  :class="['size-[6px] rounded-full', DOT[item.state]]"
+                />
+              </div>
+              <ul v-if="byDate.get(day.date)" class="hidden min-w-0 flex-col gap-[3px] sm:flex">
                 <li
                   v-for="item in byDate.get(day.date)!.slice(0, MAX_CHIPS)"
                   :key="item.id"
@@ -212,6 +241,36 @@ const dayLabel = (date: string, count: number) =>
           </div>
         </div>
       </div>
+
+      <section v-if="agenda.length" class="sm:hidden" aria-label="Entregas do mês">
+        <h2 class="pb-[8px] text-[15px]! leading-normal! font-semibold! tracking-normal!">
+          Neste mês
+        </h2>
+        <ul
+          class="rounded-[16px] border border-(--border-default) bg-(--surface) px-[14px] dark:border-(--border-inverse) dark:bg-(--surface-inverse)"
+        >
+          <li
+            v-for="item in agenda"
+            :key="item.id"
+            class="flex items-center gap-[10px] border-b border-(--border-default) py-[12px] last:border-b-0 dark:border-(--border-inverse)"
+          >
+            <span
+              :class="['size-[8px] shrink-0 rounded-full', DOT[item.state]]"
+              aria-hidden="true"
+            />
+            <span class="flex min-w-0 flex-1 flex-col leading-normal">
+              <span class="truncate text-[14px] font-medium">{{ item.title }}</span>
+              <span class="truncate text-[12px] text-(--text-muted)"
+                >{{ agendaDate(item.due_date) }} · {{ item.sector_name }}</span
+              >
+            </span>
+            <span
+              :class="['shrink-0 rounded-[6px] px-[8px] py-[2px] text-[11.5px]', CHIP[item.state]]"
+              >{{ stateLabels[item.state] }}</span
+            >
+          </li>
+        </ul>
+      </section>
 
       <p v-if="!loading && !items.length" class="text-[13px] text-(--text-muted)">
         Nenhuma entrega com data neste período. Tarefas com prazo aparecem aqui.
