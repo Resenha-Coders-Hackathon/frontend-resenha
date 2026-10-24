@@ -17,5 +17,8 @@ export interface ITasks {
   assignee_name: string | null
   position: number
   is_overdue: boolean
+  checklist_total: number
+  checklist_done: number
+  comment_count: number
   created_at: ISODateTime
 }

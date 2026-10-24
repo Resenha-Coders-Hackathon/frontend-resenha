@@ -40,7 +40,7 @@ const organizationItems = computed<MenuItem[]>(() => [
     icon: 'groups',
     label: 'Equipe',
     // a gestão de membros é uma tela à parte, aberta pela própria Equipe
-    also: ['/setores', ...(current.value ? [`/organizacoes/${current.value.id}/membros`] : [])],
+    also: [...(current.value ? [`/organizacoes/${current.value.id}/membros`] : [])],
   },
   { link: '/arquivos', icon: 'folder', label: 'Arquivos' },
   { link: '/relatorios', icon: 'bar_chart', label: 'Relatórios' },
@@ -234,8 +234,8 @@ async function signOut() {
             <ul class="grid gap-1">
               <li v-for="sector in visibleSectors" :key="sector.id">
                 <RouterLink
-                  :to="`/setores/${sector.id}/editar`"
-                  :class="itemClass(route.path === `/setores/${sector.id}/editar`)"
+                  :to="`/setores/${sector.id}`"
+                  :class="itemClass(startsWith(route.path, `/setores/${sector.id}`))"
                 >
                   <span
                     class="size-2.5 shrink-0 rounded-full bg-(--text-muted)"
