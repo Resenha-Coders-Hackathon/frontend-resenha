@@ -1,105 +1,188 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { BaseButton, BaseInput, SubheaderComp, TopbarComp } from '@/shared/components'
+import { getErrorMessage } from '@/app/plugins/axios'
+import { BaseButton, SubheaderComp, TopbarComp } from '@/shared/components'
+import { avatar } from '@/shared/utils/people'
+import { categoryColors } from '@/shared/utils/chartColors'
 import {
-  MEMBERS,
-  memberById,
-  ROLES,
-  SECTOR_COLORS,
-  SECTOR_MEMBER_COUNT,
-  SECTORS,
-} from '../utils/mocks'
-import { avatar, BADGE, BADGE_BASE, TOOLBAR_BUTTON } from '../utils/ui'
-
-// Página só de interface: "Salvar setor" e "Arquivar" não chamam o backend.
-
-const MIN_COLUMNS = 3
+  getSector,
+  useKanbanStore,
+  useSectorAccessStore,
+  useSectorsStore,
+  type Sector,
+  type SectorRole,
+} from '@/modules/module'
+import { useOrganizationsStore } from '@/modules/organizations'
+import { BADGE, BADGE_BASE, TOOLBAR_BUTTON } from '../utils/ui'
 
 const props = defineProps<{ id: string }>()
 const router = useRouter()
+const sectors = useSectorsStore()
+const access = useSectorAccessStore()
+const board = useKanbanStore()
+const organizations = useOrganizationsStore()
 
-const sector = SECTORS.find((item) => item.id === props.id)
-const form = ref({
-  name: sector?.name ?? '',
-  managerId: sector?.managerId ?? '',
-  color: sector?.color ?? SECTOR_COLORS[0]!,
-  description: sector?.description ?? '',
-  columns: [...(sector?.columns ?? [])],
-  wipLimit: String(sector?.wipLimit ?? 5),
-  visibility: sector?.visibility ?? 'sector',
-})
+const COLORS = categoryColors(6)
+const ROLE_LABELS: Record<SectorRole, string> = {
+  manager: 'Gestor',
+  editor: 'Membro',
+  viewer: 'Leitor',
+}
+const ROLE_TONES: Record<SectorRole, string> = {
+  manager: BADGE.accent,
+  editor: BADGE.outline,
+  viewer: BADGE.neutral,
+}
+
+const sector = ref<(Sector & { my_role: SectorRole }) | null>(null)
+const missing = ref(false)
+const loading = ref(false)
+const saving = ref(false)
+const form = ref({ name: '', description: '', color: COLORS[0]!, isPrivate: true, wip: '' })
 const newColumn = ref('')
-const dragIndex = ref<number | null>(null)
+const adding = ref(false)
+const candidate = ref('')
+const confirm = ref<HTMLDialogElement | null>(null)
 
-const managers = MEMBERS.filter((member) => member.role !== 'guest')
-const VISIBILITY = [
-  { value: 'sector', label: 'Somente membros do setor' },
-  { value: 'org', label: 'Toda a organização' },
-]
-const sectorMembers = computed(() =>
-  (sector?.members ?? []).map(memberById).filter((member) => !!member),
+const canEdit = computed(() => sector.value?.my_role === 'manager')
+const inProgress = computed(() => board.statuses.find((s) => s.category === 'in_progress'))
+const candidates = computed(() =>
+  organizations.members.filter((m) => !access.members.some((a) => a.user_id === m.user_id)),
 )
+const description = computed(() => {
+  const members = access.members.length
+  return `${members} ${members === 1 ? 'membro' : 'membros'} · ${board.tasks.filter((t) => !t.completed_at).length} tarefas abertas`
+})
 
-function moveColumn(from: number, to: number) {
-  if (to < 0 || to >= form.value.columns.length) return
-  const [column] = form.value.columns.splice(from, 1)
-  form.value.columns.splice(to, 0, column!)
+async function load() {
+  loading.value = true
+  missing.value = false
+  try {
+    const loaded = await getSector(props.id)
+    sector.value = loaded
+    form.value = {
+      name: loaded.name,
+      description: loaded.description,
+      color: loaded.color || COLORS[0]!,
+      isPrivate: loaded.is_private,
+      wip: '',
+    }
+    await Promise.all([
+      access.load(props.id),
+      board.load(props.id),
+      organizations.members.length || organizations.loadMembers(loaded.organization_id),
+    ])
+    form.value.wip = inProgress.value?.wip_limit ? String(inProgress.value.wip_limit) : ''
+  } catch {
+    missing.value = true
+    sector.value = null
+  } finally {
+    loading.value = false
+  }
+}
+watch(() => props.id, load, { immediate: true })
+
+const fail = (error: unknown, fallback: string) => toast.error(getErrorMessage(error, fallback))
+
+async function save() {
+  if (!canEdit.value || saving.value || !form.value.name.trim()) return
+  saving.value = true
+  try {
+    await sectors.update(props.id, {
+      name: form.value.name.trim(),
+      description: form.value.description,
+      color: form.value.color,
+      is_private: form.value.isPrivate,
+    })
+    const wip = form.value.wip.trim() ? Number(form.value.wip) : null
+    if (inProgress.value && wip !== inProgress.value.wip_limit) {
+      await board.editStatus(inProgress.value.id, { wip_limit: wip })
+    }
+    toast.success('Setor salvo.')
+    await router.push({ name: 'Team' })
+  } catch (error) {
+    fail(error, 'Não foi possível salvar o setor.')
+  } finally {
+    saving.value = false
+  }
 }
 
-function dropColumn(to: number) {
-  if (dragIndex.value !== null) moveColumn(dragIndex.value, to)
-  dragIndex.value = null
-}
-
-function addColumn() {
+async function addColumn() {
   const name = newColumn.value.trim()
-  if (name && !form.value.columns.includes(name))
-    form.value.columns.splice(form.value.columns.length - 1, 0, name)
-  newColumn.value = ''
+  if (!name || !canEdit.value) return
+  try {
+    await board.addStatus({ name, category: 'in_progress' })
+    newColumn.value = ''
+  } catch (error) {
+    fail(error, 'Não foi possível adicionar a coluna.')
+  }
 }
 
-function save() {
-  if (!form.value.name.trim()) {
-    toast.error('Dê um nome para o setor.')
-    return
+async function removeColumn(id: string) {
+  try {
+    await board.removeStatus(id)
+  } catch (error) {
+    fail(error, 'Não foi possível remover a coluna. Mova as tarefas dela antes.')
   }
-  if (!(Number(form.value.wipLimit) > 0)) {
-    toast.error('O limite em andamento precisa ser maior que zero.')
-    return
-  }
-  toast.success('Setor salvo (demonstração, sem backend).')
-  router.push({ name: 'Team' })
 }
 
-function archive() {
-  if (window.confirm(`Arquivar o setor ${form.value.name}?`)) {
-    toast.success('Setor arquivado (demonstração).')
-    router.push({ name: 'Team' })
+async function changeRole(memberId: number, role: SectorRole) {
+  try {
+    await access.changeMemberRole(memberId, role)
+  } catch (error) {
+    fail(error, 'Não foi possível mudar o papel.')
   }
 }
+
+async function removeMember(memberId: number) {
+  try {
+    await access.removeMember(memberId)
+  } catch (error) {
+    fail(error, 'Não foi possível remover a pessoa do setor.')
+  }
+}
+
+async function addMember() {
+  if (!candidate.value) return
+  try {
+    await access.addMember({ user_id: candidate.value })
+    candidate.value = ''
+    adding.value = false
+  } catch (error) {
+    fail(error, 'Não foi possível adicionar a pessoa.')
+  }
+}
+
+async function archive() {
+  confirm.value?.close()
+  try {
+    await sectors.remove(props.id)
+    toast.success('Setor arquivado.')
+    await router.push({ name: 'Team' })
+  } catch (error) {
+    fail(error, 'Não foi possível arquivar o setor.')
+  }
+}
+
+const field =
+  'rounded-[10px] border border-(--border-default) bg-transparent px-[12px] py-[10px] text-[14px] leading-normal outline-none focus:border-(--border-strong) disabled:opacity-60 dark:border-(--border-inverse)'
 </script>
 
 <template>
   <div
     class="flex min-h-dvh w-full min-w-0 flex-col bg-(--background) dark:bg-(--background-inverse)"
   >
-    <TopbarComp
-      :crumbs="['Setores', sector?.name ?? 'Setor', 'Editar']"
-    />
+    <TopbarComp :crumbs="['Equipe e setores', sector?.name ?? 'Setor', 'Editar']" />
 
     <section class="flex flex-1 flex-col gap-[16px] px-[16px] pt-[24px] pb-[32px] sm:px-[28px]">
       <SubheaderComp
         title="Editar setor"
-        :description="
-          sector
-            ? `${sector.name} · ${SECTOR_MEMBER_COUNT[sector.id]} membros · ${sector.openTasks} tarefas abertas`
-            : 'Setor não encontrado'
-        "
+        :description="missing ? 'Setor não encontrado' : `${sector?.name ?? ''} · ${description}`"
         class="mb-0!"
       >
-        <div class="flex flex-wrap gap-[8px]">
+        <div class="flex flex-wrap items-center gap-[8px]">
           <BaseButton
             variant="ghost"
             label="Cancelar"
@@ -110,253 +193,246 @@ function archive() {
           <BaseButton
             label="Salvar setor"
             :full-width="false"
-            :disabled="!sector"
             :class="TOOLBAR_BUTTON"
+            :loading="saving"
+            :disabled="!canEdit || !form.name.trim()"
             @click="save"
           />
         </div>
       </SubheaderComp>
 
-      <p
-        v-if="!sector"
-        class="text-[13px] text-(--text-secondary) dark:text-(--text-inverse-muted)"
-      >
-        Esse setor não existe ou foi arquivado. Volte para Equipe e setores.
+      <p v-if="missing" class="text-[14px] text-(--text-secondary)">
+        Esse setor não existe, foi arquivado ou você não tem acesso a ele.
+        <RouterLink to="/equipe" class="underline">Voltar para Equipe e setores</RouterLink>
+      </p>
+      <p v-else-if="loading && !sector" role="status" class="text-[14px] text-(--text-muted)">
+        Carregando setor…
       </p>
 
-      <template v-else>
+      <template v-else-if="sector">
+        <p
+          v-if="!canEdit"
+          class="rounded-[12px] border border-(--border-default) bg-(--surface) px-[14px] py-[10px] text-[13px] text-(--text-secondary) dark:border-(--border-inverse) dark:bg-(--surface-inverse)"
+        >
+          Só quem é gestor do setor pode alterar estas configurações.
+        </p>
+
         <div class="grid items-start gap-[16px] xl:grid-cols-[minmax(0,1fr)_400px]">
-          <section
-            class="flex flex-col gap-[14px] rounded-[16px] border border-(--border-default) bg-(--surface) p-[18px] dark:border-(--border-inverse) dark:bg-(--surface-inverse)"
+          <form
+            class="grid gap-[16px] rounded-[16px] border border-(--border-default) bg-(--surface) p-[18px] dark:border-(--border-inverse) dark:bg-(--surface-inverse)"
+            @submit.prevent="save"
           >
             <h2 class="text-[15px]! leading-normal! font-semibold! tracking-normal!">
               Configurações do setor
             </h2>
 
-            <div class="flex flex-col gap-[14px] sm:flex-row">
-              <label
-                class="flex min-w-0 flex-1 flex-col gap-[6px] text-[13px] leading-normal font-medium"
-              >
-                Nome
-                <BaseInput
-                  v-model="form.name"
-                  placeholder="Nome do setor"
-                  class="mt-0! font-normal"
-                />
-              </label>
-              <label
-                class="flex min-w-0 flex-1 flex-col gap-[6px] text-[13px] leading-normal font-medium"
-              >
-                Gestor
-                <select
-                  v-model="form.managerId"
-                  class="h-[44px] w-full rounded-[10px] border border-(--border-default) bg-(--surface) px-[12px] text-[14px] outline-none focus:border-(--border-strong) dark:border-(--border-inverse) dark:bg-black/30 dark:focus:border-(--text-inverse-muted) font-normal"
-                >
-                  <option v-for="member in managers" :key="member.id" :value="member.id">
-                    {{ member.name }}
-                  </option>
-                </select>
-              </label>
-            </div>
+            <label class="grid gap-[6px] text-[13px] font-medium">
+              Nome
+              <input
+                v-model="form.name"
+                maxlength="255"
+                required
+                :disabled="!canEdit"
+                :class="[field, 'font-normal']"
+              />
+            </label>
 
-            <fieldset class="flex flex-col gap-[8px]">
-              <legend class="mb-[8px] text-[13px] leading-normal font-medium">Cor</legend>
-              <div class="flex flex-wrap gap-[8px]">
-                <label
-                  v-for="color in SECTOR_COLORS"
+            <div class="grid gap-[8px]">
+              <span class="text-[13px] font-medium">Cor</span>
+              <div class="flex gap-[10px]" role="radiogroup" aria-label="Cor do setor">
+                <button
+                  v-for="color in COLORS"
                   :key="color"
+                  type="button"
+                  role="radio"
+                  :aria-checked="form.color === color"
+                  :aria-label="`Cor ${color}`"
+                  :disabled="!canEdit"
                   :class="[
-                    'grid size-[28px] cursor-pointer place-items-center rounded-full ring-offset-2 ring-offset-(--surface) has-focus-visible:outline-2 has-focus-visible:outline-offset-4 dark:ring-offset-(--surface-inverse)',
+                    'size-[26px] cursor-pointer rounded-full ring-offset-2 ring-offset-(--surface) disabled:opacity-60 dark:ring-offset-(--surface-inverse)',
                     form.color === color
                       ? 'ring-2 ring-(--text-primary) dark:ring-(--text-inverse)'
                       : '',
                   ]"
                   :style="{ backgroundColor: color }"
-                >
-                  <input
-                    v-model="form.color"
-                    type="radio"
-                    name="sector-color"
-                    :value="color"
-                    class="sr-only"
-                    :aria-label="`Cor ${color}`"
-                  />
-                </label>
+                  @click="form.color = color"
+                />
               </div>
-            </fieldset>
+            </div>
 
-            <label class="flex flex-col gap-[6px] text-[13px] leading-normal font-medium">
+            <label class="grid gap-[6px] text-[13px] font-medium">
               Descrição
               <textarea
                 v-model="form.description"
-                maxlength="280"
-                class="min-h-[96px] resize-y rounded-[10px] border border-(--border-default) bg-(--surface) px-[12px] py-[11px] text-[14px] font-normal outline-none focus:border-(--border-strong) dark:border-(--border-inverse) dark:bg-black/30 dark:focus:border-(--text-inverse-muted)"
-              ></textarea>
+                rows="4"
+                :disabled="!canEdit"
+                :class="[field, 'resize-y font-normal']"
+              />
             </label>
 
-            <div class="flex flex-col gap-[6px]">
-              <span id="board-columns-label" class="text-[13px] leading-normal font-medium"
-                >Colunas do board</span
+            <div class="grid gap-[6px]">
+              <span class="text-[13px] font-medium">Colunas</span>
+              <ul
+                class="flex flex-wrap gap-[6px] rounded-[10px] border border-(--border-default) p-[8px] dark:border-(--border-inverse)"
               >
-              <div
-                class="flex min-h-[44px] flex-wrap items-center gap-[6px] rounded-[10px] border border-(--border-default) px-[8px] py-[6px] dark:border-(--border-inverse)"
-                role="list"
-                aria-labelledby="board-columns-label"
-              >
-                <span
-                  v-for="(column, index) in form.columns"
-                  :key="column"
-                  role="listitem"
-                  draggable="true"
-                  :class="[
-                    'flex cursor-grab items-center gap-[2px] rounded-[6px] bg-(--bg-muted) py-[2px] pr-[4px] pl-[8px] text-[12px] leading-[18px] text-(--text-secondary) dark:bg-white/10 dark:text-(--text-inverse-muted)',
-                    dragIndex === index ? 'opacity-50' : '',
-                  ]"
-                  @dragstart="dragIndex = index"
-                  @dragover.prevent
-                  @drop="dropColumn(index)"
-                  @dragend="dragIndex = null"
-                >
-                  {{ column }}
-                  <button
-                    type="button"
-                    class="grid size-[16px] cursor-pointer place-items-center rounded-[4px] opacity-60 hover:opacity-100 disabled:hidden"
-                    :disabled="index === 0"
-                    :aria-label="`Mover ${column} para a esquerda`"
-                    @click="moveColumn(index, index - 1)"
-                  >
-                    <span class="material-symbols-outlined text-[13px]!" aria-hidden="true"
-                      >chevron_left</span
+                <li v-for="status in board.statuses" :key="status.id">
+                  <span :class="[BADGE_BASE, BADGE.neutral, 'gap-[6px]']">
+                    {{ status.name }}
+                    <button
+                      v-if="canEdit && board.statuses.length > 1"
+                      type="button"
+                      class="cursor-pointer leading-none text-(--text-muted) hover:text-(--destructive)"
+                      :aria-label="`Remover a coluna ${status.name}`"
+                      @click="removeColumn(status.id)"
                     >
-                  </button>
-                  <button
-                    type="button"
-                    class="grid size-[16px] cursor-pointer place-items-center rounded-[4px] opacity-60 hover:opacity-100 disabled:hidden"
-                    :disabled="form.columns.length <= MIN_COLUMNS"
-                    :aria-label="`Remover coluna ${column}`"
-                    @click="form.columns.splice(index, 1)"
-                  >
-                    <span class="material-symbols-outlined text-[13px]!" aria-hidden="true"
-                      >close</span
-                    >
-                  </button>
-                </span>
-                <input
-                  v-model="newColumn"
-                  type="text"
-                  placeholder="+ coluna"
-                  aria-label="Nova coluna do board"
-                  maxlength="30"
-                  class="h-[24px] w-[90px] bg-transparent text-[12px] outline-none placeholder:text-(--text-muted)"
-                  @keydown.enter.prevent="addColumn"
-                />
-              </div>
-              <p class="text-[12px] leading-normal text-(--text-muted)">
-                Arraste para reordenar. Mínimo de {{ MIN_COLUMNS }} colunas.
+                      ×
+                    </button>
+                  </span>
+                </li>
+                <li v-if="canEdit">
+                  <input
+                    v-model="newColumn"
+                    placeholder="Nova coluna"
+                    aria-label="Nova coluna"
+                    maxlength="100"
+                    class="w-[130px] bg-transparent px-[6px] py-[2px] text-[12.5px] outline-none"
+                    @keydown.enter.prevent="addColumn"
+                  />
+                </li>
+              </ul>
+              <p class="text-[12px] text-(--text-muted)">
+                As colunas são salvas na hora. Uma coluna só sai se não tiver tarefas.
               </p>
             </div>
 
-            <div class="flex flex-col gap-[14px] sm:flex-row">
-              <label
-                class="flex min-w-0 flex-1 flex-col gap-[6px] text-[13px] leading-normal font-medium"
-              >
+            <div class="grid gap-[16px] sm:grid-cols-2">
+              <label class="grid gap-[6px] text-[13px] font-medium">
                 Limite em andamento
-                <BaseInput
-                  v-model="form.wipLimit"
+                <input
+                  v-model="form.wip"
                   type="number"
+                  min="1"
                   inputmode="numeric"
-                  class="mt-0! font-normal"
+                  placeholder="Sem limite"
+                  :disabled="!canEdit || !inProgress"
+                  :class="[field, 'font-normal']"
                 />
               </label>
-              <label
-                class="flex min-w-0 flex-1 flex-col gap-[6px] text-[13px] leading-normal font-medium"
-              >
+              <label class="grid gap-[6px] text-[13px] font-medium">
                 Visibilidade
                 <select
-                  v-model="form.visibility"
-                  class="h-[44px] w-full rounded-[10px] border border-(--border-default) bg-(--surface) px-[12px] text-[14px] outline-none focus:border-(--border-strong) dark:border-(--border-inverse) dark:bg-black/30 dark:focus:border-(--text-inverse-muted) font-normal"
+                  v-model="form.isPrivate"
+                  :disabled="!canEdit"
+                  :class="[field, 'font-normal']"
                 >
-                  <option v-for="option in VISIBILITY" :key="option.value" :value="option.value">
-                    {{ option.label }}
-                  </option>
+                  <option :value="true">Somente membros do setor</option>
+                  <option :value="false">Toda a organização</option>
                 </select>
               </label>
             </div>
-          </section>
+          </form>
 
-          <section
-            class="flex flex-col rounded-[16px] border border-(--border-default) bg-(--surface) px-[18px] pt-[16px] pb-[6px] dark:border-(--border-inverse) dark:bg-(--surface-inverse)"
+          <aside
+            class="grid gap-[4px] rounded-[16px] border border-(--border-default) bg-(--surface) p-[18px] dark:border-(--border-inverse) dark:bg-(--surface-inverse)"
           >
-            <header class="flex items-center justify-between pb-[4px]">
+            <div class="flex items-center justify-between pb-[8px]">
               <h2 class="text-[15px]! leading-normal! font-semibold! tracking-normal!">
-                Membros · {{ SECTOR_MEMBER_COUNT[sector.id] }}
+                Membros · {{ access.members.length }}
               </h2>
               <button
+                v-if="canEdit"
                 type="button"
                 class="cursor-pointer text-[13px] font-medium text-(--bg-orange) hover:underline"
-                @click="toast.success('Adicionar membros ainda não está integrado.')"
+                @click="adding = !adding"
               >
                 Adicionar
               </button>
-            </header>
-            <ul class="flex flex-col">
+            </div>
+
+            <form v-if="adding" class="flex gap-[8px] pb-[8px]" @submit.prevent="addMember">
+              <select
+                v-model="candidate"
+                aria-label="Pessoa da organização"
+                :class="[field, 'min-w-0 flex-1']"
+              >
+                <option value="" disabled>Escolha uma pessoa</option>
+                <option v-for="person in candidates" :key="person.user_id" :value="person.user_id">
+                  {{ person.name }}
+                </option>
+              </select>
+              <BaseButton
+                type="submit"
+                label="Adicionar"
+                :full-width="false"
+                :class="TOOLBAR_BUTTON"
+                :disabled="!candidate"
+              />
+            </form>
+            <p
+              v-if="adding && !candidates.length"
+              class="pb-[8px] text-[12.5px] text-(--text-muted)"
+            >
+              Todas as pessoas da organização já estão neste setor.
+            </p>
+
+            <ul>
               <li
-                v-for="member in sectorMembers"
+                v-for="member in access.members"
                 :key="member.id"
-                class="flex items-center gap-[12px] border-b border-(--border-default) py-[11px] last:border-b-0 dark:border-(--border-inverse)"
+                class="flex items-center gap-[10px] border-b border-(--border-default) py-[10px] last:border-b-0 dark:border-(--border-inverse)"
               >
                 <span
-                  :class="[
-                    'grid size-[32px] shrink-0 place-items-center rounded-full text-[11px] leading-none font-semibold text-white',
-                    avatar(member.name).color
-                      ? ''
-                      : 'bg-(--text-primary) dark:bg-(--text-inverse) dark:text-(--text-primary)',
-                  ]"
-                  :style="{ backgroundColor: avatar(member.name).color || undefined }"
+                  class="grid size-[30px] shrink-0 place-items-center rounded-full text-[10.5px] leading-none font-semibold text-white"
+                  :style="{ backgroundColor: avatar(member.name).color }"
                   aria-hidden="true"
                   >{{ avatar(member.name).initials }}</span
                 >
                 <span class="flex min-w-0 flex-1 flex-col leading-normal">
-                  <span class="text-[13.5px] font-medium">{{ member.name }}</span>
-                  <span class="text-[12px] text-(--text-muted)">
-                    {{
-                      member.id === form.managerId ? 'Gestor do setor' : ROLES[member.role].detail
-                    }}
-                  </span>
+                  <span class="truncate text-[13.5px] font-medium">{{ member.name }}</span>
+                  <span class="truncate text-[12px] text-(--text-muted)">{{ member.email }}</span>
                 </span>
-                <span
-                  :class="[
-                    BADGE_BASE,
-                    member.id === form.managerId
-                      ? BADGE.accent
-                      : ROLES[member.role].tone === 'outline'
-                        ? BADGE.neutral
-                        : BADGE[ROLES[member.role].tone],
-                  ]"
-                  >{{ member.id === form.managerId ? 'Gestor' : ROLES[member.role].label }}</span
+                <select
+                  v-if="canEdit"
+                  :value="member.role"
+                  :aria-label="`Papel de ${member.name}`"
+                  class="rounded-[8px] border border-(--border-default) bg-transparent px-[6px] py-[3px] text-[12px] dark:border-(--border-inverse)"
+                  @change="
+                    changeRole(member.id, ($event.target as HTMLSelectElement).value as SectorRole)
+                  "
                 >
+                  <option v-for="(label, role) in ROLE_LABELS" :key="role" :value="role">
+                    {{ label }}
+                  </option>
+                </select>
+                <span v-else :class="[BADGE_BASE, ROLE_TONES[member.role]]">{{
+                  ROLE_LABELS[member.role]
+                }}</span>
+                <button
+                  v-if="canEdit"
+                  type="button"
+                  class="grid size-[26px] cursor-pointer place-items-center rounded-[8px] text-(--text-muted) hover:bg-(--bg-muted) hover:text-(--destructive) dark:hover:bg-white/10"
+                  :aria-label="`Remover ${member.name} do setor`"
+                  @click="removeMember(member.id)"
+                >
+                  <span class="material-symbols-outlined text-[16px]!" aria-hidden="true"
+                    >close</span
+                  >
+                </button>
               </li>
             </ul>
-          </section>
+          </aside>
         </div>
 
-        <section
-          class="flex flex-col gap-[12px] rounded-[16px] border border-[#f5d0d0] bg-[#fdf0f0] px-[16px] py-[14px] sm:flex-row sm:items-center dark:border-[#dc2626]/30 dark:bg-[#dc2626]/10"
+        <div
+          v-if="canEdit"
+          class="flex flex-wrap items-center justify-between gap-[12px] rounded-[14px] bg-[#fde8e8] px-[16px] py-[14px] dark:bg-[#dc2626]/15"
         >
-          <span
-            class="material-symbols-outlined text-[20px]! text-(--destructive)"
-            aria-hidden="true"
-            >error</span
-          >
-          <div class="flex min-w-0 flex-1 flex-col gap-[2px] leading-normal">
-            <h2
-              class="text-[14px]! leading-normal! font-semibold! tracking-normal! text-(--destructive)"
-            >
+          <div class="leading-normal">
+            <p class="text-[14px] font-semibold text-[#c42b2b] dark:text-[#ff8a8a]">
               Zona de perigo
-            </h2>
+            </p>
             <p class="text-[13px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
-              Arquivar o setor esconde o board e o canal de chat. As tarefas ficam disponíveis para
-              consulta por 90 dias.
+              Arquivar o setor o esconde da equipe. As tarefas ficam guardadas.
             </p>
           </div>
           <BaseButton
@@ -364,10 +440,36 @@ function archive() {
             label="Arquivar setor"
             :full-width="false"
             :class="TOOLBAR_BUTTON"
-            @click="archive"
+            @click="confirm?.showModal()"
           />
-        </section>
+        </div>
       </template>
     </section>
+
+    <dialog
+      ref="confirm"
+      class="m-auto w-[min(26rem,calc(100vw-2rem))] rounded-2xl border border-(--border-default) bg-(--surface) p-6 text-(--text-primary) dark:border-(--border-inverse) dark:bg-(--surface-inverse) dark:text-(--text-inverse)"
+    >
+      <h2 class="text-[18px]! font-semibold!">Arquivar {{ sector?.name }}?</h2>
+      <p class="mt-2 text-[14px] text-(--text-secondary) dark:text-(--text-inverse-muted)">
+        O setor some da lista da equipe. As tarefas dele ficam guardadas.
+      </p>
+      <div class="mt-5 flex justify-end gap-2">
+        <BaseButton
+          label="Cancelar"
+          variant="ghost"
+          :full-width="false"
+          class="mt-0!"
+          @click="confirm?.close()"
+        />
+        <BaseButton
+          label="Arquivar"
+          variant="destructive"
+          :full-width="false"
+          class="mt-0!"
+          @click="archive"
+        />
+      </div>
+    </dialog>
   </div>
 </template>

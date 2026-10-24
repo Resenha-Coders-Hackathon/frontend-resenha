@@ -84,6 +84,8 @@ async function load() {
     if (requestedId !== id.value) return
     organization.value = result
     await loadRows()
+    // vindo de Convidar pessoas, na Equipe: já abre o formulário
+    if (route.query.convidar && canInvite.value) openInvite()
   } catch (cause) {
     if (requestedId !== id.value) return
     error.value = getErrorMessage(
@@ -223,7 +225,11 @@ watch(id, load, { immediate: true })
                 ></strong
               >
               <p>{{ member.email }}</p>
-              <MemberActions :organization="organization" :member="member" @changed="reloadMembers" />
+              <MemberActions
+                :organization="organization"
+                :member="member"
+                @changed="reloadMembers"
+              />
             </div>
           </div>
           <span

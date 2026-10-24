@@ -1,6 +1,7 @@
 export type * from './types'
 export { useSectorsStore, useKanbanStore } from './stores'
 export {
+  getDashboard,
   listSectors,
   createSector,
   getSector,

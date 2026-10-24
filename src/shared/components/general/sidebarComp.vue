@@ -31,22 +31,22 @@ const switcherOpen = ref(false)
 onClickOutside(switcher, () => (switcherOpen.value = false))
 
 // Tudo daqui para baixo é da organização selecionada (como no GitHub).
-const organizationItems = computed<MenuItem[]>(() => {
-  const id = current.value?.id
-  return [
-    { link: '/home-usuario', icon: 'home', label: 'Visão geral' },
-    { link: '/calendario', icon: 'calendar_month', label: 'Calendário' },
-    { link: '/chat', icon: 'chat', label: 'Mensagens' },
-    { link: '/equipe', icon: 'groups', label: 'Equipe', also: ['/setores'] },
-    ...(id
-      ? [{ link: `/organizacoes/${id}/membros`, icon: 'badge', label: 'Membros' } as MenuItem]
-      : []),
-    { link: '/arquivos', icon: 'folder', label: 'Arquivos' },
-    { link: '/relatorios', icon: 'bar_chart', label: 'Relatórios' },
-    { link: '/assistente', icon: 'auto_awesome', label: 'Assistente IA' },
-    { link: '/mapbox', icon: 'map', label: 'Mapa' },
-  ]
-})
+const organizationItems = computed<MenuItem[]>(() => [
+  { link: '/home-usuario', icon: 'home', label: 'Visão geral' },
+  { link: '/calendario', icon: 'calendar_month', label: 'Calendário' },
+  { link: '/chat', icon: 'chat', label: 'Mensagens' },
+  {
+    link: '/equipe',
+    icon: 'groups',
+    label: 'Equipe',
+    // a gestão de membros é uma tela à parte, aberta pela própria Equipe
+    also: ['/setores', ...(current.value ? [`/organizacoes/${current.value.id}/membros`] : [])],
+  },
+  { link: '/arquivos', icon: 'folder', label: 'Arquivos' },
+  { link: '/relatorios', icon: 'bar_chart', label: 'Relatórios' },
+  { link: '/assistente', icon: 'auto_awesome', label: 'Assistente IA' },
+  { link: '/mapbox', icon: 'map', label: 'Mapa' },
+])
 
 const accountItems: MenuItem[] = [
   { link: '/notificacoes', icon: 'notifications', label: 'Notificações' },
@@ -234,15 +234,17 @@ async function signOut() {
             </h3>
             <ul class="grid gap-1">
               <li v-for="sector in visibleSectors" :key="sector.id">
-                <!-- shortcut: lista sem link, a tela do setor ainda não usa dados reais; ligar quando existir -->
-                <span class="flex items-center gap-2 px-5 py-1.5 text-sm font-medium">
+                <RouterLink
+                  :to="`/setores/${sector.id}/editar`"
+                  :class="itemClass(route.path === `/setores/${sector.id}/editar`)"
+                >
                   <span
                     class="size-2.5 shrink-0 rounded-full bg-(--text-muted)"
                     :style="sector.color ? { backgroundColor: sector.color } : undefined"
                     aria-hidden="true"
                   />
                   <span class="truncate">{{ sector.name }}</span>
-                </span>
+                </RouterLink>
               </li>
             </ul>
           </template>
